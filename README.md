@@ -42,8 +42,9 @@ App này là web tĩnh, nên khi đưa lên GitHub Pages có thể mở trực t
 - Cách nhanh nhất: chọn **Chế độ đề** là **Bộ 25 đề Quản trị mạng để in/PDF** rồi bấm **Tạo đề mới**.
 - Chọn **Môn học** là **Quản trị mạng - ôn thi tổng hợp**.
 - Nếu muốn tạo nhiều mã đề cùng lúc để in hoặc lưu PDF, chọn **Luyện tập**, nhập **Số đề cần tạo** từ 1 đến 30, rồi bấm **Tạo đề mới**.
-- Các đề QTM trộn câu định nghĩa, đọc cấu hình router/switch/Linux/Docker/Kubernetes, câu tình huống vận hành, bài tính subnet và câu tự luận kiểu cuối kỳ.
-- Câu tự luận được đưa về cuối đề để giống bố cục thi hơn.
+- Format QTM mặc định là **28 câu/đề**: khoảng **25 câu trắc nghiệm/đọc cấu hình/thực hành** và **3 câu tự luận cuối đề**.
+- Các đề QTM trộn câu định nghĩa, lệnh thực hành, đọc cấu hình router/switch/Linux/Docker/Kubernetes, tình huống vận hành, subnet và tự luận topology kiểu cuối kỳ.
+- Câu tự luận được ưu tiên dạng có topology/case lớn và được đưa về cuối đề để giống bố cục thi hơn.
 
 1. Tạo repository mới trên GitHub, ví dụ `atmm-qtm-exam-generator`.
 2. Mở terminal tại thư mục chứa `index.html`.

@@ -1628,6 +1628,191 @@ NETWORK_QUESTION_BANK.push(
   }
 );
 
+const NETWORK_CONCEPT_DRILL_QUESTIONS = [
+  ['QTM-DRILL-VLAN-01','QTM 2 - Switching, VLAN, STP','VLAN','Thiết bị ở hai VLAN khác nhau muốn giao tiếp bình thường cần thành phần nào?','Thiết bị layer 3 như router hoặc switch L3 để định tuyến liên VLAN',['Chỉ cần cùng switch vật lý','Chỉ cần cùng native VLAN','Chỉ cần cùng địa chỉ MAC','Chỉ cần tắt STP']],
+  ['QTM-DRILL-VLAN-02','QTM 2 - Switching, VLAN, STP','Trunk','Nếu trunk thiếu VLAN 20 trong allowed list, hiện tượng nào dễ xảy ra?','Traffic VLAN 20 không đi qua link trunk đó',['Tất cả VLAN đều tự động bị xóa','VLAN 20 được ưu tiên hơn','Router tự tạo route cho VLAN 20','DHCP luôn sửa được lỗi']],
+  ['QTM-DRILL-VLAN-03','QTM 2 - Switching, VLAN, STP','Native VLAN','Frame thuộc native VLAN trên trunk 802.1Q thường được xử lý thế nào?','Thường đi không gắn tag VLAN',['Luôn bị drop','Luôn bị mã hóa','Luôn chuyển sang VLAN 1 ở mọi trường hợp','Luôn dùng port TCP 802.1']],
+  ['QTM-DRILL-STP-01','QTM 2 - Switching, VLAN, STP','STP','BPDU trong STP dùng để làm gì?','Trao đổi thông tin để bầu root bridge và tính toán topology không loop',['Cấp IP cho host','Phân giải tên miền','Mã hóa frame Ethernet','Kiểm tra HTTP health']],
+  ['QTM-DRILL-STP-02','QTM 2 - Switching, VLAN, STP','PortFast','Vì sao PortFast không nên bật bừa trên uplink giữa switch?','Có thể làm tăng rủi ro loop nếu dùng sai vị trí',['Vì PortFast làm cổng chậm hơn','Vì PortFast chỉ dành cho router OSPF','Vì PortFast xóa VLAN database','Vì PortFast tắt DHCP']],
+  ['QTM-DRILL-STP-03','QTM 2 - Switching, VLAN, STP','BPDU Guard','BPDU Guard thường dùng để bảo vệ cổng nào?','Cổng access nối endpoint, tránh bị cắm switch lạ',['Cổng uplink core bắt buộc','Cổng WAN Internet','Cổng console','Cổng loopback router']],
+  ['QTM-DRILL-ETHER-01','QTM 2 - Switching, VLAN, STP','EtherChannel','LACP dùng cặp mode nào?','active/passive',['desirable/auto','root/backup','inside/outside','master/worker']],
+  ['QTM-DRILL-ETHER-02','QTM 2 - Switching, VLAN, STP','EtherChannel','Điều kiện quan trọng khi gom EtherChannel là gì?','Các member port phải khớp tốc độ, duplex và cấu hình VLAN/trunk chính',['Mỗi port phải khác VLAN hoàn toàn','Một port phải là routed port, một port access','Không cần khớp gì cả','Bắt buộc chạy DHCP trên port-channel']],
+  ['QTM-DRILL-IP-01','QTM 1 - IP, subnet, dịch vụ nền','ARP','ARP dùng để làm gì trong IPv4 LAN?','Tìm MAC address tương ứng với IPv4 trong cùng mạng local',['Tìm DNS server public','Tạo route OSPF','Cấp phát IP lease','Mã hóa gói tin']],
+  ['QTM-DRILL-IP-02','QTM 1 - IP, subnet, dịch vụ nền','ICMP','Ping thường dùng giao thức nào?','ICMP',['TCP 80','UDP 53','OSPF 89','GRE']],
+  ['QTM-DRILL-IP-03','QTM 1 - IP, subnet, dịch vụ nền','CIDR','/24 tương ứng subnet mask nào?','255.255.255.0',['255.255.0.0','255.255.255.252','255.255.255.128','255.0.0.0']],
+  ['QTM-DRILL-IP-04','QTM 1 - IP, subnet, dịch vụ nền','CIDR','/30 thường phù hợp cho loại link nào?','Point-to-point cần 2 địa chỉ usable',['LAN 200 host','Wi-Fi guest lớn','Database cluster 100 node','VLAN user toàn khoa']],
+  ['QTM-DRILL-DHCP-01','QTM 1 - IP, subnet, dịch vụ nền','DHCP relay','Vì sao client khác VLAN với DHCP server cần relay?','DHCP Discover là broadcast layer 2 không tự đi qua router',['Vì DHCP chỉ chạy trên IPv6','Vì DHCP cần OSPF area 0','Vì switch không có MAC table','Vì DNS bắt buộc nằm cùng VLAN']],
+  ['QTM-DRILL-DNS-01','QTM 1 - IP, subnet, dịch vụ nền','DNS','Bản ghi CNAME dùng để làm gì?','Tạo alias tên miền trỏ tới tên canonical khác',['Trỏ tên tới MAC address','Cấp IP động','Chọn root bridge','Mở port firewall']],
+  ['QTM-DRILL-DNS-02','QTM 1 - IP, subnet, dịch vụ nền','DNS','Bản ghi MX liên quan tới dịch vụ nào?','Email/mail server',['Web static','OSPF routing','Docker volume','STP']],
+  ['QTM-DRILL-OSPF-01','QTM 3 - OSPF & định tuyến','OSPF','OSPF thuộc nhóm giao thức định tuyến nào?','Link-state',['Distance-vector thuần túy như RIP','Application layer proxy','Layer 2 switching','File sharing']],
+  ['QTM-DRILL-OSPF-02','QTM 3 - OSPF & định tuyến','OSPF','Giao thức IP number của OSPF là bao nhiêu?','89',['80','53','443','22']],
+  ['QTM-DRILL-OSPF-03','QTM 3 - OSPF & định tuyến','OSPF','Router-id OSPF dùng để làm gì?','Định danh duy nhất router trong OSPF domain',['Làm default gateway cho PC','Làm mật khẩu OSPF','Làm địa chỉ DNS','Làm VLAN ID']],
+  ['QTM-DRILL-OSPF-04','QTM 3 - OSPF & định tuyến','OSPF','Nếu OSPF neighbor stuck ở 2-WAY trên mạng broadcast, trường hợp nào có thể bình thường?','Router không phải DR/BDR có thể chỉ FULL với DR/BDR',['Mọi neighbor đều bắt buộc FULL với mọi router','OSPF không chạy được trên broadcast','Cần tắt IP routing','Cần đổi sang VLAN 1']],
+  ['QTM-DRILL-ROUTE-01','QTM 3 - OSPF & định tuyến','Default route','Default route 0.0.0.0/0 dùng khi nào?','Khi không có route cụ thể hơn tới đích',['Khi đích cùng subnet','Khi ping loopback','Khi STP cần root bridge','Khi DNS trả NXDOMAIN']],
+  ['QTM-DRILL-ROUTE-02','QTM 3 - OSPF & định tuyến','Longest prefix','Router chọn route theo nguyên tắc nào trước tiên?','Longest prefix match',['Metric cao nhất luôn thắng','Route mới nhất luôn thắng','Tên interface alphabet nhỏ nhất','MAC address thấp nhất']],
+  ['QTM-DRILL-ACL-01','QTM 4 - ACL, NAT, firewall','ACL','ACL được xử lý theo thứ tự nào?','Từ trên xuống, match đầu tiên có hiệu lực',['Từ dưới lên','Ngẫu nhiên','Theo độ dài comment','Theo thời gian tạo interface']],
+  ['QTM-DRILL-ACL-02','QTM 4 - ACL, NAT, firewall','ACL','Wildcard mask 0.0.0.0 trong ACL nghĩa là gì?','Phải khớp chính xác host đó',['Khớp mọi địa chỉ','Khớp một mạng /24','Chỉ khớp broadcast','Chỉ khớp multicast']],
+  ['QTM-DRILL-ACL-03','QTM 4 - ACL, NAT, firewall','ACL','Wildcard mask 0.0.0.255 thường tương ứng phạm vi nào?','Một mạng /24',['Một host duy nhất','Toàn Internet','Một mạng /30','Chỉ địa chỉ multicast']],
+  ['QTM-DRILL-NAT-01','QTM 4 - ACL, NAT, firewall','NAT','Inside local trong NAT là gì?','Địa chỉ private thật của host nội bộ trước khi NAT',['IP public sau NAT','IP của DNS server','MAC của switch','Port TCP sau PAT']],
+  ['QTM-DRILL-NAT-02','QTM 4 - ACL, NAT, firewall','NAT','Static NAT thường dùng cho nhu cầu nào?','Public một dịch vụ nội bộ bằng ánh xạ cố định',['Cấp IP động cho client','Bầu root bridge','Tạo Pod replica','Mount NFS']],
+  ['QTM-DRILL-FW-01','QTM 4 - ACL, NAT, firewall','Firewall','Default deny nghĩa là gì?','Mặc định chặn, chỉ mở những luồng được cho phép rõ ràng',['Mặc định mở hết cho dễ truy cập','Chỉ chặn DNS','Chỉ chặn ICMP','Không cần log']],
+  ['QTM-DRILL-FW-02','QTM 4 - ACL, NAT, firewall','Firewall','Stateful firewall theo dõi thông tin gì?','Trạng thái phiên/kết nối để cho phép gói phản hồi hợp lệ',['Tên file tải xuống duy nhất','Màu dây mạng','Số VLAN trong switch','Tên repository GitHub']],
+  ['QTM-DRILL-VPN-01','QTM 5 - Linux server, VPN, giám sát','VPN','Split tunnel VPN nghĩa là gì?','Chỉ một số mạng đi qua VPN, traffic khác đi trực tiếp Internet',['Toàn bộ traffic bắt buộc qua VPN','Không có mã hóa','Chỉ dùng cho FTP','Chỉ dùng cho STP']],
+  ['QTM-DRILL-VPN-02','QTM 5 - Linux server, VPN, giám sát','VPN','Full tunnel VPN nghĩa là gì?','Toàn bộ traffic client đi qua VPN theo default route được đẩy',['Chỉ DNS đi qua VPN','Chỉ route LAN nội bộ đi qua VPN','Không có route nào đi qua VPN','Chỉ ping đi qua VPN']],
+  ['QTM-DRILL-LINUX-01','QTM 5 - Linux server, VPN, giám sát','Linux','Lệnh systemctl dùng phổ biến để làm gì?','Quản lý service systemd như start/stop/status/enable',['Chia subnet','Tạo VLAN tag','Bầu root bridge','Build Docker image duy nhất']],
+  ['QTM-DRILL-LINUX-02','QTM 5 - Linux server, VPN, giám sát','Linux','Lệnh ss -tulpn thường giúp kiểm tra gì?','Port TCP/UDP đang listen và process liên quan',['Bridge ID STP','Bản ghi DNS MX','CIDR của VLAN','Lịch backup Git']],
+  ['QTM-DRILL-LINUX-03','QTM 5 - Linux server, VPN, giám sát','Linux','Log hệ thống Linux thường xem bằng công cụ nào trên systemd?','journalctl',['kubectl expose','show vlan brief','ip nat outside','docker buildx only']],
+  ['QTM-DRILL-ZABBIX-01','QTM 5 - Linux server, VPN, giám sát','Zabbix','Item trong Zabbix là gì?','Đối tượng/metric được thu thập từ host',['Rule firewall','VLAN tag','Docker image','OSPF LSA']],
+  ['QTM-DRILL-ZABBIX-02','QTM 5 - Linux server, VPN, giám sát','Zabbix','Trigger trong Zabbix dùng để làm gì?','Định nghĩa điều kiện phát sinh cảnh báo',['Cấp IP động','Mount file share','Tạo service Kubernetes','Chọn root bridge']],
+  ['QTM-DRILL-AD-01','QTM 5 - Linux server, VPN, giám sát','AD DS','Group Policy trong AD thường dùng để làm gì?','Áp chính sách cấu hình/bảo mật tập trung cho user/máy',['Cân bằng tải HTTP','Cấp route OSPF','Đóng gói container','Tạo NAT overload']],
+  ['QTM-DRILL-DOCKER-01','QTM 6 - Docker, Kubernetes, cloud','Docker','Dockerfile dùng để làm gì?','Mô tả các bước build Docker image',['Chạy OSPF','Tạo VLAN trunk','Cấp DHCP lease','Bầu root bridge']],
+  ['QTM-DRILL-DOCKER-02','QTM 6 - Docker, Kubernetes, cloud','Docker','Docker network bridge mặc định phục vụ mục đích gì?','Cho container giao tiếp qua mạng bridge trên host',['Tạo VPN site-to-site','Tạo STP root','Cấp DNS public zone','Thay thế firewall cloud']],
+  ['QTM-DRILL-DOCKER-03','QTM 6 - Docker, Kubernetes, cloud','Docker','Bind mount khác volume ở điểm nào thường gặp?','Bind mount gắn trực tiếp đường dẫn host vào container',['Bind mount luôn public Internet','Volume không lưu dữ liệu','Bind mount chỉ dùng cho OSPF','Volume là VLAN tag']],
+  ['QTM-DRILL-K8S-01','QTM 6 - Docker, Kubernetes, cloud','Kubernetes','Node trong Kubernetes là gì?','Máy worker/control-plane chạy Pod và thành phần cluster',['Một DNS record','Một VLAN native','Một ACL line','Một file backup']],
+  ['QTM-DRILL-K8S-02','QTM 6 - Docker, Kubernetes, cloud','Kubernetes','ReplicaSet đảm bảo điều gì?','Số lượng Pod replica mong muốn đang chạy',['Địa chỉ IP public cố định','DNS MX record','Root bridge STP','DHCP excluded-address']],
+  ['QTM-DRILL-K8S-03','QTM 6 - Docker, Kubernetes, cloud','Kubernetes','ConfigMap nên chứa loại dữ liệu nào?','Cấu hình không nhạy cảm',['Password database plaintext','Private key VPN','Token admin cloud','Secret production']],
+  ['QTM-DRILL-K8S-04','QTM 6 - Docker, Kubernetes, cloud','Kubernetes','NetworkPolicy trong Kubernetes dùng để làm gì?','Kiểm soát traffic vào/ra Pod theo policy',['Build image','Cấp IP DHCP cho PC','Chọn root bridge','Tạo DNS MX']],
+  ['QTM-DRILL-CLOUD-01','QTM 6 - Docker, Kubernetes, cloud','Cloud','Load Balancer public thường đặt ở lớp nào của mô hình cloud web?','Lớp entrypoint/public subnet trước app backend',['Trong database private subnet mở public','Trên laptop client','Trong DNS resolver local','Trong switch access']],
+  ['QTM-DRILL-CLOUD-02','QTM 6 - Docker, Kubernetes, cloud','Cloud','Bastion host dùng để làm gì?','Điểm nhảy quản trị có kiểm soát vào private subnet',['Chạy DNS public bắt buộc','Thay thế database','Cấp DHCP cho Internet','Tắt toàn bộ log']],
+  ['QTM-DRILL-CLOUD-03','QTM 6 - Docker, Kubernetes, cloud','Cloud','IAM least privilege nghĩa là gì?','Chỉ cấp quyền tối thiểu cần thiết cho user/service',['Cấp admin cho mọi tài khoản','Tắt MFA để tiện dùng','Commit access key lên Git','Dùng chung root account']],
+  ['QTM-DRILL-HAPROXY-01','QTM 7 - Automation & vận hành','HAProxy','Frontend trong HAProxy thường đại diện cho gì?','Điểm nhận kết nối từ client',['Server database private','Một VLAN ID','Một DHCP scope','Một Pod label']],
+  ['QTM-DRILL-HAPROXY-02','QTM 7 - Automation & vận hành','HAProxy','Backend trong HAProxy thường chứa gì?','Danh sách server đích để phân phối traffic',['Danh sách VLAN native','Danh sách DNS root','Danh sách SSH key client','Danh sách OSPF area']],
+  ['QTM-DRILL-AUTO-01','QTM 7 - Automation & vận hành','Automation','Playbook Ansible thường viết bằng định dạng nào?','YAML',['PCAP','JPEG','DOCX binary','MP3']],
+  ['QTM-DRILL-AUTO-02','QTM 7 - Automation & vận hành','Automation','Rollback plan trong change management dùng để làm gì?','Có phương án quay lại trạng thái ổn định nếu thay đổi lỗi',['Tăng tốc CPU','Tắt giám sát','Xóa backup','Mở any-any firewall']],
+  ['QTM-DRILL-AUTO-03','QTM 7 - Automation & vận hành','Automation','Vì sao nên lưu cấu hình bằng Git/private repo?','Theo dõi lịch sử thay đổi và phục hồi khi cần',['Để Git tự vá lỗi router','Để public password','Để tắt log thiết bị','Để thay DNS server']]
+];
+
+NETWORK_CONCEPT_DRILL_QUESTIONS.forEach((item, index) => {
+  const [id, lesson, topic, question, correct, wrong] = item;
+  NETWORK_QUESTION_BANK.push({
+    id,
+    type: 'mcq',
+    lesson,
+    topic,
+    difficulty: 2,
+    question,
+    options: [correct].concat(wrong),
+    answer: 0,
+    explanation: `Câu ôn định nghĩa/thực hành ${index + 1}: ${correct}.`
+  });
+});
+
+[
+  {id:'QTM-ESSAY-FINAL-04', lesson:'QTM 3 - OSPF & định tuyến', topic:'Tự luận topology OSPF/VLAN', image:'assets/qtm-campus-topology.svg', config:'Yêu cầu: VLAN 10 Sinh viên, VLAN 20 Giảng viên, VLAN 30 Server, DMZ Web, Edge NAT ra Internet.\nSự cố: VLAN 10 ping gateway được nhưng không truy cập DMZ Web; OSPF neighbor Core-Edge FULL.', question:'Tự luận cuối kỳ: Phân tích topology campus trong hình, thiết kế bảng địa chỉ/VLAN, nêu luồng định tuyến từ VLAN 10 tới DMZ Web, sau đó lập checklist troubleshoot theo thứ tự Layer 2 -> Layer 3 -> ACL/NAT. Bài làm phải chỉ ra ít nhất 6 lệnh kiểm tra và giải thích ý nghĩa từng lệnh.', answer:'Bài tốt cần có bảng VLAN/subnet/gateway, trunk allowed VLAN, SVI up, route OSPF hoặc static tới DMZ, ACL cho phép đúng nguồn/đích/port, NAT chỉ áp dụng ra Internet. Checklist: show vlan brief, show interfaces trunk, show ip interface brief, show ip route, show ip ospf neighbor, show access-lists, show ip nat translations, ping/traceroute, kiểm log web/firewall.'},
+  {id:'QTM-ESSAY-FINAL-05', lesson:'QTM 6 - Docker, Kubernetes, cloud', topic:'Tự luận cloud/Kubernetes', image:'assets/qtm-cloud-lb.svg', config:'kubectl get deploy\napi   READY 3/3\n\nkubectl get svc\napi-svc ClusterIP 10.96.8.10 80/TCP\n\nkubectl get ingress\napi.example.com /api -> api-svc:80\n\nSecurity group backend: chỉ cho inbound từ LB subnet.', question:'Tự luận cuối kỳ: Dựa vào topology cloud/Kubernetes, mô tả luồng request từ Internet vào API, nêu vai trò của Load Balancer, Ingress, Service, Pod và security group. Sau đó đề xuất 8 điểm hardening khi triển khai đồ án web app bằng Docker/Kubernetes/cloud.', answer:'Luồng: DNS -> LB/WAF -> Ingress Controller -> Service -> Pod -> database private. Vai trò: LB nhận public traffic/TLS, Ingress route host/path, Service ổn định endpoint Pod, Pod chạy container app, SG giới hạn network. Hardening: TLS, không commit secret, RBAC least privilege, image scan, resource requests/limits, readiness/liveness, NetworkPolicy, private DB, backup, logging/monitoring, giới hạn SSH qua bastion/VPN.'},
+  {id:'QTM-ESSAY-FINAL-06', lesson:'QTM 5 - Linux server, VPN, giám sát', topic:'Tự luận OpenVPN/Zabbix/File server', image:'assets/qtm-campus-topology.svg', config:'OpenVPN: 10.8.0.0/24\nLAN Server: 192.168.30.0/24\nFile server: SMB/NFS/FTP trên 192.168.30.20\nZabbix server: 192.168.30.10\nFirewall: default deny INPUT/FORWARD', question:'Tự luận cuối kỳ: Thiết kế phương án để sinh viên remote VPN truy cập file server nội bộ an toàn, đồng thời Zabbix giám sát VPN và file server. Nêu route/firewall cần có, chính sách phân quyền file, và các trigger/cảnh báo nên cấu hình.', answer:'Cần push route LAN cho VPN client hoặc full tunnel tùy yêu cầu, bật IP forwarding, rule FORWARD tun0 <-> LAN đúng port SMB/NFS/FTP hoặc dùng jump/VPN-only, route ngược hoặc NAT phù hợp. File server cần group permission, không anonymous write, TLS/VPN, log truy cập. Zabbix giám sát OpenVPN process/tunnel, số client, ping/file service port, CPU/RAM/disk, disk full, failed login, backup status và cảnh báo qua email/Telegram.'},
+  {id:'QTM-ESSAY-FINAL-07', lesson:'QTM 7 - Automation & vận hành', topic:'Tự luận automation/change', image:'assets/qtm-campus-topology.svg', config:'Tình huống: trước giờ thi lab, cần đổi ACL chặn VLAN Sinh viên truy cập VLAN Quản trị nhưng vẫn cho truy cập Web DMZ và Internet.\nHạ tầng có 2 switch access, core L3 và edge router.', question:'Tự luận cuối kỳ: Lập kế hoạch thay đổi ACL an toàn. Trình bày bước chuẩn bị, backup, triển khai, kiểm thử, rollback và cách dùng automation/version control để giảm sai sót.', answer:'Cần xác định yêu cầu luồng traffic, backup running-config, lưu diff Git, viết ACL theo nguyên tắc rule đặc hiệu trước rule rộng, test trong lab nếu có, triển khai trong maintenance window, kiểm bằng ping/traceroute/curl/show access-lists/log deny, có rollback config rõ ràng. Automation dùng Ansible template, inventory, dry-run/check mode, lưu secret an toàn và review trước khi apply.'}
+].forEach(item => {
+  NETWORK_QUESTION_BANK.push({
+    id: item.id,
+    type: 'short',
+    lesson: item.lesson,
+    topic: item.topic,
+    difficulty: 3,
+    image: {src:item.image, alt:item.topic, caption:'Sơ đồ/topology dùng cho câu tự luận cuối kỳ.'},
+    config: item.config,
+    question: item.question,
+    answer: item.answer,
+    explanation: 'Câu tự luận dạng đề thi 90 phút: chấm theo khả năng phân tích topology, quy trình kiểm tra và lập luận cấu hình.'
+  });
+});
+
+const COMMAND_DRILLS = [
+  ['show vlan brief','xem VLAN và port access trên switch Cisco','show ip nat translations','kubectl get svc','docker images','systemctl restart ssh'],
+  ['show interfaces trunk','kiểm tra trunk, native VLAN và allowed VLAN','show users','ipconfig /flushdns','docker compose down','journalctl -u zabbix-agent'],
+  ['show mac address-table','xem bảng MAC học được trên switch','show ip ospf neighbor','kubectl describe node','iptables -t nat -L','nslookup -type=mx'],
+  ['show ip interface brief','xem nhanh trạng thái interface và IP trên router/switch L3','show spanning-tree blockedports','docker ps -a','systemctl list-timers','kubectl logs'],
+  ['show ip route','xem bảng định tuyến IPv4','show vlan private-vlan','docker volume ls','ss -tulpn','dig TXT'],
+  ['show ip ospf neighbor','kiểm tra láng giềng OSPF và trạng thái adjacency','show ip dhcp binding','docker network prune','kubectl rollout undo','iptables -S'],
+  ['show access-lists','xem hit count và rule ACL','show version','docker exec','kubectl cordon','journalctl -xe'],
+  ['show ip nat translations','xem phiên NAT/PAT đang được tạo','show archive','kubectl get ingress','dig AAAA','systemctl enable nginx'],
+  ['ping','kiểm tra reachability cơ bản ở layer 3','show inventory','docker pull','kubectl scale','net user'],
+  ['traceroute','xem đường đi layer 3 tới đích','show clock','docker login','kubectl taint','hostnamectl'],
+  ['nslookup','kiểm tra phân giải DNS từ client','show controllers','docker save','kubectl label','route print'],
+  ['ss -tulpn','xem port listen và process trên Linux','show cdp neighbors','docker tag','kubectl top nodes','gpupdate /force'],
+  ['systemctl status nginx','kiểm tra trạng thái service nginx','show ip protocols','docker rm -f','kubectl api-resources','ip route add'],
+  ['journalctl -u openvpn','xem log service OpenVPN trên Linux systemd','show interfaces status','docker history','kubectl config get-contexts','arp -a'],
+  ['iptables -L -n -v','xem rule filter và hit counter trên Linux firewall','show ip arp','docker inspect','kubectl get events','netstat -ano'],
+  ['iptables -t nat -L -n -v','xem rule NAT như DNAT/SNAT/MASQUERADE','show standby','docker restart','kubectl delete pod','nltest /dsgetdc'],
+  ['docker ps','xem container đang chạy','show etherchannel summary','ip helper-address','kubectl explain pod','repadmin /replsummary'],
+  ['docker compose up -d','khởi chạy các service trong compose ở background','show run interface trunk','ipconfig /all','kubectl drain','zabbix_get'],
+  ['docker logs web','xem log container web','show ip route ospf','dig NS','kubectl get pv','systemctl mask'],
+  ['docker network ls','xem các network Docker','show spanning-tree root','nslookup A','kubectl get secret','tcpdump -i any'],
+  ['kubectl get pods','xem trạng thái Pod trong namespace hiện tại','show vlan id 10','docker build','systemctl reload','iptables -F'],
+  ['kubectl describe pod api','xem event, probe, image, volume và lỗi scheduling của Pod','show mac address-table dynamic','docker compose logs','ip route','dig CNAME'],
+  ['kubectl logs api','xem log ứng dụng trong Pod','show ip nat statistics','docker volume inspect','systemctl cat nginx','route add'],
+  ['kubectl get svc','xem Service, type, ClusterIP và port','show access-session','docker cp','journalctl -f','nslookup -type=txt'],
+  ['kubectl get endpoints','kiểm tra Service có Pod backend hay không','show run | section router ospf','docker port','systemctl disable','netsh advfirewall show allprofiles'],
+  ['kubectl get ingress','xem rule host/path expose HTTP/HTTPS','show ip dhcp pool','docker stats','journalctl --since today','ip addr'],
+  ['kubectl rollout status deployment/api','kiểm tra trạng thái rollout của Deployment','show ip interface vlan 10','docker compose ps','iptables -P INPUT DROP','dig SOA'],
+  ['zabbix_get','kiểm tra item Zabbix agent từ server/proxy','show logging','docker events','kubectl auth can-i','systemctl is-enabled'],
+  ['tcpdump -i tun0','bắt gói trên interface VPN tun0','show platform','docker context ls','kubectl get cm','repadmin /showrepl'],
+  ['gpupdate /force','ép client Windows cập nhật Group Policy','show ip cef','docker secret ls','kubectl get ns','iptables-save']
+];
+
+COMMAND_DRILLS.forEach((row, index) => {
+  const [cmd, purpose, ...wrong] = row;
+  NETWORK_QUESTION_BANK.push({
+    id: `QTM-CMD-${String(index + 1).padStart(3,'0')}`,
+    type: 'mcq',
+    lesson: index < 8 ? 'QTM 2 - Switching, VLAN, STP' : (index < 16 ? 'QTM 5 - Linux server, VPN, giám sát' : (index < 27 ? 'QTM 6 - Docker, Kubernetes, cloud' : 'QTM 7 - Automation & vận hành')),
+    topic: 'Lệnh thực hành',
+    difficulty: 2,
+    question: `Lệnh "${cmd}" thường dùng để làm gì?`,
+    options: [purpose].concat(wrong.slice(0,4)),
+    answer: 0,
+    explanation: `Trong bài thực hành, "${cmd}" dùng để ${purpose}.`
+  });
+});
+
+const TROUBLESHOOTING_DRILLS = [
+  ['PC cùng VLAN ping nhau được nhưng không ra Internet','default gateway, route mặc định hoặc NAT/firewall ở edge','root bridge STP bị đổi tên','Docker image thiếu tag','Ingress thiếu TLS secret'],
+  ['Client nhận APIPA 169.254.x.x','DHCP không cấp được lease hoặc client không tới được DHCP server','OSPF cost quá thấp','NAT overload hoạt động tốt','Zabbix trigger quá dài'],
+  ['VLAN mới tạo nhưng không qua uplink','trunk chưa allow VLAN đó hoặc VLAN chưa tồn tại hai đầu','DNS thiếu bản ghi MX','Docker volume đầy','OpenVPN certificate hết hạn'],
+  ['OSPF neighbor không lên dù ping trực tiếp được','kiểm tra area, timer, authentication, passive-interface và subnet mask','kiểm tra SMB share permission trước tiên','tăng replicas trong Kubernetes','đổi DNS sang 8.8.8.8 là đủ'],
+  ['Service Kubernetes có endpoints rỗng','selector của Service không khớp label Pod hoặc Pod chưa Ready','Security group mở quá rộng','STP root bridge sai','DHCP excluded-address quá ngắn'],
+  ['Pod CrashLoopBackOff','xem logs/describe để kiểm tra command, env, secret, probe hoặc dependency','tạo VLAN native mới','đổi OSPF area về 1','mở SMB ra Internet'],
+  ['Web container chạy nhưng host không truy cập được port','kiểm tra port mapping host:container và firewall host','kiểm tra Bridge ID STP','tắt DHCP relay','xóa DNS zone'],
+  ['Client VPN connected nhưng không tới LAN','kiểm tra route push, IP forwarding, FORWARD firewall và route ngược/NAT','kiểm tra native VLAN mismatch đầu tiên','xóa Kubernetes Service','đổi port HTTP sang 53'],
+  ['Zabbix không cảnh báo khi service chết','kiểm tra item, trigger expression, agent/server connectivity và action notification','thêm OSPF network statement','đổi Docker image sang latest','tăng STP priority'],
+  ['FTP login được nhưng list/download lỗi','kiểm tra passive mode và dải passive port trên firewall/NAT','kiểm tra OSPF DR election','đổi Service sang ClusterIP','xóa route mặc định'],
+  ['AD client join domain thất bại','kiểm tra DNS trỏ về domain controller, thời gian hệ thống và quyền join','kiểm tra HAProxy balance algorithm','đổi Docker bridge subnet','tắt BPDU Guard'],
+  ['Guacamole truy cập RDP chập chờn','kiểm tra backend RDP/SSH, guacd, reverse proxy timeout và log phiên','mở DNS TCP 53 ra Internet','đổi VLAN native','tăng OSPF reference bandwidth'],
+  ['HAProxy vẫn gửi traffic tới server lỗi','kiểm tra health check, rise/fall, check option và backend status','kiểm tra DHCP DORA','xóa Pod label','đổi subnet /24 sang /30'],
+  ['Database cloud bị truy cập trực tiếp từ Internet','security group/subnet đang public quá rộng, cần private subnet và chỉ app tier được vào','Ingress path sai','STP loop','Zabbix item disabled'],
+  ['SSH public bị brute force','giới hạn source qua VPN/bastion, dùng key/MFA, fail2ban và tắt password nếu phù hợp','bật PortFast trunk','đổi Docker tag latest','xóa default route'],
+  ['Route OSPF có nhưng traffic chiều về mất','kiểm tra route ngược, ACL/firewall và NAT exemption nếu qua VPN','kiểm tra CNAME record','kiểm tra Docker volume','kiểm tra Group Policy'],
+  ['NFS mount bị permission denied','kiểm tra export rule, client IP, filesystem permission và firewall','kiểm tra OSPF passive-interface','đổi Ingress class','xóa bridge Docker'],
+  ['SMB truy cập được bằng IP nhưng không bằng tên','kiểm tra DNS/NetBIOS, AD DNS và bản ghi liên quan','kiểm tra NAT overload','kiểm tra STP cost','kiểm tra readinessProbe'],
+  ['Ingress trả 404 nhưng Pod vẫn chạy','kiểm tra host/path rule, Ingress Controller và Service backend','kiểm tra VLAN allowed list','kiểm tra SNMP community','kiểm tra DHCP scope'],
+  ['Deployment rollout kẹt','kiểm tra image pull, probe, resource limit, event và replica availability','kiểm tra OSPF router-id','kiểm tra FTP passive port','kiểm tra AD OU'],
+  ['Switch báo native VLAN mismatch','đồng bộ native VLAN hai đầu trunk hoặc đổi sang native VLAN không dùng','tăng replicas Pod','tạo NAT static','đổi DNS forwarder'],
+  ['Port-security err-disabled','kiểm tra MAC vi phạm, policy shutdown/restrict/protect và recovery','kiểm tra ClusterIP','xóa DHCP lease server','đổi OpenVPN cipher'],
+  ['ACL cho phép host đặc biệt nhưng vẫn bị chặn','kiểm tra thứ tự rule và deny rộng hơn phía trên','kiểm tra Dockerfile ENTRYPOINT','kiểm tra DNS MX','kiểm tra Zabbix action'],
+  ['NAT port forward từ ngoài vào không được','kiểm tra static NAT/DNAT, outside ACL, route tới server và service đang listen','kiểm tra STP PortFast','kiểm tra ConfigMap','kiểm tra AD GPO'],
+  ['Cloud VM ping ra Internet được nhưng không SSH vào được','kiểm tra security group inbound, NACL, public IP, route table và SSH service','kiểm tra Kubernetes Service selector','kiểm tra VLAN 20','kiểm tra DNS AAAA'],
+  ['Container mất dữ liệu sau khi recreate','thiếu volume/bind mount cho dữ liệu stateful','OSPF area mismatch','native VLAN mismatch','Zabbix trigger sai'],
+  ['Compose app không kết nối được db bằng localhost','trong container localhost là chính container; nên dùng tên service/network','ACL implicit deny','STP blocking port','DHCP relay thiếu'],
+  ['Kubernetes Secret bị commit lên Git','phải rotate secret và chuyển sang secret manager/quy trình không commit bí mật','đổi VLAN native','xóa OSPF route','tắt HAProxy check'],
+  ['Monitoring báo quá nhiều cảnh báo giả','điều chỉnh ngưỡng, duration, dependency và trigger theo dịch vụ','xóa toàn bộ log','mở any-any firewall','tắt DNS'],
+  ['Backup cấu hình có file nhưng restore không được','cần kiểm tra định dạng, version thiết bị, secret, quy trình restore thử và quyền truy cập','thêm Docker replicas','đổi STP priority','bật DNS recursion public']
+];
+
+TROUBLESHOOTING_DRILLS.forEach((row, index) => {
+  const [symptom, correct, ...wrong] = row;
+  NETWORK_QUESTION_BANK.push({
+    id: `QTM-LAB-${String(index + 1).padStart(3,'0')}`,
+    type: 'mcq',
+    lesson: index < 4 ? 'QTM 1 - IP, subnet, dịch vụ nền' : (index < 10 ? 'QTM 6 - Docker, Kubernetes, cloud' : (index < 18 ? 'QTM 5 - Linux server, VPN, giám sát' : 'QTM 7 - Automation & vận hành')),
+    topic: 'Tình huống thực hành',
+    difficulty: index % 3 === 0 ? 3 : 2,
+    question: `Tình huống thực hành: ${symptom}. Hướng kiểm tra hợp lý nhất là gì?`,
+    options: [correct].concat(wrong.slice(0,4)),
+    answer: 0,
+    explanation: `Hướng xử lý trọng tâm: ${correct}.`
+  });
+});
+
 const NETWORK_THEORY_CARDS = [
   {
     lesson: 'QTM 1 - IP, subnet, dịch vụ nền',

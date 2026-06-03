@@ -465,7 +465,7 @@
     const examMode = !batchMode && $('answerMode')?.value === 'exam';
     let count = parseInt($('count').value,10) || 40;
     if(mode==='docx') count = 40;
-    if(batchMode) count = 40;
+    if(batchMode) count = 28;
     if(mode==='quick') count = Math.min(count,20);
     $('count').value = count;
 
@@ -501,7 +501,7 @@
       currentExamSets.push({
         label: variantCount === 1 ? `Đề ${parseInt($('examNumber')?.value,10) || 1}` : `Đề ${v+1}`,
         seed: variantSeed,
-        questions: orderExamQuestions(expandGroupedSelection(shuffled, pool, count, rng)).map((q,i)=>prepareQuestion(q, i, rng, v))
+        questions: selectExamQuestions(subject, shuffled, pool, count, rng).map((q,i)=>prepareQuestion(q, i, rng, v))
       });
     }
     currentExam = currentExamSets.flatMap(set => set.questions.map(q => ({...q, variantSeed:set.seed, variantLabel:set.label})));
@@ -572,6 +572,53 @@
       }
     }
     return selected;
+  }
+
+  function selectExamQuestions(subject, shuffled, pool, count, rng){
+    if(subject !== 'qtm') return orderExamQuestions(expandGroupedSelection(shuffled, pool, count, rng));
+    return composeNetworkAdminExam(shuffled, pool, count, rng);
+  }
+
+  function composeNetworkAdminExam(shuffled, pool, count, rng){
+    const essayTarget = count >= 24 ? 3 : (count >= 12 ? 2 : 1);
+    const objectiveTarget = Math.max(0, count - essayTarget);
+    const seen = new Set();
+    const objectivePool = balanceQtmSelection(
+      shuffled.filter(q => q.type === 'mcq' || q.type === 'tf' || q.type === 'match' || q.type === 'fill'),
+      objectiveTarget,
+      rng
+    );
+    const selected = [];
+    for(const q of objectivePool){
+      if(selected.length >= objectiveTarget) break;
+      if(seen.has(q.id)) continue;
+      selected.push(q);
+      seen.add(q.id);
+    }
+    if(selected.length < objectiveTarget){
+      for(const q of shuffle(pool.filter(q => q.type !== 'short' && q.type !== 'calc'), rng)){
+        if(selected.length >= objectiveTarget) break;
+        if(seen.has(q.id)) continue;
+        selected.push(q);
+        seen.add(q.id);
+      }
+    }
+
+    const essayPool = shuffle(pool.filter(q => q.type === 'short'), rng).sort((a,b) => {
+      const aFinal = String(a.id || '').includes('ESSAY-FINAL') ? 0 : 1;
+      const bFinal = String(b.id || '').includes('ESSAY-FINAL') ? 0 : 1;
+      const aMedia = a.image ? 0 : 1;
+      const bMedia = b.image ? 0 : 1;
+      return aFinal - bFinal || aMedia - bMedia;
+    });
+    const essays = [];
+    for(const q of essayPool){
+      if(essays.length >= essayTarget) break;
+      if(seen.has(q.id)) continue;
+      essays.push(q);
+      seen.add(q.id);
+    }
+    return selected.concat(essays).slice(0, count);
   }
 
   function orderExamQuestions(questions){
@@ -940,7 +987,7 @@
     if(subject === 'qtm'){
       if($('mode')) $('mode').value = 'mixed';
       if($('difficulty')) $('difficulty').value = 2;
-      if($('count')) $('count').value = 50;
+      if($('count')) $('count').value = 28;
       if($('examDuration')) $('examDuration').value = 90;
       document.querySelectorAll('input[name="qtype"]').forEach(x=>{ x.checked = true; });
     } else {
@@ -969,7 +1016,7 @@
         if($('subject')) $('subject').value = 'qtm';
         if($('answerMode')) $('answerMode').value = 'practice';
         $('difficulty').value = 2;
-        $('count').value = 40;
+        $('count').value = 28;
         if($('variantCount')) $('variantCount').value = 25;
         if($('examDuration')) $('examDuration').value = 90;
         document.querySelectorAll('input[name="qtype"]').forEach(x=>{ x.checked = true; });
