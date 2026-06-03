@@ -45,6 +45,7 @@ App này là web tĩnh, nên khi đưa lên GitHub Pages có thể mở trực t
 - Format QTM mặc định là **28 câu/đề**: khoảng **25 câu trắc nghiệm/đọc cấu hình/thực hành** và **3 câu tự luận cuối đề**.
 - Các đề QTM trộn câu định nghĩa, lệnh thực hành, đọc cấu hình router/switch/Linux/Docker/Kubernetes, tình huống vận hành, subnet và tự luận topology kiểu cuối kỳ.
 - Câu tự luận được ưu tiên dạng có topology/case lớn, chia ý **a, b, c** như đề thi và được đưa về cuối đề.
+- Khi chọn sai trong chế độ luyện tập hoặc sau khi nộp bài, app sẽ giải thích vì sao phương án đã chọn sai.
 
 1. Tạo repository mới trên GitHub, ví dụ `atmm-qtm-exam-generator`.
 2. Mở terminal tại thư mục chứa `index.html`.

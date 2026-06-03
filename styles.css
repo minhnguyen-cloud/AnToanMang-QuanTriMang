@@ -113,6 +113,8 @@ button.primary{background:var(--brand);color:#fff;border-color:var(--brand)}
 .answer{margin-top:12px;border-left:4px solid var(--brand2);background:#ecfdf3;border-radius:8px;padding:12px 14px;color:#064e3b}
 .answer.hidden{display:none}
 .answer strong{color:#065f46}
+.wrong-feedback{background:#fff7ed;border:1px solid #fed7aa;border-left:4px solid #f97316;border-radius:8px;color:#7c2d12;padding:10px 12px;margin:0 0 10px}
+.wrong-feedback strong{color:#9a3412}
 .match-table{width:100%;border-collapse:collapse;margin-top:10px}
 .match-table th,.match-table td{border:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:top}
 .match-table th{background:#f8fafc}

@@ -638,7 +638,7 @@
     copy.uid = `v${variantIndex}-${copy.id}-${index}`;
     if(copy.type==='mcq' || (copy.type==='calc' && copy.options && copy.options.length)){
       const correctValue = copy.options[copy.answer];
-      const opts = shuffle(copy.options, rng).slice(0,5);
+      const opts = isNetworkQuestion(copy) ? networkBalancedOptions(copy, correctValue, rng) : shuffle(copy.options, rng).slice(0,5);
       // Ensure correct still included
       if(!opts.includes(correctValue)) opts[Math.floor(rng()*opts.length)] = correctValue;
       copy.options = opts;
@@ -651,6 +651,118 @@
       copy.matchRight = right;
     }
     return copy;
+  }
+
+  function isNetworkQuestion(q){
+    return String(q.lesson || '').startsWith('QTM ');
+  }
+
+  function networkBalancedOptions(q, correctValue, rng){
+    const existing = q.options.filter(o => o !== correctValue);
+    const generated = networkDistractors(q, correctValue);
+    const candidates = uniqueStrings(existing.concat(generated))
+      .filter(o => o && o !== correctValue)
+      .filter(o => !tooSimilarOption(o, correctValue));
+    const selected = [];
+    const targetLen = String(correctValue).length;
+    const shuffled = shuffle(candidates, rng).sort((a,b) => Math.abs(a.length - targetLen) - Math.abs(b.length - targetLen));
+    for(const item of shuffled){
+      if(selected.length >= 4) break;
+      if(selected.some(prev => tooSimilarOption(prev, item))) continue;
+      selected.push(item);
+    }
+    while(selected.length < 4){
+      selected.push(genericNetworkDistractor(q, selected.length));
+    }
+    return shuffle([correctValue].concat(selected.slice(0,4)), rng);
+  }
+
+  function uniqueStrings(items){
+    const seen = new Set();
+    const out = [];
+    for(const item of items){
+      const text = String(item || '').trim();
+      const key = text.toLowerCase();
+      if(!text || seen.has(key)) continue;
+      seen.add(key);
+      out.push(text);
+    }
+    return out;
+  }
+
+  function tooSimilarOption(a,b){
+    const x = String(a).toLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').trim();
+    const y = String(b).toLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').trim();
+    if(!x || !y) return false;
+    if(x === y) return true;
+    const short = x.length < y.length ? x : y;
+    const long = x.length < y.length ? y : x;
+    return short.length > 16 && long.includes(short);
+  }
+
+  function networkDistractors(q, correctValue){
+    const text = `${q.lesson || ''} ${q.topic || ''} ${q.question || ''} ${q.config || ''}`.toLowerCase();
+    const d = [];
+    const add = (...items) => d.push(...items);
+    if(/vlan|trunk|stp|etherchannel|switch/.test(text)){
+      add(
+        'Kiểm tra VLAN/trunk là cần thiết, nhưng kết luận này bỏ qua gateway layer 3 hoặc ACL nên chưa đủ đúng',
+        'Có thể đúng nếu lỗi chỉ nằm ở access port, nhưng không giải thích được toàn bộ luồng end-to-end',
+        'Tập trung vào STP/root bridge nghe hợp lý, nhưng không phải nguyên nhân trực tiếp trong dữ kiện đã cho',
+        'Đổi native VLAN có thể xử lý một số lỗi trunk, nhưng không phải bước đầu tiên nếu đề hỏi định tuyến liên VLAN'
+      );
+    }
+    if(/ospf|route|routing|default route|định tuyến|router/.test(text)){
+      add(
+        'Kiểm tra route là đúng hướng, nhưng phương án này thiếu điều kiện route ngược hoặc adjacency nên chưa chính xác nhất',
+        'OSPF area 0 là quan trọng, nhưng không phải mọi lỗi routing đều do thiếu area 0',
+        'Default route giúp ra Internet, nhưng không thay thế route nội bộ hoặc route tới mạng chi nhánh',
+        'Ping trực tiếp chỉ chứng minh reachability cơ bản, chưa đủ kết luận bảng định tuyến đã đúng'
+      );
+    }
+    if(/acl|firewall|nat|dmz|iptables|security group/.test(text)){
+      add(
+        'Mở rule rộng có thể làm thông mạng, nhưng sai nguyên tắc least privilege và không phải đáp án an toàn nhất',
+        'NAT xử lý luồng ra Internet, nhưng không nên áp dụng bừa cho traffic nội bộ hoặc VPN',
+        'ACL đúng chiều là quan trọng, nhưng phương án này bỏ qua thứ tự rule và implicit deny',
+        'Chỉ kiểm tra service đích là chưa đủ nếu firewall hoặc route hai chiều đang chặn'
+      );
+    }
+    if(/docker|container|compose|kubernetes|kubectl|pod|service|ingress|cloud/.test(text)){
+      add(
+        'Pod/container chạy không đồng nghĩa ứng dụng đã sẵn sàng nhận traffic qua Service hoặc Ingress',
+        'Mở port public nghe có vẻ xử lý nhanh, nhưng bỏ qua selector, targetPort hoặc security group',
+        'Scale thêm replica có thể tăng tải, nhưng không sửa lỗi cấu hình route/service/secret/probe',
+        'Dùng image mới hơn không phải đáp án trọng tâm nếu dữ kiện đang nói về network hoặc endpoint'
+      );
+    }
+    if(/vpn|openvpn|zabbix|smb|nfs|ftp|linux|systemd|ssh|ad ds|guacamole/.test(text)){
+      add(
+        'Service up là điều kiện cần, nhưng chưa đủ nếu route, firewall hoặc phân quyền vẫn sai',
+        'Mở port toàn Internet có thể làm truy cập được, nhưng là cách xử lý không an toàn trong quản trị mạng',
+        'Đổi DNS có thể cần khi truy cập bằng tên, nhưng không giải quyết lỗi route/firewall theo IP',
+        'Chỉ xem log ứng dụng là chưa đủ nếu gói tin chưa tới được server qua tunnel hoặc firewall'
+      );
+    }
+    if(!d.length){
+      add(
+        'Nhận định này đúng một phần nhưng thiếu điều kiện quan trọng trong dữ kiện đề bài',
+        'Cách này có thể dùng khi troubleshoot, nhưng chưa phải nguyên nhân hoặc giải pháp sát nhất',
+        'Phương án này xử lý ở tầng khác nên không trả lời đúng trọng tâm câu hỏi',
+        'Kết luận này quá rộng, dễ đúng trong vài trường hợp nhưng không đúng nhất với tình huống đã cho'
+      );
+    }
+    return d.filter(item => item !== correctValue);
+  }
+
+  function genericNetworkDistractor(q, index){
+    const items = [
+      'Đúng trong một số bài lab, nhưng chưa đủ điều kiện để kết luận là đáp án chính của câu này',
+      'Nghe hợp lý về mặt vận hành, nhưng xử lý sai tầng giao thức so với dữ kiện đề bài',
+      'Có thể là bước kiểm tra phụ, nhưng không giải thích được nguyên nhân trọng tâm',
+      'Phương án này quá rộng và bỏ qua chi tiết cấu hình đang được hỏi'
+    ];
+    return items[index % items.length];
   }
 
   function renderExam(){
@@ -724,13 +836,42 @@
     return tpl;
   }
 
-  function answerHtml(q){
+  function answerHtml(q, selectedChoice=null){
     let a = '';
     if(q.type==='mcq' || (q.type==='calc' && q.options && q.options.length)) a = `${letters[q.answer]}. ${escapeHtml(q.options[q.answer])}`;
     else if(q.type==='tf') a = q.answer ? 'Đúng' : 'Sai';
     else if(q.type==='match') a = q.answer.map(p=>`${escapeHtml(p[0])} → ${escapeHtml(p[1])}`).join('; ');
     else a = escapeHtml(String(q.answer));
-    return `<strong>Đáp án:</strong> ${a}<br><strong>Giải thích:</strong> ${escapeHtml(richExplanation(q))}`;
+    const wrong = wrongFeedbackHtml(q, selectedChoice);
+    return `${wrong}<strong>Đáp án:</strong> ${a}<br><strong>Giải thích:</strong> ${escapeHtml(richExplanation(q))}`;
+  }
+
+  function wrongFeedbackHtml(q, selectedChoice){
+    if(selectedChoice === null || selectedChoice === undefined) return '';
+    if(!isGradable(q) || isCorrect(q, selectedChoice)) return '';
+    let chosenText = '';
+    if(q.type === 'tf') chosenText = selectedChoice ? 'Đúng' : 'Sai';
+    else if(q.options && q.options[selectedChoice] !== undefined) chosenText = `${letters[selectedChoice]}. ${q.options[selectedChoice]}`;
+    if(!chosenText) return '';
+    return `<div class="wrong-feedback"><strong>Bạn chọn:</strong> ${escapeHtml(chosenText)}<br><strong>Vì sao sai:</strong> ${escapeHtml(explainWrongChoice(q, selectedChoice))}</div>`;
+  }
+
+  function explainWrongChoice(q, selectedChoice){
+    if(q.optionFeedback && q.optionFeedback[selectedChoice]) return q.optionFeedback[selectedChoice];
+    const chosen = q.type === 'tf' ? (selectedChoice ? 'Đúng' : 'Sai') : String(q.options?.[selectedChoice] || '');
+    const correct = q.type === 'tf' ? (q.answer ? 'Đúng' : 'Sai') : String(q.options?.[q.answer] || '');
+    const text = `${q.lesson || ''} ${q.topic || ''} ${q.question || ''} ${q.config || ''} ${chosen}`.toLowerCase();
+    const reasons = [
+      {keys:['vlan','trunk','native','stp','etherchannel','switch'], reason:'phương án này chỉ nhìn một phần layer 2 hoặc nhầm vai trò access/trunk/STP; câu hỏi cần đối chiếu cả VLAN, gateway và luồng đi qua thiết bị.'},
+      {keys:['ospf','route','routing','default','router','area'], reason:'phương án này bỏ sót điều kiện định tuyến như area, adjacency, longest-prefix, default route hoặc route ngược; vì vậy chưa giải thích đúng luồng end-to-end.'},
+      {keys:['acl','firewall','nat','dmz','iptables','security group'], reason:'phương án này dễ làm thông mạng nhưng sai hoặc thiếu về thứ tự rule, chiều áp ACL/NAT, implicit deny hoặc nguyên tắc least privilege.'},
+      {keys:['docker','container','kubernetes','kubectl','pod','service','ingress','cloud'], reason:'phương án này nhầm giữa thành phần đang chạy và đường truy cập thật; với container/Kubernetes phải kiểm selector, port/targetPort, endpoint, probe và security group.'},
+      {keys:['vpn','openvpn','zabbix','smb','nfs','ftp','linux','ssh','systemd','ad ds','guacamole'], reason:'phương án này chỉ xử lý service hoặc ứng dụng, nhưng tình huống còn phụ thuộc route, firewall, phân quyền, DNS hoặc luồng qua VPN/server.'},
+      {keys:['dhcp','dns','subnet','gateway','ipv6','arp'], reason:'phương án này nhầm vai trò dịch vụ nền; cần phân biệt địa chỉ IP/subnet/gateway với phân giải tên, DHCP lease và reachability layer 2/3.'}
+    ];
+    const matched = reasons.find(item => item.keys.some(k => text.includes(k)));
+    const base = matched ? matched.reason : 'phương án này có thể đúng trong vài ngữ cảnh khác, nhưng không thỏa điều kiện trọng tâm của dữ kiện đề bài.';
+    return `${base} Đáp án đúng hướng tới: ${correct}.`;
   }
 
   function richExplanation(q){
@@ -800,7 +941,11 @@
       btn.classList.toggle('correct', correct);
       btn.classList.toggle('incorrect', btnChoice === choice && !correct);
     });
-    card.querySelector('.answer')?.classList.remove('hidden');
+    const answer = card.querySelector('.answer');
+    if(answer){
+      answer.innerHTML = answerHtml(q, choice);
+      answer.classList.remove('hidden');
+    }
   }
 
   function submitExam(autoSubmitted=false){
