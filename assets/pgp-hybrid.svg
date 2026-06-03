@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="430" viewBox="0 0 980 430" role="img" aria-label="PGP hybrid encryption diagram">
+  <rect width="980" height="430" fill="#ffffff"/>
+  <text x="490" y="42" text-anchor="middle" font-family="Arial" font-size="28" font-weight="700" fill="#0f172a">PGP: mã hóa lai</text>
+  <rect x="58" y="110" width="120" height="70" rx="8" fill="#eef2ff" stroke="#4f46e5" stroke-width="2"/>
+  <text x="118" y="153" text-anchor="middle" font-family="Arial" font-size="22" font-weight="700">M</text>
+  <rect x="250" y="110" width="135" height="70" rx="8" fill="#ecfdf3" stroke="#0f766e" stroke-width="2"/>
+  <text x="318" y="141" text-anchor="middle" font-family="Arial" font-size="19" font-weight="700">Encrypt</text>
+  <text x="318" y="165" text-anchor="middle" font-family="Arial" font-size="16">with Ks</text>
+  <line x1="178" y1="145" x2="248" y2="145" stroke="#111827" stroke-width="3"/>
+  <polygon points="248,145 230,135 230,155" fill="#111827"/>
+  <rect x="455" y="110" width="150" height="70" rx="8" fill="#fff7ed" stroke="#ea580c" stroke-width="2"/>
+  <text x="530" y="141" text-anchor="middle" font-family="Arial" font-size="19" font-weight="700">Ciphertext</text>
+  <text x="530" y="165" text-anchor="middle" font-family="Arial" font-size="16">E(Ks, M)</text>
+  <line x1="385" y1="145" x2="452" y2="145" stroke="#111827" stroke-width="3"/>
+  <polygon points="452,145 434,135 434,155" fill="#111827"/>
+  <rect x="250" y="250" width="135" height="70" rx="8" fill="#f8fafc" stroke="#475569" stroke-width="2"/>
+  <text x="318" y="280" text-anchor="middle" font-family="Arial" font-size="19" font-weight="700">Session key</text>
+  <text x="318" y="304" text-anchor="middle" font-family="Arial" font-size="16">Ks</text>
+  <rect x="455" y="250" width="150" height="70" rx="8" fill="#fee2e2" stroke="#dc2626" stroke-width="2"/>
+  <text x="530" y="280" text-anchor="middle" font-family="Arial" font-size="19" font-weight="700">Encrypt Ks</text>
+  <text x="530" y="304" text-anchor="middle" font-family="Arial" font-size="16">with PUb</text>
+  <line x1="385" y1="285" x2="452" y2="285" stroke="#111827" stroke-width="3"/>
+  <polygon points="452,285 434,275 434,295" fill="#111827"/>
+  <rect x="690" y="175" width="210" height="86" rx="8" fill="#ecfeff" stroke="#0891b2" stroke-width="2"/>
+  <text x="795" y="210" text-anchor="middle" font-family="Arial" font-size="20" font-weight="700">PGP message</text>
+  <text x="795" y="238" text-anchor="middle" font-family="Arial" font-size="16">E(Ks,M) + E(PUb,Ks)</text>
+  <line x1="605" y1="145" x2="688" y2="197" stroke="#111827" stroke-width="3"/>
+  <polygon points="688,197 667,195 678,178" fill="#111827"/>
+  <line x1="605" y1="285" x2="688" y2="239" stroke="#111827" stroke-width="3"/>
+  <polygon points="688,239 676,257 667,238" fill="#111827"/>
+</svg>

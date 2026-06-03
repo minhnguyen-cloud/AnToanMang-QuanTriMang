@@ -1,0 +1,17 @@
+{
+  "name": "atmm-exam-generator",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Web local tạo đề ôn An toàn mạng máy tính, chạy bằng Node.js/VS Code.",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "ATMMT",
+    "exam",
+    "local-web"
+  ],
+  "author": "",
+  "license": "UNLICENSED"
+}

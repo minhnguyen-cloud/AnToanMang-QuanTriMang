@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540" role="img" aria-label="Campus network topology">
+  <defs>
+    <style>
+      .bg{fill:#f8fafc}.zone{fill:#ffffff;stroke:#cbd5e1;stroke-width:2}.node{fill:#e0f2fe;stroke:#0369a1;stroke-width:2}.core{fill:#dcfce7;stroke:#15803d}.dmz{fill:#fee2e2;stroke:#b91c1c}.wan{fill:#ede9fe;stroke:#6d28d9}.txt{font-family:Segoe UI,Arial,sans-serif;fill:#0f172a;font-size:18px;font-weight:700}.small{font-size:14px;font-weight:600;fill:#475569}.link{stroke:#334155;stroke-width:3;fill:none}.dash{stroke-dasharray:7 7}
+    </style>
+  </defs>
+  <rect class="bg" width="960" height="540"/>
+  <rect class="zone" x="36" y="48" width="360" height="420" rx="8"/>
+  <rect class="zone" x="564" y="48" width="360" height="420" rx="8"/>
+  <text class="txt" x="56" y="82">Campus LAN</text>
+  <text class="txt" x="584" y="82">Edge / DMZ / WAN</text>
+
+  <rect class="node" x="94" y="130" width="180" height="58" rx="8"/>
+  <text class="txt" x="128" y="154">Access SW</text>
+  <text class="small" x="116" y="176">VLAN 10, 20, 30</text>
+
+  <rect class="core" x="146" y="292" width="180" height="64" rx="8"/>
+  <text class="txt" x="182" y="318">Core L3</text>
+  <text class="small" x="166" y="340">SVI + OSPF area 0</text>
+
+  <rect class="node" x="52" y="226" width="126" height="56" rx="8"/>
+  <text class="txt" x="79" y="250">PCs</text>
+  <text class="small" x="65" y="270">VLAN 10</text>
+
+  <rect class="node" x="246" y="226" width="126" height="56" rx="8"/>
+  <text class="txt" x="276" y="250">Users</text>
+  <text class="small" x="260" y="270">VLAN 20</text>
+
+  <rect class="wan" x="426" y="292" width="150" height="64" rx="8"/>
+  <text class="txt" x="459" y="318">Edge R1</text>
+  <text class="small" x="442" y="340">NAT + ACL</text>
+
+  <rect class="dmz" x="632" y="136" width="178" height="64" rx="8"/>
+  <text class="txt" x="674" y="162">DMZ Web</text>
+  <text class="small" x="660" y="184">10.10.10.50:80</text>
+
+  <rect class="node" x="636" y="282" width="178" height="64" rx="8"/>
+  <text class="txt" x="672" y="308">DB / AD / DNS</text>
+  <text class="small" x="658" y="330">LAN Server VLAN</text>
+
+  <rect class="wan" x="714" y="408" width="170" height="56" rx="8"/>
+  <text class="txt" x="768" y="432">Internet</text>
+  <text class="small" x="744" y="452">203.0.113.0/24</text>
+
+  <path class="link" d="M184 188v38"/>
+  <path class="link" d="M115 226v-22h69"/>
+  <path class="link" d="M309 226v-22h-125"/>
+  <path class="link" d="M236 292v-104"/>
+  <path class="link" d="M326 324h100"/>
+  <path class="link" d="M576 324h60"/>
+  <path class="link" d="M576 310c70-8 82-90 56-142"/>
+  <path class="link" d="M810 436h-42c-62 0-90-52-84-90"/>
+  <path class="link dash" d="M721 200v82"/>
+
+  <text class="small" x="354" y="306">trunk / routed link</text>
+  <text class="small" x="600" y="260">ACL: DMZ -> DB only needed ports</text>
+  <text class="small" x="612" y="386">Default route + NAT overload at Edge</text>
+</svg>

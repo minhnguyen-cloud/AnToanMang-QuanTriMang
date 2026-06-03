@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="520" viewBox="0 0 900 520" role="img" aria-label="Exam answer sheet">
+  <rect width="900" height="520" fill="#ffffff"/>
+  <text x="450" y="44" text-anchor="middle" font-family="Arial" font-size="26" font-weight="700">BẢNG TRẢ LỜI TRẮC NGHIỆM</text>
+  <text x="450" y="76" text-anchor="middle" font-family="Arial" font-size="18">40 câu, mỗi câu chọn một đáp án A-E</text>
+  <g font-family="Arial" font-size="14" fill="#111827" stroke="#111827" stroke-width="1">
+    <rect x="70" y="105" width="760" height="340" fill="none"/>
+    <g>
+      <line x1="70" y1="139" x2="830" y2="139"/>
+      <line x1="70" y1="173" x2="830" y2="173"/>
+      <line x1="70" y1="207" x2="830" y2="207"/>
+      <line x1="70" y1="241" x2="830" y2="241"/>
+      <line x1="70" y1="275" x2="830" y2="275"/>
+      <line x1="70" y1="309" x2="830" y2="309"/>
+      <line x1="70" y1="343" x2="830" y2="343"/>
+      <line x1="70" y1="377" x2="830" y2="377"/>
+      <line x1="70" y1="411" x2="830" y2="411"/>
+    </g>
+    <g>
+      <line x1="260" y1="105" x2="260" y2="445"/>
+      <line x1="450" y1="105" x2="450" y2="445"/>
+      <line x1="640" y1="105" x2="640" y2="445"/>
+    </g>
+  </g>
+  <g font-family="Arial" font-size="16" fill="#111827">
+    <text x="100" y="128">1  a b c d e</text><text x="290" y="128">11 a b c d e</text><text x="480" y="128">21 a b c d e</text><text x="670" y="128">31 a b c d e</text>
+    <text x="100" y="162">2  a b c d e</text><text x="290" y="162">12 a b c d e</text><text x="480" y="162">22 a b c d e</text><text x="670" y="162">32 a b c d e</text>
+    <text x="100" y="196">3  a b c d e</text><text x="290" y="196">13 a b c d e</text><text x="480" y="196">23 a b c d e</text><text x="670" y="196">33 a b c d e</text>
+    <text x="100" y="230">4  a b c d e</text><text x="290" y="230">14 a b c d e</text><text x="480" y="230">24 a b c d e</text><text x="670" y="230">34 a b c d e</text>
+    <text x="100" y="264">5  a b c d e</text><text x="290" y="264">15 a b c d e</text><text x="480" y="264">25 a b c d e</text><text x="670" y="264">35 a b c d e</text>
+    <text x="100" y="298">6  a b c d e</text><text x="290" y="298">16 a b c d e</text><text x="480" y="298">26 a b c d e</text><text x="670" y="298">36 a b c d e</text>
+    <text x="100" y="332">7  a b c d e</text><text x="290" y="332">17 a b c d e</text><text x="480" y="332">27 a b c d e</text><text x="670" y="332">37 a b c d e</text>
+    <text x="100" y="366">8  a b c d e</text><text x="290" y="366">18 a b c d e</text><text x="480" y="366">28 a b c d e</text><text x="670" y="366">38 a b c d e</text>
+    <text x="100" y="400">9  a b c d e</text><text x="290" y="400">19 a b c d e</text><text x="480" y="400">29 a b c d e</text><text x="670" y="400">39 a b c d e</text>
+    <text x="100" y="434">10 a b c d e</text><text x="290" y="434">20 a b c d e</text><text x="480" y="434">30 a b c d e</text><text x="670" y="434">40 a b c d e</text>
+  </g>
+</svg>

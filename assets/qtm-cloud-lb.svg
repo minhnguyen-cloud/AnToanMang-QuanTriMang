@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540" role="img" aria-label="Cloud load balancer Kubernetes topology">
+  <defs>
+    <style>
+      .bg{fill:#f8fafc}.box{fill:#fff;stroke:#cbd5e1;stroke-width:2}.net{fill:#ecfeff;stroke:#0891b2}.sec{fill:#fef3c7;stroke:#d97706}.pod{fill:#dcfce7;stroke:#15803d}.db{fill:#fee2e2;stroke:#b91c1c}.txt{font-family:Segoe UI,Arial,sans-serif;fill:#0f172a;font-size:18px;font-weight:750}.small{font-size:14px;font-weight:600;fill:#475569}.link{stroke:#334155;stroke-width:3;fill:none;marker-end:url(#arrow)}
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#334155"/>
+    </marker>
+  </defs>
+  <rect class="bg" width="960" height="540"/>
+  <rect class="box" x="42" y="72" width="850" height="380" rx="8"/>
+  <text class="txt" x="66" y="108">Cloud VPC / Private Cluster</text>
+
+  <rect class="sec" x="84" y="176" width="144" height="70" rx="8"/>
+  <text class="txt" x="122" y="204">Client</text>
+  <text class="small" x="106" y="226">HTTPS 443</text>
+
+  <rect class="net" x="302" y="152" width="168" height="98" rx="8"/>
+  <text class="txt" x="342" y="184">LB / WAF</text>
+  <text class="small" x="326" y="208">TLS terminate</text>
+  <text class="small" x="330" y="230">Public subnet</text>
+
+  <rect class="net" x="542" y="132" width="188" height="118" rx="8"/>
+  <text class="txt" x="590" y="164">Ingress</text>
+  <text class="small" x="574" y="188">host/path routing</text>
+  <text class="small" x="574" y="212">NetworkPolicy</text>
+
+  <rect class="pod" x="542" y="296" width="188" height="92" rx="8"/>
+  <text class="txt" x="592" y="326">Service</text>
+  <text class="small" x="574" y="350">selector app=api</text>
+  <text class="small" x="584" y="372">port 80 -> 8080</text>
+
+  <rect class="pod" x="778" y="284" width="132" height="64" rx="8"/>
+  <text class="txt" x="818" y="312">Pod A</text>
+  <text class="small" x="802" y="334">api:8080</text>
+
+  <rect class="pod" x="778" y="372" width="132" height="64" rx="8"/>
+  <text class="txt" x="818" y="400">Pod B</text>
+  <text class="small" x="802" y="422">api:8080</text>
+
+  <rect class="db" x="300" y="330" width="168" height="76" rx="8"/>
+  <text class="txt" x="340" y="360">Database</text>
+  <text class="small" x="326" y="382">private subnet only</text>
+
+  <path class="link" d="M228 211h74"/>
+  <path class="link" d="M470 202h72"/>
+  <path class="link" d="M636 250v46"/>
+  <path class="link" d="M730 342h48"/>
+  <path class="link" d="M730 358c42 0 42 60 78 60"/>
+  <path class="link" d="M542 362H468"/>
+
+  <text class="small" x="92" y="486">Hardening checklist: security group, RBAC, Secret, image scan, probes, limits, logs, backup, NetworkPolicy.</text>
+</svg>
