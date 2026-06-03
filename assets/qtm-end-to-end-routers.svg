@@ -47,7 +47,7 @@
   <path class="link vpn" d="M164 374c120 108 552 108 708 0"/>
   <path class="link" d="M872 216v96"/>
 
-  <text class="small" x="292" y="326">R-A <-> R-Core: 10.0.12.0/30</text>
-  <text class="small" x="626" y="246">R-Core <-> R-B: 10.0.23.0/30</text>
+  <text class="small" x="292" y="326">R-A to R-Core: 10.0.12.0/30</text>
+  <text class="small" x="626" y="246">R-Core to R-B: 10.0.23.0/30</text>
   <text class="small" x="354" y="438">Purple dashed: IPsec/OpenVPN tunnel between branches</text>
 </svg>

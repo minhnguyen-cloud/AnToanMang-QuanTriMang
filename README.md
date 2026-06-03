@@ -43,7 +43,7 @@ App này là web tĩnh, nên khi đưa lên GitHub Pages có thể mở trực t
 - Chọn **Môn học** là **Quản trị mạng - ôn thi tổng hợp**.
 - Nếu muốn tạo nhiều mã đề cùng lúc để in hoặc lưu PDF, chọn **Luyện tập**, nhập **Số đề cần tạo** từ 1 đến 30, rồi bấm **Tạo đề mới**.
 - Format QTM mặc định là **28 câu/đề**: khoảng **25 câu trắc nghiệm/đọc cấu hình/thực hành** và **3 câu tự luận cuối đề**.
-- Các đề QTM trộn câu định nghĩa, lệnh thực hành, đọc cấu hình router/switch/Linux/Docker/Kubernetes, tình huống vận hành, subnet và tự luận topology kiểu cuối kỳ.
+- Các đề QTM ưu tiên lý thuyết/lab nền tảng từ slide: IP/subnet, DHCP/DNS, VLAN/STP, OSPF/static route, ACL/NAT/firewall, Linux server/VPN/Zabbix; Docker/Kubernetes/cloud chỉ xen vừa phải theo phần đồ án.
 - Câu tự luận được ưu tiên dạng có topology/case lớn, chia ý **a, b, c** như đề thi và được đưa về cuối đề.
 - Khi chọn sai trong chế độ luyện tập hoặc sau khi nộp bài, app sẽ giải thích vì sao phương án đã chọn sai.
 

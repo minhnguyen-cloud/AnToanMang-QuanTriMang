@@ -583,7 +583,7 @@
     const essayTarget = count >= 24 ? 3 : (count >= 12 ? 2 : 1);
     const objectiveTarget = Math.max(0, count - essayTarget);
     const seen = new Set();
-    const objectivePool = balanceQtmSelection(
+    const objectivePool = prioritizeQtmSlideTheory(
       shuffled.filter(q => q.type === 'mcq' || q.type === 'tf' || q.type === 'match' || q.type === 'fill'),
       objectiveTarget,
       rng
@@ -609,7 +609,7 @@
       const bFinal = /ESSAY-(FINAL|END2END)/.test(String(b.id || '')) ? 0 : 1;
       const aMedia = a.image ? 0 : 1;
       const bMedia = b.image ? 0 : 1;
-      return aFinal - bFinal || aMedia - bMedia;
+      return aFinal - bFinal || essaySlideScore(a) - essaySlideScore(b) || aMedia - bMedia;
     });
     const essays = [];
     for(const q of essayPool){
@@ -619,6 +619,49 @@
       seen.add(q.id);
     }
     return selected.concat(essays).slice(0, count);
+  }
+
+  function prioritizeQtmSlideTheory(questions, targetCount, rng){
+    const isObjective = q => q.type === 'mcq' || q.type === 'tf' || q.type === 'match' || q.type === 'fill';
+    const core = questions.filter(q => isObjective(q) && isCoreSlideLesson(q.lesson));
+    const extended = questions.filter(q => isObjective(q) && !isCoreSlideLesson(q.lesson));
+    const coreTarget = Math.min(targetCount, Math.max(0, Math.round(targetCount * 0.8)));
+    const selected = [];
+    const seen = new Set();
+    const takeFrom = (list, limit) => {
+      const balanced = balanceQtmSelection(list, limit, rng);
+      for(const q of balanced){
+        if(selected.length >= limit) break;
+        if(seen.has(q.id)) continue;
+        selected.push(q);
+        seen.add(q.id);
+      }
+    };
+    takeFrom(core, coreTarget);
+    const extendedTarget = targetCount - selected.length;
+    takeFrom(extended, selected.length + extendedTarget);
+    if(selected.length < targetCount){
+      for(const q of balanceQtmSelection(questions, targetCount, rng)){
+        if(selected.length >= targetCount) break;
+        if(seen.has(q.id)) continue;
+        selected.push(q);
+        seen.add(q.id);
+      }
+    }
+    return selected.concat(questions.filter(q => !seen.has(q.id)));
+  }
+
+  function isCoreSlideLesson(lesson){
+    return /^QTM [1-5]\b/.test(String(lesson || ''));
+  }
+
+  function essaySlideScore(q){
+    const id = String(q.id || '');
+    const lesson = String(q.lesson || '');
+    if(id.includes('END2END')) return 0;
+    if(/QTM [1-5]\b/.test(lesson)) return 1;
+    if(/cloud|kubernetes|docker/i.test(`${lesson} ${q.topic || ''}`)) return 3;
+    return 2;
   }
 
   function orderExamQuestions(questions){
