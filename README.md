@@ -44,7 +44,7 @@ App này là web tĩnh, nên khi đưa lên GitHub Pages có thể mở trực t
 - Nếu muốn tạo nhiều mã đề cùng lúc để in hoặc lưu PDF, chọn **Luyện tập**, nhập **Số đề cần tạo** từ 1 đến 30, rồi bấm **Tạo đề mới**.
 - Format QTM mặc định là **28 câu/đề**: khoảng **25 câu trắc nghiệm/đọc cấu hình/thực hành** và **3 câu tự luận cuối đề**.
 - Các đề QTM trộn câu định nghĩa, lệnh thực hành, đọc cấu hình router/switch/Linux/Docker/Kubernetes, tình huống vận hành, subnet và tự luận topology kiểu cuối kỳ.
-- Câu tự luận được ưu tiên dạng có topology/case lớn và được đưa về cuối đề để giống bố cục thi hơn.
+- Câu tự luận được ưu tiên dạng có topology/case lớn, chia ý **a, b, c** như đề thi và được đưa về cuối đề.
 
 1. Tạo repository mới trên GitHub, ví dụ `atmm-qtm-exam-generator`.
 2. Mở terminal tại thư mục chứa `index.html`.

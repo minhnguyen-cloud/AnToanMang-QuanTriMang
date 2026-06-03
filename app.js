@@ -605,8 +605,8 @@
     }
 
     const essayPool = shuffle(pool.filter(q => q.type === 'short'), rng).sort((a,b) => {
-      const aFinal = String(a.id || '').includes('ESSAY-FINAL') ? 0 : 1;
-      const bFinal = String(b.id || '').includes('ESSAY-FINAL') ? 0 : 1;
+      const aFinal = /ESSAY-(FINAL|END2END)/.test(String(a.id || '')) ? 0 : 1;
+      const bFinal = /ESSAY-(FINAL|END2END)/.test(String(b.id || '')) ? 0 : 1;
       const aMedia = a.image ? 0 : 1;
       const bMedia = b.image ? 0 : 1;
       return aFinal - bFinal || aMedia - bMedia;
@@ -702,7 +702,7 @@
     if(q.image){
       questionHtml += `<figure class="q-figure"><img src="${escapeAttr(q.image.src)}" alt="${escapeAttr(q.image.alt || 'Hình minh họa câu hỏi')}" />${q.image.caption ? `<figcaption>${escapeHtml(q.image.caption)}</figcaption>` : ''}</figure>`;
     }
-    questionHtml += `<div>${escapeHtml(q.question).replace(/________/g, '<span class="fill-line"></span>')}</div>`;
+    questionHtml += `<div>${escapeHtml(q.question).replace(/________/g, '<span class="fill-line"></span>').replace(/\n/g, '<br>')}</div>`;
     tpl.querySelector('.q-text').innerHTML = questionHtml;
     const body = tpl.querySelector('.q-body');
     if(q.type==='mcq' || (q.type==='calc' && q.options && q.options.length)){
