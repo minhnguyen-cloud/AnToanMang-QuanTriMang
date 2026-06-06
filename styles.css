@@ -45,6 +45,34 @@ body{
   width:100%;border:1px solid var(--line);border-radius:8px;padding:11px 12px;font-size:15px;background:#fff;color:var(--ink);font-family:inherit
 }
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.exam-picker-section{margin:2px 0 16px;padding:12px;border:1px solid #bfdbfe;border-radius:8px;background:#f8fbff}
+.exam-picker-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px}
+.controls .exam-picker-heading h3{margin:0 0 2px;color:#1e3a8a}
+.exam-picker-heading p{margin:0;color:var(--muted);font-size:12px;font-weight:650}
+.next-new-exam{padding:7px 9px;font-size:12px;color:#1d4ed8;border-color:#93c5fd;background:#fff;white-space:nowrap}
+.exam-picker{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.exam-pick{
+  position:relative;
+  display:grid;
+  gap:1px;
+  min-height:52px;
+  padding:7px 5px;
+  text-align:center;
+  background:#fff;
+  border-color:#bfdbfe;
+  line-height:1.15;
+}
+.exam-pick strong{font-size:13px}
+.exam-pick small{font-size:10px;color:#15803d;font-weight:800;text-transform:uppercase;letter-spacing:.03em}
+.exam-pick.completed{background:#f1f5f9;border-color:#cbd5e1}
+.exam-pick.completed small{color:#64748b}
+.exam-pick.active{color:#fff;background:#1d4ed8;border-color:#1d4ed8;box-shadow:0 0 0 3px #bfdbfe}
+.exam-pick.active small{color:#dbeafe}
+.exam-picker-legend{display:flex;gap:14px;margin-top:9px;color:var(--muted);font-size:11px;font-weight:650}
+.exam-picker-legend span{display:flex;align-items:center;gap:5px}
+.exam-status-dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+.exam-status-dot.new{background:#22c55e}
+.exam-status-dot.completed{background:#94a3b8}
 .segmented-control{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .mode-choice{
   display:grid;
@@ -180,6 +208,7 @@ button.primary{background:var(--brand);color:#fff;border-color:var(--brand)}
 }
 @media (max-width: 560px){
   .grid2{grid-template-columns:1fr}
+  .exam-picker{grid-template-columns:repeat(4,1fr)}
   .question-nav-grid{grid-template-columns:repeat(5,1fr)}
 }
 @media print{

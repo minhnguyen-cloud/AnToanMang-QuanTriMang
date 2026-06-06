@@ -11,6 +11,8 @@
   let timerId = null;
   let timerEndsAt = 0;
   let activeQuestionUid = null;
+  const EXAM_CATALOG_SIZE = 20;
+  const COMPLETED_EXAMS_KEY = 'atmmt-qtm-completed-exams-v1';
 
   const subjectConfig = {
     atmm: {
@@ -435,6 +437,70 @@
     return $('subject')?.value || 'atmm';
   }
 
+  function getCompletedExams(){
+    try{
+      const saved = JSON.parse(localStorage.getItem(COMPLETED_EXAMS_KEY) || '{}');
+      const values = Array.isArray(saved[getSubject()]) ? saved[getSubject()] : [];
+      return new Set(values.map(Number).filter(n => n >= 1 && n <= EXAM_CATALOG_SIZE));
+    } catch(error){
+      return new Set();
+    }
+  }
+
+  function markCurrentExamCompleted(){
+    if(currentExamSets.length !== 1) return;
+    const examNo = Math.max(1, Math.min(EXAM_CATALOG_SIZE, parseInt($('examNumber')?.value, 10) || 1));
+    try{
+      const saved = JSON.parse(localStorage.getItem(COMPLETED_EXAMS_KEY) || '{}');
+      const completed = new Set(Array.isArray(saved[getSubject()]) ? saved[getSubject()].map(Number) : []);
+      completed.add(examNo);
+      saved[getSubject()] = [...completed].sort((a,b) => a - b);
+      localStorage.setItem(COMPLETED_EXAMS_KEY, JSON.stringify(saved));
+    } catch(error){
+      // The exam still works when browser storage is disabled.
+    }
+    renderExamPicker();
+  }
+
+  function renderExamPicker(){
+    const picker = $('examPicker');
+    if(!picker) return;
+    const current = Math.max(1, Math.min(EXAM_CATALOG_SIZE, parseInt($('examNumber')?.value, 10) || 1));
+    const completed = getCompletedExams();
+    picker.innerHTML = Array.from({length:EXAM_CATALOG_SIZE}, (_, index) => {
+      const examNo = index + 1;
+      const isCompleted = completed.has(examNo);
+      const classes = ['exam-pick', isCompleted ? 'completed' : 'new', examNo === current ? 'active' : ''].filter(Boolean).join(' ');
+      return `<button type="button" class="${classes}" data-exam-number="${examNo}" aria-pressed="${examNo === current}">
+        <strong>Đề ${String(examNo).padStart(2, '0')}</strong>
+        <small>${isCompleted ? 'Đã làm' : 'Mới'}</small>
+      </button>`;
+    }).join('');
+    if($('examPickerSummary')){
+      $('examPickerSummary').textContent = `${EXAM_CATALOG_SIZE} đề · ${completed.size} đề đã làm · ${EXAM_CATALOG_SIZE - completed.size} đề mới`;
+    }
+  }
+
+  function selectExamNumber(examNo){
+    const normalized = Math.max(1, Math.min(EXAM_CATALOG_SIZE, Number(examNo) || 1));
+    if($('examNumber')) $('examNumber').value = normalized;
+    renderExamPicker();
+    generateExam();
+  }
+
+  function selectNextNewExam(){
+    const completed = getCompletedExams();
+    const current = Math.max(1, Math.min(EXAM_CATALOG_SIZE, parseInt($('examNumber')?.value, 10) || 1));
+    for(let offset = 1; offset <= EXAM_CATALOG_SIZE; offset++){
+      const candidate = ((current - 1 + offset) % EXAM_CATALOG_SIZE) + 1;
+      if(!completed.has(candidate)){
+        selectExamNumber(candidate);
+        return;
+      }
+    }
+    selectExamNumber((current % EXAM_CATALOG_SIZE) + 1);
+  }
+
   function baseQuestions(){
     if(getSubject() === 'qtm' && typeof NETWORK_QUESTION_BANK !== 'undefined'){
       return NETWORK_QUESTION_BANK;
@@ -444,10 +510,11 @@
 
   function syncSeedFromExamNumber(){
     const input = $('examNumber');
-    const examNo = Math.max(1, Math.min(99, parseInt(input?.value,10) || 1));
+    const examNo = Math.max(1, Math.min(EXAM_CATALOG_SIZE, parseInt(input?.value,10) || 1));
     if(input) input.value = examNo;
     const seed = `DE-${examNo}`;
     if($('seed')) $('seed').value = seed;
+    renderExamPicker();
     return seed;
   }
 
@@ -490,7 +557,8 @@
     for(let v=0; v<variantCount; v++){
       const variantSeed = variantCount === 1 ? seed : `${seed}-DE${v+1}`;
       const rng = rngFromSeed(variantSeed+'-'+mode+'-'+count);
-      let shuffled = avoidRecentRepeats(shuffle(pool, rng), previousIds, count);
+      let shuffled = shuffle(pool, rng);
+      if(variantCount > 1) shuffled = avoidRecentRepeats(shuffled, previousIds, count);
       if(subject === 'qtm' && (mode === 'mixed' || batchMode)) shuffled = balanceQtmSelection(shuffled, count, rng);
       if(shuffled.length < count){
         const fallback = shuffle(baseQuestions().concat(dynamicQuestions(variantSeed+'fallback',80)), rng)
@@ -972,6 +1040,10 @@
 
     if($('answerMode')?.value === 'practice'){
       revealQuestionResult(q, card);
+      const gradableQuestions = currentExam.filter(isGradable);
+      if(gradableQuestions.length && gradableQuestions.every(item => Object.prototype.hasOwnProperty.call(userAnswers, item.uid))){
+        markCurrentExamCompleted();
+      }
     }
     updateQuestionNavigator();
   }
@@ -1015,6 +1087,7 @@
     }
     updateAnswerModeUI();
     updateQuestionNavigator();
+    markCurrentExamCompleted();
   }
 
   function buildMatchHtml(q){
@@ -1193,6 +1266,7 @@
       initFilters();
       renderTheory();
       renderStats();
+      renderExamPicker();
       generateExam();
     });
   }
@@ -1244,6 +1318,7 @@
     $('toggleAnswersBtn')?.classList.toggle('hidden', examMode && !examSubmitted);
     $('variantCount')?.closest('.field')?.classList.toggle('hidden', examMode);
     $('examDuration')?.closest('.field')?.classList.toggle('hidden', !examMode);
+    $('examPickerSection')?.classList.toggle('hidden', batchMode);
     document.querySelectorAll('.mode-choice').forEach(btn => {
       btn.classList.toggle('active', btn.dataset.answerMode === $('answerMode')?.value);
     });
@@ -1252,8 +1327,14 @@
   }
 
   document.addEventListener('DOMContentLoaded',()=>{
-    initFilters(); initTabs(); initSubjectBehavior(); initModeBehavior(); renderTheory(); renderStats(); generateExam();
+    initFilters(); initTabs(); initSubjectBehavior(); initModeBehavior(); renderTheory(); renderStats(); renderExamPicker(); generateExam();
     $('generateBtn').addEventListener('click', generateExam);
+    $('examNumber')?.addEventListener('change', ()=>selectExamNumber($('examNumber').value));
+    $('examPicker')?.addEventListener('click', event => {
+      const button = event.target.closest('[data-exam-number]');
+      if(button) selectExamNumber(button.dataset.examNumber);
+    });
+    $('nextNewExamBtn')?.addEventListener('click', selectNextNewExam);
     $('submitExamBtn').addEventListener('click', ()=>submitExam(false));
     $('examOutput').addEventListener('click', (event)=>{
       const btn = event.target.closest('.option-btn');

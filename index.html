@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>ATMMT/QTM - Máy tạo đề ôn local</title>
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css?v=20260606-exam-picker" />
 </head>
 <body>
   <header class="hero no-print">
@@ -63,10 +63,25 @@
         </label>
         <label class="field">
           <span>Mã đề</span>
-          <input id="examNumber" type="number" min="1" max="99" value="1" />
+          <input id="examNumber" type="number" min="1" max="20" value="1" />
         </label>
       </div>
       <input id="seed" type="hidden" value="DE-1" />
+
+      <section id="examPickerSection" class="exam-picker-section">
+        <div class="exam-picker-heading">
+          <div>
+            <h3>Chọn đề luyện</h3>
+            <p id="examPickerSummary">20 đề · 0 đề đã làm</p>
+          </div>
+          <button id="nextNewExamBtn" class="next-new-exam" type="button">Đề mới tiếp theo</button>
+        </div>
+        <div id="examPicker" class="exam-picker" aria-label="Chọn đề từ 1 đến 20"></div>
+        <div class="exam-picker-legend">
+          <span><i class="exam-status-dot new"></i>Mới</span>
+          <span><i class="exam-status-dot completed"></i>Đã làm</span>
+        </div>
+      </section>
 
       <label class="field">
         <span>Số đề cần tạo</span>
@@ -113,7 +128,7 @@
         <button id="exportJsonBtn">Xuất JSON</button>
       </div>
 
-      <p class="hint">Mã đề 1, 2, 3... tạo các đề khác nhau. Muốn tạo nhiều đề một lượt để in/PDF, chuyển sang Luyện tập rồi tăng Số đề cần tạo.</p>
+      <p class="hint">Mỗi môn có 20 mã đề cố định. Chọn ô có nhãn <strong>Mới</strong> để luyện đề chưa làm; sau khi nộp bài, đề sẽ được đánh dấu <strong>Đã làm</strong>.</p>
     </aside>
 
     <section class="content">
@@ -177,8 +192,8 @@
     </article>
   </template>
 
-  <script src="questionBank.js"></script>
-  <script src="networkQuestionBank.js"></script>
-  <script src="app.js"></script>
+  <script src="questionBank.js?v=20260606-exam-picker"></script>
+  <script src="networkQuestionBank.js?v=20260606-exam-picker"></script>
+  <script src="app.js?v=20260606-exam-picker"></script>
 </body>
 </html>
