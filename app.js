@@ -12,6 +12,7 @@
   let timerEndsAt = 0;
   let activeQuestionUid = null;
   const EXAM_CATALOG_SIZE = 20;
+  const DYNAMIC_BANK_SIZE = 1200;
   const COMPLETED_EXAMS_KEY = 'atmmt-qtm-completed-exams-v1';
 
   const subjectConfig = {
@@ -301,6 +302,7 @@
         options: shuffle([s.ans,'MAC address','Caesar shift','Packet flood','Port 31337'],rng), answer:null,
         computedAnswer:s.ans, explanation:s.why});
     }
+    appendAtmmtMegaDrills(qs, rng, count);
     // Fix MCQ answer indexes after shuffling
     for(const q of qs){
       if(q.options && q.options.length && q.computedAnswer){
@@ -419,14 +421,152 @@
       });
     }
 
+    appendNetworkMegaDrills(qs, rng, count, shuffleOptions);
     return qs.slice(0,count);
+  }
+
+  function appendAtmmtMegaDrills(qs, rng, targetCount){
+    if(qs.length >= targetCount) return;
+    const concepts = [
+      {lesson:'Bài 1', topic:'Confidentiality', cue:'dữ liệu bị người không có quyền đọc được', correct:'Ưu tiên mã hóa, phân quyền truy cập và bảo vệ kênh truyền để giữ tính bí mật', wrongs:['Chỉ tăng băng thông để giảm trễ truy cập','Tập trung non-repudiation dù chưa có tranh chấp người gửi','Tắt toàn bộ log để tránh lộ thông tin vận hành','Đổi địa chỉ IP gateway nhưng không kiểm soát quyền đọc'], explanation:'Confidentiality tập trung ngăn lộ thông tin cho chủ thể không được phép.'},
+      {lesson:'Bài 1', topic:'Integrity', cue:'dữ liệu bị sửa trên đường truyền', correct:'Dùng hash/MAC/chữ ký số hoặc cơ chế kiểm toàn vẹn để phát hiện sửa đổi', wrongs:['Chỉ nén dữ liệu trước khi gửi','Chỉ đổi SSID Wi-Fi mà không kiểm chứng nội dung','Tăng số lần retry TCP để tránh mất gói','Tắt xác thực vì dữ liệu vẫn đọc được'], explanation:'Integrity trả lời câu hỏi dữ liệu có còn nguyên vẹn hay đã bị sửa.'},
+      {lesson:'Bài 1', topic:'Availability', cue:'dịch vụ hợp lệ bị làm quá tải hoặc không truy cập được', correct:'Thiết kế chống DoS, dự phòng, giới hạn lưu lượng và giám sát để giữ dịch vụ sẵn sàng', wrongs:['Chỉ dùng chữ ký số cho từng request','Chỉ đổi thuật toán mã hóa đối xứng','Chặn mọi người dùng kể cả người hợp lệ','Tập trung chứng minh người gửi không thể chối bỏ'], explanation:'Availability là khả năng cung cấp dịch vụ cho người dùng hợp lệ khi cần.'},
+      {lesson:'Bài 1', topic:'Replay attack', cue:'gói xác thực cũ bị gửi lại nhưng vẫn được chấp nhận', correct:'Dùng nonce, timestamp, số thứ tự hoặc đánh dấu token đã dùng để chống phát lại', wrongs:['Tăng độ dài username nhưng cho phép dùng lại OTP','Chỉ đổi port dịch vụ sang số khác','Bỏ kiểm tra thời gian để giảm lỗi đồng bộ','Dùng cùng ticket lâu dài cho nhiều phiên'], explanation:'Replay lợi dụng thông điệp hợp lệ cũ; cần cơ chế phân biệt phiên/lần dùng.'},
+      {lesson:'Bài 1', topic:'MITM', cue:'kẻ tấn công đứng giữa thay khóa công khai', correct:'Xác thực endpoint/khóa công khai bằng certificate hoặc chữ ký số trước khi tin khóa', wrongs:['Chỉ tăng kích thước khóa DH là tự hết MITM','Chuyển sang HTTP để giảm cảnh báo chứng chỉ','Gửi private key qua kênh công khai cho tiện kiểm tra','Tắt kiểm tra hostname trong chứng chỉ'], explanation:'Trao đổi khóa không xác thực vẫn có thể bị người đứng giữa thay khóa.'},
+      {lesson:'Bài 2a', topic:'Worm', cue:'mã độc tự lan qua mạng không cần người dùng sao chép thủ công', correct:'Worm tự khai thác mạng/dịch vụ để lan truyền sang máy khác', wrongs:['Virus luôn chỉ là email rác không thể lây file','Trojan tự nhân bản nhanh hơn worm theo định nghĩa','Spyware chủ yếu làm cạn băng thông bằng flood','Rootkit là chương trình nén file hợp pháp'], explanation:'Worm nhấn mạnh khả năng tự lan truyền qua mạng.'},
+      {lesson:'Bài 2a', topic:'Trojan', cue:'phần mềm giả hữu ích nhưng cài chức năng độc hại', correct:'Trojan đánh lừa người dùng chạy chương trình tưởng hợp pháp để thực thi hành vi độc hại', wrongs:['Trojan bắt buộc phải tự lây qua mọi host trong LAN','Trojan là thuật toán mã hóa khối','Trojan chỉ xảy ra khi DNS bị sai bản ghi','Trojan luôn cần OSPF area mismatch'], explanation:'Trojan dựa trên ngụy trang/chức năng ẩn, không nhất thiết tự nhân bản.'},
+      {lesson:'Bài 2a', topic:'Rootkit', cue:'mã độc che giấu tiến trình, file hoặc quyền kiểm soát', correct:'Rootkit tập trung ẩn mình và duy trì quyền kiểm soát khó phát hiện', wrongs:['Rootkit chỉ là chính sách backup định kỳ','Rootkit làm nhiệm vụ cấp DHCP lease','Rootkit chỉ dùng để chọn root bridge STP','Rootkit luôn là một dạng chữ ký số hợp lệ'], explanation:'Rootkit thường can thiệp sâu để che dấu dấu vết và quyền truy cập.'},
+      {lesson:'Bài 3', topic:'Caesar cipher', cue:'dịch mỗi chữ cái theo cùng một khóa k', correct:'Caesar là mã thay thế đơn giản với C=(P+k) mod 26', wrongs:['Caesar dùng hai khóa công khai và bí mật như RSA','Caesar chia block 128 bit như AES','Caesar tạo MAC có khóa bí mật','Caesar yêu cầu certificate từ CA'], explanation:'Caesar là mã cổ điển, dễ bị vét cạn vì không gian khóa nhỏ.'},
+      {lesson:'Bài 3', topic:'Vigenere', cue:'khóa chữ lặp lại để cộng với plaintext', correct:'Vigenere dùng nhiều dịch chuyển Caesar theo chuỗi khóa lặp', wrongs:['Vigenere là mode vận hành của firewall stateful','Vigenere luôn tạo chữ ký số không thể chối bỏ','Vigenere bắt buộc dùng cặp khóa RSA','Vigenere tự phát hiện replay attack'], explanation:'Vigenere cải tiến Caesar bằng khóa lặp nhưng vẫn là mã cổ điển.'},
+      {lesson:'Bài 3', topic:'One-time pad', cue:'khóa ngẫu nhiên dài bằng thông điệp và dùng đúng một lần', correct:'OTP chỉ an toàn hoàn hảo khi khóa thật ngẫu nhiên, dài bằng bản rõ và không tái sử dụng', wrongs:['OTP vẫn an toàn nếu dùng lại cùng khóa cho nhiều bản tin','OTP cần khóa ngắn hơn bản rõ để dễ nhớ','OTP là tên khác của NAT overload','OTP chỉ phụ thuộc vào certificate TLS'], explanation:'Dùng lại khóa OTP làm lộ quan hệ giữa các plaintext.'},
+      {lesson:'Bài 3', topic:'ECB mode', cue:'các block plaintext giống nhau cho ciphertext giống nhau', correct:'ECB làm lộ mẫu lặp vì mỗi block được mã hóa độc lập', wrongs:['ECB luôn cung cấp xác thực nguồn gửi','ECB tự thêm IV ngẫu nhiên cho mỗi block','ECB là mode được khuyên dùng cho ảnh/tập tin có mẫu lặp','ECB chống replay tốt hơn timestamp'], explanation:'ECB là bẫy kinh điển khi hỏi về mode mã khối.'},
+      {lesson:'Bài 4', topic:'RSA', cue:'n=pq, phi(n), e và d là nghịch đảo modulo', correct:'RSA dựa trên khó phân tích n=pq và cần chọn e,d thỏa e*d ≡ 1 mod phi(n)', wrongs:['RSA dùng chung một khóa bí mật cho hai bên','RSA không cần số nguyên tố p và q','RSA bảo mật nhờ giấu thuật toán thay vì giấu khóa','RSA chỉ dùng để tạo VLAN trunk'], explanation:'RSA là hệ khóa công khai, thường hỏi n, phi(n), e, d và vai trò public/private key.'},
+      {lesson:'Bài 4', topic:'Diffie-Hellman', cue:'hai bên tạo khóa chung qua kênh công khai', correct:'DH tạo shared secret nhưng cần xác thực để tránh MITM', wrongs:['DH tự chứng minh danh tính hai bên trong mọi trường hợp','DH là thuật toán hash một chiều','DH yêu cầu gửi trực tiếp private key cho đối phương','DH thay thế hoàn toàn certificate trong TLS'], explanation:'DH giải quyết trao đổi khóa, không tự giải quyết xác thực danh tính.'},
+      {lesson:'Bài 5', topic:'Hash one-way', cue:'từ digest khó khôi phục message gốc', correct:'Hàm băm tốt có tính một chiều và chống tìm tiền ảnh', wrongs:['Hash luôn giải mã ngược được bằng public key','Hash có khóa bí mật giống HMAC trong mọi trường hợp','Hash dùng để nén ảnh lossless trong bài này','Hash bắt buộc giữ nguyên độ dài bản tin'], explanation:'Hash không khóa khác MAC/HMAC; thuộc tính một chiều rất hay ra thi.'},
+      {lesson:'Bài 5', topic:'Collision resistance', cue:'khó tìm hai bản tin khác nhau cùng digest', correct:'Chống va chạm nghĩa là khó tìm m1 khác m2 nhưng H(m1)=H(m2)', wrongs:['Collision là khi server bị tràn băng thông','Collision nghĩa là plaintext bằng ciphertext','Collision chỉ liên quan đến VLAN native mismatch','Collision làm certificate tự gia hạn'], explanation:'Collision resistance khác preimage resistance.'},
+      {lesson:'Bài 5', topic:'HMAC/MAC', cue:'kiểm tra toàn vẹn kèm xác thực bằng khóa bí mật chia sẻ', correct:'HMAC/MAC dùng khóa bí mật nên phát hiện sửa đổi và xác thực bên biết khóa', wrongs:['MAC không cần khóa nên ai cũng tạo được hợp lệ','MAC cung cấp non-repudiation mạnh như chữ ký số','MAC chỉ dùng để đổi địa chỉ MAC của card mạng','MAC giải mã nội dung giống AES'], explanation:'MAC/HMAC khác hash thường ở yếu tố khóa bí mật.'},
+      {lesson:'Bài 5', topic:'Digital signature', cue:'chống chối bỏ và xác minh bằng public key', correct:'Người ký dùng private key, người nhận dùng public key để xác minh chữ ký', wrongs:['Người ký dùng public key để ký và private key để công bố','Chữ ký số chỉ là hash không có khóa','Chữ ký số bắt buộc hai bên chia sẻ cùng secret','Chữ ký số không cần kiểm tra certificate/khóa công khai'], explanation:'Chữ ký số gắn với private key của người ký và hỗ trợ non-repudiation.'},
+      {lesson:'Bài 6', topic:'TLS certificate', cue:'trình duyệt cảnh báo chứng chỉ sai tên miền/không tin cậy', correct:'Không nên bỏ qua cảnh báo vì có thể đang bị MITM hoặc server giả mạo', wrongs:['Bỏ qua cảnh báo giúp tăng bảo mật vì khóa dài hơn','Certificate sai vẫn chứng minh đúng danh tính server','TLS chỉ cần mã hóa, không cần xác thực server','Cảnh báo certificate chỉ ảnh hưởng giao diện'], explanation:'TLS cần xác thực certificate để biết public key thuộc đúng server.'},
+      {lesson:'Bài 6', topic:'IPsec tunnel mode', cue:'bọc cả gói IP nội bộ trong gói IP mới qua Internet', correct:'Tunnel mode phù hợp VPN site-to-site giữa gateway/chi nhánh', wrongs:['Transport mode luôn bọc cả header IP gốc trong header mới','IPsec tunnel mode là một loại Wi-Fi Evil Twin','Tunnel mode chỉ dùng để cấp DHCP','IPsec không cần chính sách xác thực/khóa'], explanation:'IPsec tunnel mode thường dùng cho VPN gateway-to-gateway.'},
+      {lesson:'Bài 6', topic:'Kerberos', cue:'client dùng ticket thay vì gửi mật khẩu cho từng dịch vụ', correct:'Kerberos dùng KDC, TGT, service ticket và khóa phiên để xác thực', wrongs:['Kerberos loại bỏ hoàn toàn nhu cầu đồng bộ thời gian','Kerberos là thuật toán mã hóa cổ điển thay thế Caesar','Kerberos gửi mật khẩu plaintext cho mọi server','Kerberos chỉ hoạt động khi tắt DNS nội bộ'], explanation:'Kerberos thường bẫy ở vai trò KDC/TGT/TGS và thời gian.'},
+      {lesson:'Bài 7', topic:'Evil Twin', cue:'AP giả cùng SSID để lừa người dùng kết nối', correct:'Evil Twin giả mạo điểm truy cập hợp pháp để đánh cắp thông tin hoặc MITM', wrongs:['Evil Twin là cách chọn root bridge trong STP','Evil Twin chỉ là mật khẩu Wi-Fi dài hơn','Evil Twin là mode AES bảo mật hơn GCM','Evil Twin luôn cần truy cập vật lý vào switch core'], explanation:'Wi-Fi hay hỏi phân biệt AP giả, deauth, bắt handshake và WEP/WPA.'},
+      {lesson:'Bài 7', topic:'WPA handshake', cue:'attacker deauth client để bắt quá trình kết nối lại', correct:'Deauth ép client bắt tay lại để attacker thu handshake rồi thử passphrase offline', wrongs:['Deauth trực tiếp giải mã được mọi gói tin AES','Bắt handshake là đã biết ngay mật khẩu Wi-Fi','Chỉ cần đổi kênh sóng là phá được WPA2','Handshake không liên quan đến xác thực Wi-Fi'], explanation:'Deauth là bước tạo cơ hội thu handshake, không tự bẻ khóa.'},
+      {lesson:'Bài 8', topic:'Stateful firewall', cue:'gói phản hồi thuộc phiên hợp lệ được cho qua', correct:'Stateful firewall theo dõi trạng thái phiên để xử lý traffic trả về hợp lệ', wrongs:['Stateful firewall không cần rule nào cả','Stateful firewall đọc được toàn bộ HTTPS sau mã hóa','Stateful firewall chỉ lọc theo địa chỉ MAC','Stateful firewall thay thế hoàn toàn antivirus'], explanation:'Stateful khác stateless packet filter ở việc nhớ trạng thái kết nối.'},
+      {lesson:'Bài 8', topic:'DMZ', cue:'dịch vụ public không nên đặt thẳng trong LAN nội bộ', correct:'Đưa dịch vụ public vào DMZ và chỉ mở luồng tối thiểu theo least privilege', wrongs:['Đặt database nội bộ public trực tiếp để dễ truy cập','Cho phép any-any giữa Internet và LAN để giảm lỗi','Tắt log firewall ở vùng DMZ','Đặt web public chung máy domain controller'], explanation:'DMZ giảm rủi ro lan vào LAN nội bộ khi dịch vụ public bị tấn công.'}
+    ];
+    const scenarios = [
+      'cổng đăng nhập sinh viên', 'hệ thống email nội bộ', 'máy chủ web trong DMZ', 'file chia sẻ phòng ban',
+      'VPN truy cập từ xa', 'ứng dụng ngân hàng giả lập', 'máy chủ cơ sở dữ liệu', 'mạng Wi-Fi phòng lab',
+      'dịch vụ API có TLS', 'hệ thống xác thực OTP', 'máy trạm nghi nhiễm mã độc', 'kênh trao đổi khóa công khai',
+      'log firewall cuối ngày', 'gói tin bắt được bằng Wireshark', 'máy chủ AD/Kerberos', 'bản sao lưu cấu hình'
+    ];
+    const forms = [
+      (c, s) => `Trong tình huống ${s}, đề nhấn mạnh "${c.cue}". Nhận định nào đúng nhất?`,
+      (c, s) => `Khi ôn ${c.topic} cho ${s}, phương án nào bám sát lý thuyết trong slide nhất?`,
+      (c, s) => `Nếu câu hỏi yêu cầu phân biệt ${c.topic} với các khái niệm gần giống trong ${s}, điểm mấu chốt là gì?`,
+      (c, s) => `Một sự cố ở ${s} có dấu hiệu: ${c.cue}. Cách hiểu/biện pháp nào đúng trọng tâm?`
+    ];
+    let index = 0;
+    while(qs.length < targetCount && index < targetCount * 5){
+      const c = concepts[index % concepts.length];
+      const s = scenarios[Math.floor(index / concepts.length) % scenarios.length];
+      const form = forms[Math.floor(index / (concepts.length * scenarios.length)) % forms.length];
+      const options = shuffle([c.correct].concat(c.wrongs), rng).slice(0,5);
+      if(!options.includes(c.correct)) options[Math.floor(rng()*options.length)] = c.correct;
+      qs.push({
+        id:`DYN-ATMMT-MEGA-${String(index + 1).padStart(4,'0')}`,
+        type:'mcq',
+        lesson:c.lesson,
+        topic:c.topic,
+        difficulty:index % 5 === 0 ? 3 : 2,
+        question:form(c, s),
+        options,
+        answer:options.indexOf(c.correct),
+        explanation:`${c.explanation} Bẫy thường gặp là chọn phương án nghe có vẻ bảo mật nhưng không xử lý đúng dấu hiệu: ${c.cue}.`
+      });
+      index++;
+    }
+  }
+
+  function appendNetworkMegaDrills(qs, rng, targetCount, shuffleOptions){
+    if(qs.length >= targetCount) return;
+    const drills = [
+      {lesson:'QTM 1 - IP, subnet, dịch vụ nền', topic:'DHCP relay', clue:'client khác VLAN không nhận được IP từ DHCP server trung tâm', correct:'Kiểm tra ip helper-address/DHCP relay trên gateway VLAN, scope DHCP, route và firewall UDP 67/68', wrongs:['Đổi native VLAN là đủ dù DHCP server ở khác mạng','Chỉ xóa ARP cache trên client','Tăng OSPF cost trên WAN','Mở port 443 cho DHCP'], config:'Client VLAN 20, DHCP server 192.168.10.5 ở VLAN 10; gateway VLAN 20 là Core SVI.'},
+      {lesson:'QTM 1 - IP, subnet, dịch vụ nền', topic:'DNS nội bộ', clue:'truy cập bằng IP được nhưng bằng tên server thì lỗi', correct:'Kiểm tra DNS client đang trỏ về DNS nội bộ, bản ghi A/CNAME và vùng DNS liên quan', wrongs:['Đổi subnet mask thành /30 để DNS nhanh hơn','Bật PortFast trên access port','Xóa default route ra Internet','Tắt firewall trên mọi máy'], config:'ping 192.168.30.20 OK; ping filesrv.local failed.'},
+      {lesson:'QTM 1 - IP, subnet, dịch vụ nền', topic:'Subnet/VLSM', clue:'cần cấp ít nhất 60 host cho một VLAN', correct:'Chọn /26 vì có 62 địa chỉ usable, đủ cho 60 host và ít lãng phí hơn /25', wrongs:['Chọn /27 vì có 64 host usable','Chọn /30 vì tiết kiệm nhất cho người dùng','Chọn /24 vì mọi VLAN bắt buộc /24','Không cần tính network/broadcast'], config:'VLAN Staff cần >=60 host; IPv4 private 192.168.10.0/24.'},
+      {lesson:'QTM 2 - Switching, VLAN, STP', topic:'Trunk allowed VLAN', clue:'VLAN mới tạo không đi qua uplink tới core', correct:'Kiểm tra VLAN có tồn tại hai đầu và được thêm vào allowed VLAN trên trunk', wrongs:['Đổi OSPF router-id để VLAN đi qua trunk','Mở NAT overload trên switch access','Tạo thêm DNS CNAME cho VLAN','Tắt toàn bộ STP trên switch'], config:'switchport mode trunk\nswitchport trunk allowed vlan 10,20'},
+      {lesson:'QTM 2 - Switching, VLAN, STP', topic:'Native VLAN mismatch', clue:'log báo native VLAN mismatch trên hai đầu trunk', correct:'Đồng bộ native VLAN hai đầu trunk hoặc chuyển native VLAN sang VLAN không dùng cho user', wrongs:['Tăng DHCP lease time','Đổi area OSPF sang area 0','Scale thêm Pod backend','Mở FTP passive port'], config:'SW1 native VLAN 99; SW2 native VLAN 1.'},
+      {lesson:'QTM 2 - Switching, VLAN, STP', topic:'STP root bridge', clue:'switch không mong muốn trở thành root bridge', correct:'Cấu hình priority thấp hơn cho switch core/distribution mong muốn làm root bridge', wrongs:['Đổi hostname switch access là đủ','Tăng số VLAN trên access switch','Tắt trunk allowed VLAN','Tạo NAT static cho core'], config:'Access switch có priority thấp hơn core sau khi thêm thiết bị cũ.'},
+      {lesson:'QTM 2 - Switching, VLAN, STP', topic:'BPDU Guard', clue:'cổng access err-disabled sau khi cắm thêm switch nhỏ', correct:'BPDU Guard bảo vệ cổng PortFast; cần gỡ thiết bị gây BPDU và recovery có kiểm soát', wrongs:['BPDU Guard dùng để tăng tốc OSPF neighbor','Cứ tắt STP toàn mạng là xong','Chuyển cổng sang trunk cho mọi endpoint','Mở port 80 trên firewall'], config:'spanning-tree portfast\nspanning-tree bpduguard enable'},
+      {lesson:'QTM 3 - OSPF & định tuyến', topic:'OSPF area mismatch', clue:'hai router ping trực tiếp được nhưng OSPF không lên FULL', correct:'Kiểm tra area ID, subnet/mask, hello/dead timer, authentication và passive-interface', wrongs:['Bật NAT overload là OSPF lên FULL','Đổi DNS server của router','Tạo VLAN native mới','Xóa toàn bộ static route trước khi kiểm tra'], config:'R1 area 0; R2 area 10 trên cùng link 10.0.12.0/30.'},
+      {lesson:'QTM 3 - OSPF & định tuyến', topic:'Passive interface', clue:'mạng được quảng bá nhưng không lập neighbor trên interface đó', correct:'passive-interface không gửi Hello trên interface nhưng prefix vẫn có thể được quảng bá nếu match network', wrongs:['passive-interface xóa luôn route khỏi OSPF database','passive-interface chỉ dùng cho NAT','passive-interface làm router-id trùng nhau','passive-interface bắt buộc tắt mọi SVI'], config:'router ospf 1\n passive-interface default\n no passive-interface Gi0/0'},
+      {lesson:'QTM 3 - OSPF & định tuyến', topic:'Default route OSPF', clue:'router biên cần phát default route cho mạng nội bộ', correct:'Có default route trong routing table rồi dùng default-information originate, hoặc dùng always khi phù hợp', wrongs:['Mọi router phải có router-id giống nhau','Chỉ cần tạo VLAN 1 làm native','Default route chỉ quảng bá nếu là route connected','OSPF không hỗ trợ default route'], config:'ip route 0.0.0.0 0.0.0.0 203.0.113.1\nrouter ospf 10\n default-information originate'},
+      {lesson:'QTM 4 - ACL, NAT, firewall', topic:'ACL order', clue:'permit host đặc biệt đứng sau deny rộng hơn', correct:'ACL xử lý từ trên xuống; rule deny rộng đứng trước sẽ chặn trước khi tới permit đặc hiệu', wrongs:['Rule permit luôn ưu tiên cao hơn deny','ACL chỉ kiểm tra dòng cuối cùng','Extended ACL không lọc port TCP','Tên ACL càng dài càng ưu tiên'], config:'deny tcp any host 10.10.10.20 eq 443\npermit tcp host 203.0.113.5 host 10.10.10.20 eq 443'},
+      {lesson:'QTM 4 - ACL, NAT, firewall', topic:'Extended ACL placement', clue:'chặn VLAN sinh viên truy cập server quản trị nhưng vẫn cho Internet', correct:'Đặt extended ACL gần nguồn, trên SVI/interface VLAN sinh viên chiều inbound', wrongs:['Đặt sau permit ip any any để tránh lỗi','Đặt trên cổng console router','Đặt gần đích Internet chiều outbound','Không cần xét chiều vào/ra'], config:'Student VLAN -> Management Server deny; Student VLAN -> Internet permit.'},
+      {lesson:'QTM 4 - ACL, NAT, firewall', topic:'NAT overload', clue:'nhiều host private dùng chung một IP public ra Internet', correct:'PAT/NAT overload ánh xạ nhiều kết nối inside ra IP interface outside bằng port', wrongs:['Static NAT một-một cho từng host là bắt buộc','NAT overload dùng để chia VLAN trunk','NAT overload thay thế default gateway nội bộ','NAT overload tự mở port inbound vào server'], config:'ip nat inside source list 1 interface Gi0/1 overload'},
+      {lesson:'QTM 4 - ACL, NAT, firewall', topic:'NAT exemption VPN', clue:'traffic site-to-site VPN bị NAT làm sai địa chỉ nguồn', correct:'Loại traffic giữa các subnet VPN khỏi NAT Internet bằng no-NAT/NAT exemption', wrongs:['NAT tất cả traffic nội bộ để dễ debug','Chuyển VPN sang FTP passive mode','Tắt route ngược để tránh loop','Đổi STP root bridge'], config:'LAN A 192.168.10.0/24 <-> LAN B 192.168.20.0/24 qua VPN; Internet NAT ở edge.'},
+      {lesson:'QTM 5 - Linux server, VPN, giám sát', topic:'OpenVPN route push', clue:'client VPN connected nhưng không tới được LAN server', correct:'Kiểm tra push route, IP forwarding, FORWARD firewall và route ngược hoặc NAT phù hợp', wrongs:['Chỉ đổi port SSH của VPN server','Tắt DNS là vào LAN được','Đổi native VLAN trên switch access','Scale thêm container OpenVPN'], config:'OpenVPN 10.8.0.0/24; LAN server 192.168.30.0/24; default FORWARD DROP.'},
+      {lesson:'QTM 5 - Linux server, VPN, giám sát', topic:'SMB/NFS permission', clue:'mount hoặc truy cập share bị permission denied', correct:'Kiểm tra export/share rule, user/group, filesystem permission, client IP và firewall dịch vụ', wrongs:['Đổi OSPF area trên router biên','Mở public SMB cho toàn Internet','Chỉ xóa DNS cache là đủ','Tắt toàn bộ logging'], config:'/data/project chia sẻ cho group qtm; client 192.168.30.50.'},
+      {lesson:'QTM 5 - Linux server, VPN, giám sát', topic:'FTP passive mode', clue:'FTP login được nhưng list/download lỗi sau NAT/firewall', correct:'Kiểm tra passive mode, dải passive port và rule firewall/NAT tương ứng', wrongs:['Đổi Service Kubernetes sang ClusterIP','Tăng STP priority','Tắt gateway mặc định của server','Chỉ mở port 445 SMB'], config:'FTP server sau firewall; control port 21 mở, passive ports chưa mở.'},
+      {lesson:'QTM 5 - Linux server, VPN, giám sát', topic:'Zabbix trigger', clue:'service chết nhưng không có cảnh báo', correct:'Kiểm tra item key, trigger expression, agent connectivity, action notification và ngưỡng thời gian', wrongs:['Đổi VLAN native là có cảnh báo','Chỉ đổi Docker image sang latest','Xóa toàn bộ history Zabbix','Tắt agent để tránh nhiễu'], config:'zabbix-agent active; item service.info[nginx] không đổi trạng thái.'},
+      {lesson:'QTM 6 - Docker, Kubernetes, cloud', topic:'Docker port mapping', clue:'container chạy nhưng host không truy cập được web', correct:'Kiểm tra mapping HOST:CONTAINER, service listen trong container và firewall trên host', wrongs:['Container chạy là chắc chắn port đã public','Dùng localhost trong container để truy cập host web','Đổi OSPF router-id','Tạo thêm VLAN trunk'], config:'ports:\n  - "8080:80"'},
+      {lesson:'QTM 6 - Docker, Kubernetes, cloud', topic:'Docker volume', clue:'container mất dữ liệu sau khi recreate', correct:'Dữ liệu stateful cần volume hoặc bind mount thay vì chỉ lưu trong filesystem container', wrongs:['Dùng tag latest sẽ giữ dữ liệu vĩnh viễn','Expose port 80 để lưu database','Tăng replicas luôn bảo toàn dữ liệu local','Xóa volume trước khi recreate'], config:'mysql container không khai báo volumes.'},
+      {lesson:'QTM 6 - Docker, Kubernetes, cloud', topic:'Kubernetes Service selector', clue:'Service có endpoints rỗng dù Pod đang chạy', correct:'Selector của Service không khớp label Pod hoặc Pod chưa Ready', wrongs:['ClusterIP bị private nên endpoints luôn rỗng','Ingress TLS secret thiếu sẽ xóa endpoint','Tăng NAT overload trên router','Đổi DNS MX record'], config:'Service selector app=api; Pod label app=web.'},
+      {lesson:'QTM 6 - Docker, Kubernetes, cloud', topic:'Ingress 404', clue:'Pod chạy nhưng truy cập qua Ingress bị 404', correct:'Kiểm tra host/path rule, Ingress Controller, serviceName/servicePort và backend endpoint', wrongs:['Đổi STP root bridge','Mở SMB 445 ra Internet','Tắt readinessProbe luôn đúng','Xóa default route node'], config:'Ingress host api.example.com path /api -> api-svc:80.'},
+      {lesson:'QTM 6 - Docker, Kubernetes, cloud', topic:'Security group', clue:'VM ra Internet được nhưng không SSH vào được', correct:'Kiểm tra inbound security group/NACL, public IP, route table và sshd trên VM', wrongs:['Kiểm tra VLAN allowed list trong Kubernetes','Đổi Docker bridge subnet là đủ','Tạo DNS CNAME cho SSH','Tắt mọi firewall nội bộ'], config:'Outbound OK; inbound TCP 22 chưa có rule từ IP quản trị.'},
+      {lesson:'QTM 6 - Docker, Kubernetes, cloud', topic:'Kubernetes Secret', clue:'secret bị commit lên Git', correct:'Rotate secret, xóa khỏi lịch sử nếu cần và chuyển sang secret manager/quy trình không commit bí mật', wrongs:['Đổi tên file secret là đủ an toàn','Tăng replica để secret tự đổi','Tắt RBAC toàn cluster','Public repo để secret dễ đồng bộ'], config:'db-password.yaml đã push lên repository.'},
+      {lesson:'QTM 7 - Automation & vận hành', topic:'Ansible idempotent', clue:'chạy playbook nhiều lần không nên làm thay đổi nếu trạng thái đã đúng', correct:'Idempotent nghĩa là lệnh/playbook đưa hệ thống về trạng thái mong muốn và chạy lại không gây thay đổi thừa', wrongs:['Idempotent là chạy lệnh random để tránh trùng','Idempotent bắt buộc tắt kiểm tra diff','Idempotent chỉ dùng cho Wi-Fi handshake','Idempotent nghĩa là không cần backup'], config:'Playbook cấu hình Nginx, firewall và user quản trị.'},
+      {lesson:'QTM 7 - Automation & vận hành', topic:'Backup cấu hình', clue:'có file backup nhưng restore thất bại khi sự cố', correct:'Cần kiểm thử restore, lưu version/diff, bảo vệ secret và ghi runbook rollback rõ ràng', wrongs:['Chỉ backup một lần lúc cài máy là đủ','Backup vào cùng máy không cần kiểm tra','Xóa log để restore nhanh hơn','Không cần biết phiên bản thiết bị'], config:'backup running-config hằng ngày nhưng chưa từng restore thử.'},
+      {lesson:'QTM 7 - Automation & vận hành', topic:'HAProxy health check', clue:'load balancer vẫn gửi traffic tới backend lỗi', correct:'Kiểm tra health check, rise/fall, timeout, backend status và log của HAProxy', wrongs:['Đổi subnet mask client','Tăng DHCP lease time','Tắt kiểm tra sức khỏe để cân bằng nhanh','Chỉ đổi DNS server local'], config:'backend app1 down nhưng vẫn nhận request.'},
+      {lesson:'QTM 7 - Automation & vận hành', topic:'Change management', clue:'đổi ACL trước giờ thi lab làm mất truy cập', correct:'Backup cấu hình, review diff, maintenance window, kiểm thử từng luồng và chuẩn bị rollback', wrongs:['Sửa trực tiếp production không cần ghi chú','Xóa toàn bộ ACL rồi mở any-any lâu dài','Không cần test route ngược','Chỉ chụp ảnh màn hình là đủ backup'], config:'Cần chặn Student VLAN vào Management VLAN nhưng vẫn cho Web DMZ/Internet.'}
+    ];
+    const forms = [
+      (d) => `Đọc tình huống: ${d.clue}. Hướng kiểm tra hoặc kết luận đúng nhất là gì?`,
+      (d) => `Trong bài lab ${d.topic}, dữ kiện "${d.clue}" thường dẫn tới nhận định nào?`,
+      (d) => `Nếu đề cho cấu hình/dữ kiện sau, phương án nào xử lý đúng trọng tâm?`,
+      (d) => `Câu hỏi thực hành yêu cầu không đoán mò mà đọc luồng end-to-end. Với dấu hiệu "${d.clue}", chọn gì?`
+    ];
+    const labs = [
+      'mạng campus có Access switch, Core L3 và Edge router',
+      'đồ án triển khai server nội bộ có DMZ và VLAN người dùng',
+      'chi nhánh kết nối về trung tâm qua VPN site-to-site',
+      'phòng lab dùng Cisco IOS, Linux server và firewall default deny',
+      'hệ thống cloud có public subnet, private subnet và load balancer',
+      'cluster Kubernetes expose dịch vụ qua Ingress Controller',
+      'mạng có Zabbix giám sát service, port, disk và log',
+      'bài thực hành yêu cầu chứng minh bằng lệnh kiểm tra trước khi sửa',
+      'topology end-to-end có route đi và route về qua nhiều thiết bị',
+      'môi trường vận hành cần backup, rollback và ghi log thay đổi',
+      'server public chỉ được mở dịch vụ tối thiểu theo least privilege',
+      'người dùng báo lỗi theo triệu chứng, không đưa sẵn nguyên nhân'
+    ];
+    let index = 0;
+    while(qs.length < targetCount && index < targetCount * 5){
+      const d = drills[index % drills.length];
+      const form = forms[Math.floor(index / drills.length) % forms.length];
+      const lab = labs[Math.floor(index / (drills.length * forms.length)) % labs.length];
+      const {options, answer} = shuffleOptions(d.correct, d.wrongs);
+      qs.push({
+        id:`QTM-MEGA-${String(index + 1).padStart(4,'0')}`,
+        type:'mcq',
+        lesson:d.lesson,
+        topic:d.topic,
+        difficulty:index % 4 === 0 ? 3 : 2,
+        config:index % 3 === 0 ? `${d.config}\nBối cảnh: ${lab}.` : undefined,
+        question:`${form(d)} Bối cảnh: ${lab}.`,
+        options,
+        answer,
+        explanation:`Trọng tâm là ${d.correct}. Các đáp án sai thường chỉ đúng một phần, sai tầng giao thức, hoặc bỏ qua điều kiện route/firewall/cấu hình trong dữ kiện.`
+      });
+      index++;
+    }
   }
 
   function initFilters(){
     const lessons = [...new Set(baseQuestions().map(q=>q.lesson))];
     const box = $('lessonFilters');
     box.innerHTML = lessons.map(l => `<label><input type="checkbox" name="lesson" value="${escapeHtml(l)}" checked /> ${escapeHtml(l)}</label>`).join('');
-    $('bankCount').textContent = baseQuestions().length + dynamicQuestions('count-preview', 80).length;
+    $('bankCount').textContent = baseQuestions().length + dynamicQuestions('count-preview', DYNAMIC_BANK_SIZE).length;
   }
 
   function getSelected(name){
@@ -549,7 +689,7 @@
     if(types.length===0) types=['mcq'];
 
     let pool = baseQuestions().filter(q => lessons.includes(q.lesson) && q.difficulty >= minDiff && types.includes(q.type));
-    pool = pool.concat(dynamicQuestions(seed, 80).filter(q => lessons.includes(q.lesson) && q.difficulty >= minDiff && types.includes(q.type)));
+    pool = pool.concat(dynamicQuestions(seed, DYNAMIC_BANK_SIZE).filter(q => lessons.includes(q.lesson) && q.difficulty >= minDiff && types.includes(q.type)));
     if(mode==='docx') pool = pool.filter(q=>q.type==='mcq');
     if(mode==='hard') pool = pool.filter(q=>q.difficulty>=3 || q.type==='calc');
 
@@ -561,7 +701,7 @@
       if(variantCount > 1) shuffled = avoidRecentRepeats(shuffled, previousIds, count);
       if(subject === 'qtm' && (mode === 'mixed' || batchMode)) shuffled = balanceQtmSelection(shuffled, count, rng);
       if(shuffled.length < count){
-        const fallback = shuffle(baseQuestions().concat(dynamicQuestions(variantSeed+'fallback',80)), rng)
+        const fallback = shuffle(baseQuestions().concat(dynamicQuestions(variantSeed+'fallback',DYNAMIC_BANK_SIZE)), rng)
           .filter(q => (mode==='docx'? q.type==='mcq': true) && lessons.includes(q.lesson) && q.difficulty >= minDiff && types.includes(q.type));
         const seen = new Set(shuffled.map(q=>q.id));
         for(const q of fallback){ if(!seen.has(q.id)){ shuffled.push(q); seen.add(q.id); } if(shuffled.length>=count) break; }
@@ -1196,7 +1336,7 @@
 
   function renderStats(){
     const byLesson = {};
-    const all = baseQuestions().concat(dynamicQuestions($('seed').value || 'stats', 80));
+    const all = baseQuestions().concat(dynamicQuestions($('seed').value || 'stats', DYNAMIC_BANK_SIZE));
     for(const q of all){
       if(!byLesson[q.lesson]) byLesson[q.lesson] = {total:0, mcq:0, tf:0, fill:0, short:0, match:0, calc:0, hard:0};
       byLesson[q.lesson].total++;
