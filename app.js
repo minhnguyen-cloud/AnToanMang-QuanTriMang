@@ -11,8 +11,8 @@
   let timerId = null;
   let timerEndsAt = 0;
   let activeQuestionUid = null;
-  const EXAM_CATALOG_SIZE = 20;
-  const DYNAMIC_BANK_SIZE = 1200;
+  const EXAM_CATALOG_SIZE = 50;
+  const DYNAMIC_BANK_SIZE = 2000;
   const COMPLETED_EXAMS_KEY = 'atmmt-qtm-completed-exams-v1';
 
   const subjectConfig = {
@@ -178,6 +178,10 @@
   }
   function choice(arr,rng){ return arr[Math.floor(rng()*arr.length)]; }
   function isGradable(q){ return q.type==='mcq' || (q.type==='calc' && q.options && q.options.length) || q.type==='tf'; }
+
+  function stableScore(value, salt=''){
+    return xmur3(`${salt}|${value}`)() / 4294967296;
+  }
 
   function modPow(base, exp, mod){
     let b = BigInt(base), e = BigInt(exp), m = BigInt(mod), r = 1n;
@@ -488,6 +492,31 @@
     }
   }
 
+  function extraNetworkDrills(){
+    return [
+      {lesson:'QTM 1 - IP, subnet, dịch vụ nền', topic:'Default gateway', clue:'PC cùng VLAN ping được nhau nhưng không ra khác mạng', correct:'Kiểm tra default gateway trên PC, trạng thái SVI/gateway, route và ACL giữa các VLAN', wrongs:['Đổi DNS là đủ vì DNS quyết định mọi gói IP','Tắt STP toàn mạng để gói đi xa hơn','Tạo NAT static cho từng PC trong VLAN','Chỉ đổi hostname switch access'], config:'PC 192.168.20.25/24; gateway khai báo 192.168.20.254 nhưng SVI thực tế là 192.168.20.1.'},
+      {lesson:'QTM 1 - IP, subnet, dịch vụ nền', topic:'IP conflict', clue:'hai máy thỉnh thoảng rớt mạng và log báo duplicate IP', correct:'Tìm thiết bị trùng IP, kiểm DHCP reservation/static IP, ARP table và dải cấp phát DHCP', wrongs:['Tăng OSPF cost trên uplink','Mở thêm port 22 inbound','Đổi native VLAN không cần kiểm IP','Xóa toàn bộ DNS zone'], config:'DHCP pool 192.168.10.50-192.168.10.200; một máy in đặt static 192.168.10.88.'},
+      {lesson:'QTM 1 - IP, subnet, dịch vụ nền', topic:'DHCP scope', clue:'một VLAN nhận được IP sai dải của VLAN khác', correct:'Kiểm tra VLAN access/trunk, DHCP relay, scope tương ứng subnet và có server DHCP giả hay không', wrongs:['Bật PortFast sẽ tự sửa dải DHCP','Đổi cipher suite TLS','Chỉ tăng lease time','Tắt default route Internet'], config:'VLAN 30 đáng lẽ nhận 192.168.30.0/24 nhưng client nhận 192.168.10.x.'},
+      {lesson:'QTM 1 - IP, subnet, dịch vụ nền', topic:'DNS split horizon', clue:'trong LAN truy cập domain public trỏ nhầm ra IP ngoài thay vì server nội bộ', correct:'Kiểm tra DNS nội bộ, split DNS/hairpin NAT và bản ghi A tương ứng môi trường trong LAN', wrongs:['Đổi STP root bridge','Chỉ mở thêm UDP 67/68','Tăng MTU trên trunk','Xóa mọi bản ghi MX'], config:'app.company.vn public = 203.0.113.10; server nội bộ = 10.10.30.20.'},
+      {lesson:'QTM 2 - Switching, VLAN, STP', topic:'Access VLAN sai', clue:'máy phòng kế toán cắm vào port mới nhưng nhận IP của VLAN sinh viên', correct:'Kiểm tra switchport access vlan, profile port, mô tả cổng và DHCP scope nhận được', wrongs:['Đổi OSPF area trên router biên','Mở NAT overload trên server DNS','Tăng replica Kubernetes','Chỉ đổi password Wi-Fi'], config:'interface Gi0/18\n switchport mode access\n switchport access vlan 40'},
+      {lesson:'QTM 2 - Switching, VLAN, STP', topic:'EtherChannel mismatch', clue:'hai uplink cấu hình channel-group nhưng port-channel không lên', correct:'Kiểm tra mode LACP/PAgP hai đầu, speed/duplex, native/allowed VLAN và cấu hình member port đồng nhất', wrongs:['Tạo DHCP reservation cho port-channel','Đổi CA certificate','Mở ICMP trên firewall là đủ','Xóa toàn bộ VLAN database'], config:'SW1 channel-group 1 mode active; SW2 channel-group 1 mode on.'},
+      {lesson:'QTM 2 - Switching, VLAN, STP', topic:'Port security', clue:'cổng access bị err-disabled sau khi thay máy người dùng', correct:'Kiểm tra port-security sticky/static MAC, violation mode và recovery trước khi cho thiết bị mới hoạt động', wrongs:['Đổi OSPF router-id','Tăng timeout HAProxy','Đổi subnet mask thành /30','Tắt backup cấu hình'], config:'switchport port-security\nswitchport port-security mac-address sticky'},
+      {lesson:'QTM 3 - OSPF & định tuyến', topic:'Route chiều về', clue:'từ VLAN user ping tới server qua WAN có request đi nhưng reply không quay lại', correct:'Kiểm tra route chiều về trên server/gateway phía đích, default route, NAT và ACL stateful', wrongs:['Chỉ đổi DNS client','Tạo VLAN native mới','Tăng DHCP lease time','Đổi bridge priority'], config:'User 10.10.20.0/24 -> Server 172.16.50.10; server gateway thiếu route về 10.10.20.0/24.'},
+      {lesson:'QTM 3 - OSPF & định tuyến', topic:'OSPF network mask', clue:'một subnet connected không xuất hiện trong OSPF database', correct:'Kiểm tra network statement/wildcard mask, interface up/up, passive-interface và area đang gán', wrongs:['Bật NAT overload trên interface đó','Đổi DNS suffix','Tắt spanning-tree toàn mạng','Chỉ thêm CNAME'], config:'interface Vlan60 ip 192.168.60.1/24; network 192.168.6.0 0.0.0.255 area 0.'},
+      {lesson:'QTM 3 - OSPF & định tuyến', topic:'Metric chọn đường', clue:'đường backup bị chọn làm primary dù băng thông thấp hơn', correct:'Kiểm tra OSPF cost/reference-bandwidth, bandwidth interface và chính sách route redistribution nếu có', wrongs:['Đổi DHCP pool','Mở port SMB public','Xóa all firewall rules','Tăng số Pod frontend'], config:'WAN chính 1Gbps cost 100; WAN backup 100Mbps cost 10.'},
+      {lesson:'QTM 4 - ACL, NAT, firewall', topic:'Implicit deny', clue:'sau khi thêm ACL chỉ có một rule permit SSH thì web và DNS bị mất', correct:'Nhớ implicit deny cuối ACL; thêm các permit cần thiết đúng thứ tự và đúng chiều', wrongs:['ACL tự permit mọi traffic còn lại','Đổi STP priority sẽ mở web','Chỉ đổi DNS resolver','Tăng MTU là đủ'], config:'ip access-list extended MGMT-IN\n permit tcp 10.10.99.0 0.0.0.255 any eq 22'},
+      {lesson:'QTM 4 - ACL, NAT, firewall', topic:'Hairpin NAT', clue:'người dùng nội bộ truy cập tên miền public của server nội bộ thì lỗi, ngoài Internet lại được', correct:'Kiểm tra split DNS hoặc hairpin NAT/NAT reflection và rule firewall nội bộ tới server', wrongs:['Tắt DNS nội bộ vĩnh viễn','Đổi OSPF area sang NSSA','Chỉ mở UDP 67','Chuyển access port sang trunk cho PC'], config:'LAN client -> public IP firewall -> DNAT về web server DMZ.'},
+      {lesson:'QTM 4 - ACL, NAT, firewall', topic:'Rule direction', clue:'ACL đúng địa chỉ nhưng đặt sai chiều nên traffic vẫn đi qua', correct:'Xác định interface và chiều inbound/outbound theo hướng gói đi rồi áp ACL tại điểm phù hợp', wrongs:['ACL có tên đúng thì chiều nào cũng chạy','Đặt ACL trên loopback là đủ cho mọi luồng','Chỉ thêm deny cuối cùng','Đổi DNS zone'], config:'deny Student -> Management đặt outbound trên interface Student thay vì inbound đúng hướng.'},
+      {lesson:'QTM 4 - ACL, NAT, firewall', topic:'DNAT port forward', clue:'public IP mở port 8080 nhưng web server nội bộ nghe port 80', correct:'Kiểm tra static PAT/DNAT public:8080 tới private:80, ACL outside-in và route trả lời', wrongs:['Host port và server port bắt buộc giống nhau','Chỉ đổi VLAN native','Tạo thêm DHCP relay','Tắt service web'], config:'203.0.113.10:8080 -> 10.10.30.50:80.'},
+      {lesson:'QTM 5 - Linux server, VPN, giám sát', topic:'Linux firewall', clue:'dịch vụ nginx active nhưng máy khác không truy cập được port 80', correct:'Kiểm tra service listen address, ss/netstat, firewall ufw/iptables/nftables và route tới server', wrongs:['Nginx active là chắc chắn truy cập được từ xa','Đổi OSPF area trên switch access','Tăng Docker replica','Xóa DNS MX'], config:'systemctl status nginx active; ss -lntp thấy 127.0.0.1:80.'},
+      {lesson:'QTM 5 - Linux server, VPN, giám sát', topic:'OpenVPN DNS push', clue:'VPN truy cập IP nội bộ được nhưng không phân giải tên nội bộ', correct:'Kiểm tra push DNS/search-domain cho client VPN, route tới DNS và firewall UDP/TCP 53', wrongs:['Đổi port OpenVPN là đủ','Tắt DNS server nội bộ','Chỉ mở SMB 445','Đổi native VLAN'], config:'push "dhcp-option DNS 10.10.10.5" chưa có trong server.conf.'},
+      {lesson:'QTM 6 - Docker, Kubernetes, cloud', topic:'Docker bridge subnet conflict', clue:'container không đi được tới LAN vì subnet docker trùng subnet công ty', correct:'Đổi subnet Docker bridge/custom network tránh trùng, kiểm route host và firewall forwarding', wrongs:['Scale thêm container sẽ hết trùng subnet','Đổi DNS CNAME','Mở port 443 public','Tắt STP'], config:'docker0 = 172.17.0.0/16; LAN công ty cũng dùng 172.17.20.0/24.'},
+      {lesson:'QTM 6 - Docker, Kubernetes, cloud', topic:'Readiness probe', clue:'Pod Running nhưng Service không chuyển traffic tới Pod', correct:'Kiểm tra readinessProbe, endpoint, selector và cổng container/service', wrongs:['Pod Running luôn nhận traffic Service','Đổi VLAN native','Mở NAT overload','Tắt DNS zone'], config:'kubectl get endpoints api-svc trả về empty; Pod condition Ready=False.'},
+      {lesson:'QTM 6 - Docker, Kubernetes, cloud', topic:'Cloud private subnet', clue:'VM private subnet không ra Internet cập nhật package được', correct:'Kiểm tra route table tới NAT gateway/instance, security group outbound và NACL', wrongs:['Gán public IP cho database private là cách duy nhất','Đổi STP priority','Xóa service selector','Chỉ thêm DNS MX'], config:'Private subnet default route chưa trỏ tới NAT gateway.'},
+      {lesson:'QTM 7 - Automation & vận hành', topic:'Rollback plan', clue:'cập nhật firewall thành công trên CLI nhưng phát hiện mất VPN chi nhánh', correct:'Dùng rollback theo bản backup/diff đã chuẩn bị, kiểm lại luồng VPN và ghi nhận nguyên nhân', wrongs:['Tiếp tục sửa tay không lưu lại thay đổi','Xóa luôn ACL để nhanh có mạng','Đổi DNS public','Tắt backup định kỳ'], config:'ACL mới chặn UDP 500/4500 và ESP giữa hai peer VPN.'}
+    ];
+  }
+
   function appendNetworkMegaDrills(qs, rng, targetCount, shuffleOptions){
     if(qs.length >= targetCount) return;
     const drills = [
@@ -520,6 +549,7 @@
       {lesson:'QTM 7 - Automation & vận hành', topic:'HAProxy health check', clue:'load balancer vẫn gửi traffic tới backend lỗi', correct:'Kiểm tra health check, rise/fall, timeout, backend status và log của HAProxy', wrongs:['Đổi subnet mask client','Tăng DHCP lease time','Tắt kiểm tra sức khỏe để cân bằng nhanh','Chỉ đổi DNS server local'], config:'backend app1 down nhưng vẫn nhận request.'},
       {lesson:'QTM 7 - Automation & vận hành', topic:'Change management', clue:'đổi ACL trước giờ thi lab làm mất truy cập', correct:'Backup cấu hình, review diff, maintenance window, kiểm thử từng luồng và chuẩn bị rollback', wrongs:['Sửa trực tiếp production không cần ghi chú','Xóa toàn bộ ACL rồi mở any-any lâu dài','Không cần test route ngược','Chỉ chụp ảnh màn hình là đủ backup'], config:'Cần chặn Student VLAN vào Management VLAN nhưng vẫn cho Web DMZ/Internet.'}
     ];
+    drills.push(...extraNetworkDrills());
     const forms = [
       (d) => `Đọc tình huống: ${d.clue}. Hướng kiểm tra hoặc kết luận đúng nhất là gì?`,
       (d) => `Trong bài lab ${d.topic}, dữ kiện "${d.clue}" thường dẫn tới nhận định nào?`,
@@ -677,12 +707,13 @@
     $('count').value = count;
 
     const seed = syncSeedFromExamNumber();
-    const variantCount = batchMode ? 25 : (examMode ? 1 : Math.max(1, Math.min(30, parseInt($('variantCount')?.value,10) || 1)));
+    const variantCount = batchMode ? EXAM_CATALOG_SIZE : (examMode ? 1 : Math.max(1, Math.min(EXAM_CATALOG_SIZE, parseInt($('variantCount')?.value,10) || 1)));
     if($('variantCount')) $('variantCount').value = variantCount;
     const minDiff = parseInt($('difficulty').value,10);
     const lessons = getSelected('lesson');
     let types = getSelected('qtype');
     const previousIds = new Set(lastExamIds);
+    const batchUsedIds = new Set();
 
     if(mode==='docx') types = ['mcq'];
     if(mode==='hard') types = types.filter(t => t !== 'tf' && t !== 'fill');
@@ -697,7 +728,9 @@
     for(let v=0; v<variantCount; v++){
       const variantSeed = variantCount === 1 ? seed : `${seed}-DE${v+1}`;
       const rng = rngFromSeed(variantSeed+'-'+mode+'-'+count);
+      const catalogExamNo = batchMode ? v + 1 : Math.max(1, Math.min(EXAM_CATALOG_SIZE, parseInt($('examNumber')?.value,10) || 1));
       let shuffled = shuffle(pool, rng);
+      if(subject === 'qtm') shuffled = prioritizeQtmCatalogSlot(shuffled, catalogExamNo, rng);
       if(variantCount > 1) shuffled = avoidRecentRepeats(shuffled, previousIds, count);
       if(subject === 'qtm' && (mode === 'mixed' || batchMode)) shuffled = balanceQtmSelection(shuffled, count, rng);
       if(shuffled.length < count){
@@ -709,8 +742,9 @@
       currentExamSets.push({
         label: variantCount === 1 ? `Đề ${parseInt($('examNumber')?.value,10) || 1}` : `Đề ${v+1}`,
         seed: variantSeed,
-        questions: selectExamQuestions(subject, shuffled, pool, count, rng).map((q,i)=>prepareQuestion(q, i, rng, v))
+        questions: selectExamQuestions(subject, shuffled, pool, count, rng, batchUsedIds, catalogExamNo).map((q,i)=>prepareQuestion(q, i, rng, v))
       });
+      currentExamSets[currentExamSets.length - 1].questions.forEach(q => batchUsedIds.add(q.caseId || q.id));
     }
     currentExam = currentExamSets.flatMap(set => set.questions.map(q => ({...q, variantSeed:set.seed, variantLabel:set.label})));
     lastExamIds = currentExam.map(q => q.caseId || q.id);
@@ -729,9 +763,62 @@
     return fresh.length >= count ? fresh.concat(repeated) : fresh.concat(repeated);
   }
 
+  function normalizeDuplicateText(value){
+    return String(value || '')
+      .toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^\p{L}\p{N}]+/gu, ' ')
+      .replace(/\b\d+\b/g, '#')
+      .trim();
+  }
+
+  function qtmIdentity(q){
+    return q.caseId || q.id;
+  }
+
+  function qtmTopicKey(q){
+    return normalizeDuplicateText(`${q.lesson || ''}|${q.topic || ''}`);
+  }
+
+  function qtmContentFingerprint(q){
+    const question = normalizeDuplicateText(q.question).slice(0, 180);
+    const config = normalizeDuplicateText(q.config).slice(0, 160);
+    const answer = normalizeDuplicateText(q.answer || q.computedAnswer || '').slice(0, 120);
+    return `${q.type}|${qtmTopicKey(q)}|${question}|${config}|${answer}`;
+  }
+
+  function tryAddQtmQuestion(q, selected, state, options={}){
+    const identity = qtmIdentity(q);
+    const fingerprint = qtmContentFingerprint(q);
+    const topicKey = qtmTopicKey(q);
+    const maxTopic = options.maxTopic ?? 1;
+    if(state.ids.has(identity) || state.ids.has(q.id)) return false;
+    if(!options.allowFingerprintRepeat && state.fingerprints.has(fingerprint)) return false;
+    if(topicKey && !options.allowTopicOverflow && (state.topicCounts.get(topicKey) || 0) >= maxTopic) return false;
+    selected.push(q);
+    state.ids.add(identity);
+    state.ids.add(q.id);
+    state.fingerprints.add(fingerprint);
+    if(topicKey) state.topicCounts.set(topicKey, (state.topicCounts.get(topicKey) || 0) + 1);
+    return true;
+  }
+
+  function prioritizeQtmCatalogSlot(questions, examNo, rng){
+    const bucket = ((Number(examNo) || 1) - 1 + EXAM_CATALOG_SIZE) % EXAM_CATALOG_SIZE;
+    const ordered = questions.map((q, index) => ({
+      q,
+      index,
+      score: stableScore(q.caseId || q.id || index, 'qtm-catalog')
+    })).sort((a,b) => a.score - b.score || a.index - b.index);
+    const preferredIds = new Set(ordered.filter((item, index) => index % EXAM_CATALOG_SIZE === bucket).map(item => item.q.id));
+    const preferred = questions.filter(q => preferredIds.has(q.id));
+    const rest = questions.filter(q => !preferredIds.has(q.id));
+    return preferred.concat(shuffle(rest, rng));
+  }
+
   function balanceQtmSelection(shuffled, count, rng){
-    const medium = shuffle(shuffled.filter(q => q.difficulty <= 2), rng);
-    const hard = shuffle(shuffled.filter(q => q.difficulty >= 3), rng);
+    const medium = shuffled.filter(q => q.difficulty <= 2);
+    const hard = shuffled.filter(q => q.difficulty >= 3);
     const picked = [];
     const seen = new Set();
     const take = (list) => {
@@ -782,37 +869,56 @@
     return selected;
   }
 
-  function selectExamQuestions(subject, shuffled, pool, count, rng){
+  function selectExamQuestions(subject, shuffled, pool, count, rng, excludedIds=new Set(), catalogExamNo=1){
     if(subject !== 'qtm') return orderExamQuestions(expandGroupedSelection(shuffled, pool, count, rng));
-    return composeNetworkAdminExam(shuffled, pool, count, rng);
+    return composeNetworkAdminExam(shuffled, pool, count, rng, excludedIds, catalogExamNo);
   }
 
-  function composeNetworkAdminExam(shuffled, pool, count, rng){
+  function composeNetworkAdminExam(shuffled, pool, count, rng, excludedIds=new Set(), catalogExamNo=1){
     const essayTarget = count >= 24 ? 3 : (count >= 12 ? 2 : 1);
     const objectiveTarget = Math.max(0, count - essayTarget);
     const seen = new Set();
+    const isExcluded = q => excludedIds.has(q.caseId || q.id);
+    let filteredShuffled = shuffled.filter(q => !isExcluded(q));
+    let filteredPool = pool.filter(q => !isExcluded(q));
+    if(filteredShuffled.length < count) filteredShuffled = shuffled;
+    if(filteredPool.length < count) filteredPool = pool;
+    const objectiveState = {ids:new Set(), fingerprints:new Set(), topicCounts:new Map()};
+    const essayState = {ids:new Set(), fingerprints:new Set(), topicCounts:new Map()};
     const objectivePool = prioritizeQtmSlideTheory(
-      shuffled.filter(q => q.type === 'mcq' || q.type === 'tf' || q.type === 'match' || q.type === 'fill'),
+      filteredShuffled.filter(q => q.type === 'mcq' || q.type === 'tf' || q.type === 'match' || q.type === 'fill'),
       objectiveTarget,
       rng
     );
     const selected = [];
     for(const q of objectivePool){
       if(selected.length >= objectiveTarget) break;
-      if(seen.has(q.id)) continue;
-      selected.push(q);
-      seen.add(q.id);
+      if(!tryAddQtmQuestion(q, selected, objectiveState, {maxTopic:1})) continue;
+      seen.add(qtmIdentity(q));
     }
     if(selected.length < objectiveTarget){
-      for(const q of shuffle(pool.filter(q => q.type !== 'short' && q.type !== 'calc'), rng)){
+      for(const q of prioritizeQtmCatalogSlot(filteredPool.filter(q => q.type !== 'short' && q.type !== 'calc'), catalogExamNo, rng)){
         if(selected.length >= objectiveTarget) break;
-        if(seen.has(q.id)) continue;
-        selected.push(q);
-        seen.add(q.id);
+        if(!tryAddQtmQuestion(q, selected, objectiveState, {maxTopic:2})) continue;
+        seen.add(qtmIdentity(q));
+      }
+    }
+    if(selected.length < objectiveTarget){
+      for(const q of prioritizeQtmCatalogSlot(pool.filter(q => q.type !== 'short' && q.type !== 'calc'), catalogExamNo, rng)){
+        if(selected.length >= objectiveTarget) break;
+        if(!tryAddQtmQuestion(q, selected, objectiveState, {maxTopic:3})) continue;
+        seen.add(qtmIdentity(q));
+      }
+    }
+    if(selected.length < objectiveTarget){
+      for(const q of prioritizeQtmCatalogSlot(pool.filter(q => q.type !== 'short' && q.type !== 'calc'), catalogExamNo, rng)){
+        if(selected.length >= objectiveTarget) break;
+        if(!tryAddQtmQuestion(q, selected, objectiveState, {allowFingerprintRepeat:true, allowTopicOverflow:true})) continue;
+        seen.add(qtmIdentity(q));
       }
     }
 
-    const essayPool = shuffle(pool.filter(q => q.type === 'short'), rng).sort((a,b) => {
+    const essayPool = prioritizeQtmCatalogSlot(filteredPool.filter(q => q.type === 'short'), catalogExamNo, rng).sort((a,b) => {
       const aFinal = /ESSAY-(FINAL|END2END)/.test(String(a.id || '')) ? 0 : 1;
       const bFinal = /ESSAY-(FINAL|END2END)/.test(String(b.id || '')) ? 0 : 1;
       const aMedia = a.image ? 0 : 1;
@@ -822,9 +928,31 @@
     const essays = [];
     for(const q of essayPool){
       if(essays.length >= essayTarget) break;
-      if(seen.has(q.id)) continue;
-      essays.push(q);
-      seen.add(q.id);
+      if(seen.has(qtmIdentity(q))) continue;
+      if(!tryAddQtmQuestion(q, essays, essayState, {maxTopic:1})) continue;
+      seen.add(qtmIdentity(q));
+    }
+    if(essays.length < essayTarget){
+      const fallbackEssays = prioritizeQtmCatalogSlot(pool.filter(q => q.type === 'short'), catalogExamNo, rng).sort((a,b) => {
+        const aFinal = /ESSAY-(FINAL|END2END)/.test(String(a.id || '')) ? 0 : 1;
+        const bFinal = /ESSAY-(FINAL|END2END)/.test(String(b.id || '')) ? 0 : 1;
+        const aMedia = a.image ? 0 : 1;
+        const bMedia = b.image ? 0 : 1;
+        return aFinal - bFinal || essaySlideScore(a) - essaySlideScore(b) || aMedia - bMedia;
+      });
+      for(const q of fallbackEssays){
+        if(essays.length >= essayTarget) break;
+        if(seen.has(qtmIdentity(q))) continue;
+        if(!tryAddQtmQuestion(q, essays, essayState, {maxTopic:2})) continue;
+        seen.add(qtmIdentity(q));
+      }
+    }
+    if(essays.length < essayTarget){
+      for(const q of prioritizeQtmCatalogSlot(pool.filter(q => q.type === 'short'), catalogExamNo, rng)){
+        if(essays.length >= essayTarget) break;
+        if(!tryAddQtmQuestion(q, essays, essayState, {allowFingerprintRepeat:true, allowTopicOverflow:true})) continue;
+        seen.add(qtmIdentity(q));
+      }
     }
     return selected.concat(essays).slice(0, count);
   }
@@ -1092,9 +1220,13 @@
     if(q.type==='mcq' || (q.type==='calc' && q.options && q.options.length)) a = `${letters[q.answer]}. ${escapeHtml(q.options[q.answer])}`;
     else if(q.type==='tf') a = q.answer ? 'Đúng' : 'Sai';
     else if(q.type==='match') a = q.answer.map(p=>`${escapeHtml(p[0])} → ${escapeHtml(p[1])}`).join('; ');
-    else a = escapeHtml(String(q.answer));
+    else a = formatMultilineText(q.answer);
     const wrong = wrongFeedbackHtml(q, selectedChoice);
-    return `${wrong}<strong>Đáp án:</strong> ${a}<br><strong>Giải thích:</strong> ${escapeHtml(richExplanation(q))}`;
+    return `${wrong}<strong>Đáp án:</strong> ${a}<br><strong>Giải thích:</strong> ${formatMultilineText(richExplanation(q))}`;
+  }
+
+  function formatMultilineText(value){
+    return escapeHtml(String(value || '')).replace(/\n/g, '<br>');
   }
 
   function wrongFeedbackHtml(q, selectedChoice){
@@ -1419,7 +1551,7 @@
         if($('answerMode')) $('answerMode').value = 'practice';
         $('difficulty').value = 2;
         $('count').value = 28;
-        if($('variantCount')) $('variantCount').value = 25;
+        if($('variantCount')) $('variantCount').value = EXAM_CATALOG_SIZE;
         if($('examDuration')) $('examDuration').value = 90;
         document.querySelectorAll('input[name="qtype"]').forEach(x=>{ x.checked = true; });
         initFilters();

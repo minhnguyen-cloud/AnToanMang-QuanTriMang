@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 760" role="img" aria-labelledby="title desc">
+  <title id="title">Packet Tracer style VLAN addressing topology</title>
+  <desc id="desc">Three access switches, one core layer 3 switch, PCs with visible IP addresses and default gateways, plus an addressing table.</desc>
+  <defs>
+    <style>
+      .bg{fill:#f8fafc}.panel{fill:#fff;stroke:#cbd5e1;stroke-width:2}.sw{fill:#0f9f9a;stroke:#0f766e;stroke-width:3}.core{fill:#1d4ed8;stroke:#1e40af;stroke-width:3}.pc{fill:#ccfbf1;stroke:#0f766e;stroke-width:3}.srv{fill:#fee2e2;stroke:#b91c1c;stroke-width:3}.rtr{fill:#dcfce7;stroke:#15803d;stroke-width:3}.line{stroke:#111827;stroke-width:5;stroke-linecap:round}.trunk{stroke:#111827;stroke-width:5;stroke-dasharray:14 10;stroke-linecap:round}.wan{stroke:#dc2626;stroke-width:6;stroke-linecap:round}.txt{font-family:Segoe UI,Arial,sans-serif;fill:#0f172a;font-weight:750;font-size:18px}.small{font-size:14px;font-weight:650;fill:#334155}.tiny{font-size:12px;font-weight:650;fill:#475569}.white{fill:#fff}.ip{font-size:13px;font-weight:750;fill:#0f172a}.hdr{fill:#e0f2fe;stroke:#93c5fd}.row{fill:#fff;stroke:#cbd5e1}.gw{fill:#fff7ed;stroke:#f97316}
+    </style>
+  </defs>
+  <rect class="bg" width="1180" height="760"/>
+  <rect class="panel" x="24" y="24" width="1132" height="712" rx="10"/>
+
+  <text class="txt" x="52" y="62">Campus VLAN topology - Packet Tracer style</text>
+  <text class="small" x="52" y="86">Yeu cau tu luan: thiet ke subnet/gateway, trunk, inter-VLAN routing, ACL va troubleshoot.</text>
+
+  <rect class="sw" x="482" y="114" width="150" height="58" rx="8"/>
+  <text class="txt white" x="557" y="151" text-anchor="middle">CORE-L3</text>
+  <text class="tiny" x="482" y="104">SVI gateways</text>
+
+  <rect class="sw" x="118" y="282" width="128" height="52" rx="7"/>
+  <text class="txt white" x="182" y="316" text-anchor="middle">S1</text>
+  <rect class="sw" x="498" y="282" width="128" height="52" rx="7"/>
+  <text class="txt white" x="562" y="316" text-anchor="middle">S2</text>
+  <rect class="sw" x="878" y="282" width="128" height="52" rx="7"/>
+  <text class="txt white" x="942" y="316" text-anchor="middle">S3</text>
+
+  <line class="trunk" x1="246" y1="300" x2="482" y2="153"/>
+  <line class="trunk" x1="562" y1="282" x2="557" y2="172"/>
+  <line class="trunk" x1="878" y1="300" x2="632" y2="153"/>
+  <text class="tiny" x="318" y="229">trunk G0/1 VLAN 10,20,30,99</text>
+  <text class="tiny" x="581" y="233">trunk G0/1</text>
+  <text class="tiny" x="706" y="229">trunk G0/1</text>
+
+  <rect class="pc" x="66" y="170" width="95" height="58" rx="7"/>
+  <text class="txt" x="114" y="205" text-anchor="middle">PC-A</text>
+  <line class="line" x1="113" y1="228" x2="148" y2="282"/>
+  <text class="ip" x="36" y="248">VLAN10 192.168.10.11/24</text>
+  <text class="ip" x="36" y="267">GW 192.168.10.1</text>
+
+  <rect class="pc" x="206" y="170" width="95" height="58" rx="7"/>
+  <text class="txt" x="254" y="205" text-anchor="middle">PC-B</text>
+  <line class="line" x1="254" y1="228" x2="204" y2="282"/>
+  <text class="ip" x="226" y="248">VLAN20 192.168.20.12/24</text>
+  <text class="ip" x="226" y="267">GW 192.168.20.1</text>
+
+  <rect class="pc" x="438" y="402" width="95" height="58" rx="7"/>
+  <text class="txt" x="486" y="437" text-anchor="middle">PC-C</text>
+  <line class="line" x1="506" y1="402" x2="540" y2="334"/>
+  <text class="ip" x="380" y="487">VLAN10 192.168.10.21/24</text>
+  <text class="ip" x="380" y="506">GW 192.168.10.1</text>
+
+  <rect class="pc" x="592" y="402" width="95" height="58" rx="7"/>
+  <text class="txt" x="640" y="437" text-anchor="middle">PC-D</text>
+  <line class="line" x1="620" y1="402" x2="584" y2="334"/>
+  <text class="ip" x="594" y="487">VLAN30 192.168.30.13/24</text>
+  <text class="ip" x="594" y="506">GW 192.168.30.1</text>
+
+  <rect class="pc" x="828" y="170" width="95" height="58" rx="7"/>
+  <text class="txt" x="876" y="205" text-anchor="middle">PC-E</text>
+  <line class="line" x1="876" y1="228" x2="918" y2="282"/>
+  <text class="ip" x="756" y="248">VLAN20 192.168.20.22/24</text>
+  <text class="ip" x="756" y="267">GW 192.168.20.1</text>
+
+  <rect class="srv" x="978" y="170" width="104" height="58" rx="7"/>
+  <text class="txt" x="1030" y="205" text-anchor="middle">WEB</text>
+  <line class="line" x1="1030" y1="228" x2="966" y2="282"/>
+  <text class="ip" x="970" y="248">DMZ 192.168.30.50/24</text>
+  <text class="ip" x="970" y="267">GW 192.168.30.1</text>
+
+  <ellipse class="rtr" cx="557" cy="62" rx="62" ry="28"/>
+  <text class="txt" x="557" y="69" text-anchor="middle">EDGE</text>
+  <line class="wan" x1="557" y1="90" x2="557" y2="114"/>
+  <text class="tiny" x="634" y="69">Default route/NAT to ISP</text>
+
+  <rect class="gw" x="430" y="198" width="252" height="58" rx="8"/>
+  <text class="small" x="446" y="220">SVI gateways on CORE-L3</text>
+  <text class="tiny" x="446" y="239">Vlan10 192.168.10.1 | Vlan20 192.168.20.1 | Vlan30 192.168.30.1</text>
+
+  <g transform="translate(60 560)">
+    <rect class="hdr" x="0" y="0" width="1060" height="32"/>
+    <text class="small" x="12" y="22">Addressing table</text>
+    <rect class="row" x="0" y="32" width="1060" height="34"/>
+    <rect class="row" x="0" y="66" width="1060" height="34"/>
+    <rect class="row" x="0" y="100" width="1060" height="34"/>
+    <rect class="row" x="0" y="134" width="1060" height="34"/>
+    <text class="tiny" x="16" y="54">VLAN 10 Students: 192.168.10.0/24, gateway 192.168.10.1, hosts PC-A .11, PC-C .21</text>
+    <text class="tiny" x="16" y="88">VLAN 20 Teachers: 192.168.20.0/24, gateway 192.168.20.1, hosts PC-B .12, PC-E .22</text>
+    <text class="tiny" x="16" y="122">VLAN 30 Server/DMZ: 192.168.30.0/24, gateway 192.168.30.1, WEB 192.168.30.50</text>
+    <text class="tiny" x="16" y="156">Trunks: S1/S2/S3 to CORE allow VLAN 10,20,30,99. EDGE advertises default route and applies NAT/ACL.</text>
+  </g>
+</svg>

@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1220 820" role="img" aria-labelledby="title desc">
+  <title id="title">Packet Tracer fault topology with highlighted errors</title>
+  <desc id="desc">Campus VLAN and routing lab with red error markers showing wrong gateway, missing trunk VLAN, ACL deny, and missing DHCP relay.</desc>
+  <defs>
+    <style>
+      .bg{fill:#f8fafc}.panel{fill:#fff;stroke:#cbd5e1;stroke-width:2}.sw{fill:#0f9f9a;stroke:#0f766e;stroke-width:3}.core{fill:#1d4ed8;stroke:#1e40af;stroke-width:3}.pc{fill:#ccfbf1;stroke:#0f766e;stroke-width:3}.srv{fill:#fee2e2;stroke:#b91c1c;stroke-width:3}.edge{fill:#dcfce7;stroke:#15803d;stroke-width:3}.line{stroke:#111827;stroke-width:5;stroke-linecap:round}.trunk{stroke:#111827;stroke-width:5;stroke-dasharray:14 10;stroke-linecap:round}.badlink{stroke:#dc2626;stroke-width:7;stroke-dasharray:14 8;stroke-linecap:round}.wan{stroke:#334155;stroke-width:5;stroke-linecap:round}.txt{font-family:Segoe UI,Arial,sans-serif;fill:#0f172a;font-weight:750;font-size:18px}.small{font-size:14px;font-weight:650;fill:#334155}.tiny{font-size:12px;font-weight:650;fill:#475569}.ip{font-size:13px;font-weight:750;fill:#0f172a}.white{fill:#fff}.err{fill:#dc2626;stroke:#991b1b;stroke-width:2}.errtxt{font-family:Segoe UI,Arial,sans-serif;fill:#fff;font-weight:900;font-size:17px}.note{fill:#fff7ed;stroke:#f97316;stroke-width:2}.deny{fill:#fee2e2;stroke:#dc2626;stroke-width:2}.hdr{fill:#fee2e2;stroke:#fca5a5}.row{fill:#fff;stroke:#cbd5e1}.ok{fill:#ecfdf3;stroke:#86efac}
+    </style>
+  </defs>
+  <rect class="bg" width="1220" height="820"/>
+  <rect class="panel" x="24" y="24" width="1172" height="772" rx="10"/>
+  <text class="txt" x="52" y="62">Fault lab topology - mark the broken points before fixing</text>
+  <text class="small" x="52" y="86">Dang de cac nam hay gap: doc so do, chi ra loi, viet lenh kiem tra, sua theo thu tu Layer 2 -> Layer 3 -> ACL/DHCP.</text>
+
+  <rect class="core" x="506" y="124" width="160" height="62" rx="8"/>
+  <text class="txt white" x="586" y="162" text-anchor="middle">CORE-L3</text>
+  <text class="tiny" x="506" y="112">SVI: VLAN10 .1 | VLAN20 .1 | VLAN30 .1</text>
+
+  <ellipse class="edge" cx="586" cy="54" rx="64" ry="28"/>
+  <text class="txt" x="586" y="61" text-anchor="middle">EDGE</text>
+  <line class="wan" x1="586" y1="82" x2="586" y2="124"/>
+  <text class="tiny" x="666" y="62">NAT + default route</text>
+
+  <rect class="sw" x="112" y="310" width="132" height="54" rx="8"/>
+  <text class="txt white" x="178" y="345" text-anchor="middle">S1</text>
+  <rect class="sw" x="520" y="310" width="132" height="54" rx="8"/>
+  <text class="txt white" x="586" y="345" text-anchor="middle">S2</text>
+  <rect class="sw" x="918" y="310" width="132" height="54" rx="8"/>
+  <text class="txt white" x="984" y="345" text-anchor="middle">S3</text>
+
+  <line class="trunk" x1="244" y1="328" x2="506" y2="168"/>
+  <line class="badlink" x1="586" y1="310" x2="586" y2="186"/>
+  <line class="trunk" x1="918" y1="328" x2="666" y2="168"/>
+  <text class="tiny" x="292" y="250">S1 trunk allow 10,20,30</text>
+  <text class="tiny" x="602" y="254">S2 trunk allow 10,20 only</text>
+  <text class="tiny" x="738" y="250">S3 trunk allow 10,20,30</text>
+
+  <circle class="err" cx="590" cy="246" r="22"/>
+  <text class="errtxt" x="590" y="253" text-anchor="middle">E1</text>
+  <rect class="deny" x="626" y="218" width="246" height="50" rx="8"/>
+  <text class="tiny" x="642" y="239">E1: trunk S2-CORE missing VLAN30</text>
+  <text class="tiny" x="642" y="257">Symptom: PC-D cannot reach WEB/DMZ</text>
+
+  <rect class="pc" x="64" y="190" width="96" height="58" rx="7"/>
+  <text class="txt" x="112" y="225" text-anchor="middle">PC-A</text>
+  <line class="line" x1="112" y1="248" x2="148" y2="310"/>
+  <text class="ip" x="34" y="270">VLAN10 192.168.10.11/24</text>
+  <text class="ip" x="34" y="289">GW 192.168.10.1</text>
+
+  <rect class="pc" x="226" y="190" width="96" height="58" rx="7"/>
+  <text class="txt" x="274" y="225" text-anchor="middle">PC-B</text>
+  <line class="line" x1="274" y1="248" x2="210" y2="310"/>
+  <text class="ip" x="214" y="270">VLAN20 192.168.20.12/24</text>
+  <text class="ip" x="214" y="289">GW 192.168.20.1</text>
+
+  <rect class="pc" x="472" y="430" width="96" height="58" rx="7"/>
+  <text class="txt" x="520" y="465" text-anchor="middle">PC-C</text>
+  <line class="line" x1="536" y1="430" x2="562" y2="364"/>
+  <text class="ip" x="388" y="512">VLAN10 192.168.10.21/24</text>
+  <text class="ip" x="388" y="531">GW 192.168.10.1</text>
+
+  <rect class="pc" x="620" y="430" width="96" height="58" rx="7"/>
+  <text class="txt" x="668" y="465" text-anchor="middle">PC-D</text>
+  <line class="line" x1="650" y1="430" x2="610" y2="364"/>
+  <text class="ip" x="604" y="512">VLAN30 192.168.30.13/24</text>
+  <text class="ip" x="604" y="531">GW 192.168.30.1</text>
+
+  <rect class="pc" x="848" y="190" width="96" height="58" rx="7"/>
+  <text class="txt" x="896" y="225" text-anchor="middle">PC-E</text>
+  <line class="line" x1="896" y1="248" x2="944" y2="310"/>
+  <text class="ip" x="782" y="270">VLAN20 192.168.20.22/24</text>
+  <text class="ip" x="782" y="289">GW 192.168.20.1</text>
+
+  <rect class="pc" x="1016" y="190" width="96" height="58" rx="7"/>
+  <text class="txt" x="1064" y="225" text-anchor="middle">PC-F</text>
+  <line class="line" x1="1064" y1="248" x2="1014" y2="310"/>
+  <text class="ip" x="996" y="270">VLAN20 192.168.20.23/24</text>
+  <text class="ip" x="996" y="289" fill="#dc2626">GW 192.168.30.1 WRONG</text>
+  <circle class="err" cx="1120" cy="286" r="22"/>
+  <text class="errtxt" x="1120" y="293" text-anchor="middle">E2</text>
+
+  <rect class="srv" x="964" y="440" width="112" height="58" rx="7"/>
+  <text class="txt" x="1020" y="475" text-anchor="middle">WEB</text>
+  <line class="line" x1="1006" y1="440" x2="988" y2="364"/>
+  <text class="ip" x="946" y="520">DMZ 192.168.30.50/24</text>
+  <text class="ip" x="946" y="539">GW 192.168.30.1</text>
+
+  <rect class="deny" x="742" y="392" width="178" height="74" rx="8"/>
+  <text class="tiny" x="758" y="414">E3: ACL on VLAN10</text>
+  <text class="tiny" x="758" y="432">deny 192.168.10.0/24</text>
+  <text class="tiny" x="758" y="450">to host 192.168.30.50</text>
+  <circle class="err" cx="742" cy="392" r="22"/>
+  <text class="errtxt" x="742" y="399" text-anchor="middle">E3</text>
+
+  <rect class="note" x="354" y="190" width="230" height="62" rx="8"/>
+  <text class="tiny" x="370" y="212">E4: VLAN20 DHCP clients fail</text>
+  <text class="tiny" x="370" y="230">Missing ip helper-address</text>
+  <text class="tiny" x="370" y="248">on interface Vlan20</text>
+  <circle class="err" cx="354" cy="190" r="22"/>
+  <text class="errtxt" x="354" y="197" text-anchor="middle">E4</text>
+
+  <g transform="translate(56 610)">
+    <rect class="hdr" x="0" y="0" width="1110" height="32"/>
+    <text class="small" x="12" y="22">Fault table: visible error markers</text>
+    <rect class="row" x="0" y="32" width="1110" height="34"/>
+    <rect class="row" x="0" y="66" width="1110" height="34"/>
+    <rect class="row" x="0" y="100" width="1110" height="34"/>
+    <rect class="row" x="0" y="134" width="1110" height="34"/>
+    <text class="tiny" x="14" y="54">E1 Missing VLAN30 on S2 trunk: check show interfaces trunk, show vlan brief, show spanning-tree vlan 30.</text>
+    <text class="tiny" x="14" y="88">E2 Wrong default gateway on PC-F: IP is VLAN20 but gateway points to VLAN30; check ipconfig, ping 192.168.20.1.</text>
+    <text class="tiny" x="14" y="122">E3 ACL blocks VLAN10 to WEB: check show access-lists hit count, ACL order, interface direction inbound/outbound.</text>
+    <text class="tiny" x="14" y="156">E4 Missing DHCP relay on Vlan20: check ip helper-address, DHCP scope, UDP 67/68, route to DHCP server.</text>
+  </g>
+</svg>

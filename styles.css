@@ -50,7 +50,7 @@ body{
 .controls .exam-picker-heading h3{margin:0 0 2px;color:#1e3a8a}
 .exam-picker-heading p{margin:0;color:var(--muted);font-size:12px;font-weight:650}
 .next-new-exam{padding:7px 9px;font-size:12px;color:#1d4ed8;border-color:#93c5fd;background:#fff;white-space:nowrap}
-.exam-picker{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.exam-picker{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}
 .exam-pick{
   position:relative;
   display:grid;

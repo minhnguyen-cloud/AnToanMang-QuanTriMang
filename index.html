@@ -35,7 +35,7 @@
         <select id="mode">
           <option value="docx">Giống đề thi DOCX - 40 câu trắc nghiệm A-E</option>
           <option value="mixed">Đề trộn nhiều dạng</option>
-          <option value="qtm-batch">Bộ 25 đề Quản trị mạng để in/PDF</option>
+          <option value="qtm-batch">Bộ 50 đề Quản trị mạng để in/PDF</option>
           <option value="hard">Đề khó/vận dụng cao</option>
           <option value="quick">Ôn nhanh theo chủ đề</option>
         </select>
@@ -63,7 +63,7 @@
         </label>
         <label class="field">
           <span>Mã đề</span>
-          <input id="examNumber" type="number" min="1" max="20" value="1" />
+          <input id="examNumber" type="number" min="1" max="50" value="1" />
         </label>
       </div>
       <input id="seed" type="hidden" value="DE-1" />
@@ -72,11 +72,11 @@
         <div class="exam-picker-heading">
           <div>
             <h3>Chọn đề luyện</h3>
-            <p id="examPickerSummary">20 đề · 0 đề đã làm</p>
+            <p id="examPickerSummary">50 đề · 0 đề đã làm</p>
           </div>
           <button id="nextNewExamBtn" class="next-new-exam" type="button">Đề mới tiếp theo</button>
         </div>
-        <div id="examPicker" class="exam-picker" aria-label="Chọn đề từ 1 đến 20"></div>
+        <div id="examPicker" class="exam-picker" aria-label="Chọn đề từ 1 đến 50"></div>
         <div class="exam-picker-legend">
           <span><i class="exam-status-dot new"></i>Mới</span>
           <span><i class="exam-status-dot completed"></i>Đã làm</span>
@@ -85,7 +85,7 @@
 
       <label class="field">
         <span>Số đề cần tạo</span>
-        <input id="variantCount" type="number" min="1" max="30" value="1" />
+        <input id="variantCount" type="number" min="1" max="50" value="1" />
       </label>
 
       <label class="field timer-field">
@@ -128,7 +128,7 @@
         <button id="exportJsonBtn">Xuất JSON</button>
       </div>
 
-      <p class="hint">Mỗi môn có 20 mã đề cố định. Chọn ô có nhãn <strong>Mới</strong> để luyện đề chưa làm; sau khi nộp bài, đề sẽ được đánh dấu <strong>Đã làm</strong>.</p>
+      <p class="hint">Mỗi môn có 50 mã đề cố định. Chọn ô có nhãn <strong>Mới</strong> để luyện đề chưa làm; sau khi nộp bài, đề sẽ được đánh dấu <strong>Đã làm</strong>.</p>
     </aside>
 
     <section class="content">

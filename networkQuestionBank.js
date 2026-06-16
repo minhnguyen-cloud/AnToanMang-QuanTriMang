@@ -1840,8 +1840,111 @@ NETWORK_QUESTION_BANK.push(
   }
 );
 
+NETWORK_QUESTION_BANK.push(
+  {
+    id: 'QTM-ESSAY-PT-VLAN-01',
+    type: 'short',
+    lesson: 'QTM 2 - Switching, VLAN, STP',
+    topic: 'Tự luận Packet Tracer VLAN addressing',
+    difficulty: 3,
+    image: {src:'assets/qtm-packet-tracer-vlan-addressing.svg', alt:'Packet Tracer VLAN topology with PC IPs and default gateways', caption:'Topology Packet Tracer: PC, switch, Core L3, IP host, default gateway và bảng địa chỉ.'},
+    config: 'Tình huống: PC-A VLAN10 ping được PC-C VLAN10 nhưng không truy cập được WEB 192.168.30.50. PC-B VLAN20 vẫn ra Internet bình thường.\nYêu cầu giữ nguyên bảng địa chỉ trong hình, chỉ sửa cấu hình mạng nếu cần.',
+    question: 'Tự luận Packet Tracer:\na) Dựa vào hình, lập lại bảng VLAN/subnet/default gateway cho VLAN 10, VLAN 20, VLAN 30/DMZ và chỉ rõ port trunk/access cần có.\nb) Mô tả luồng gói tin từ PC-A 192.168.10.11 tới WEB 192.168.30.50 qua default gateway nào, thiết bị nào định tuyến liên VLAN.\nc) Nêu quy trình troubleshoot theo thứ tự Layer 2 -> Layer 3 -> ACL/firewall, kèm tối thiểu 8 lệnh kiểm tra và kết quả mong đợi.',
+    answer: 'a) VLAN10 Students: 192.168.10.0/24, gateway SVI 192.168.10.1, host PC-A .11 và PC-C .21. VLAN20 Teachers: 192.168.20.0/24, gateway 192.168.20.1, host PC-B .12 và PC-E .22. VLAN30 Server/DMZ: 192.168.30.0/24, gateway 192.168.30.1, WEB 192.168.30.50. Các port nối PC là access đúng VLAN; uplink S1/S2/S3 lên CORE-L3 là trunk allow VLAN 10,20,30,99.\nb) PC-A thấy đích khác subnet nên gửi frame tới MAC của default gateway 192.168.10.1 trên CORE-L3. CORE-L3 định tuyến từ SVI VLAN10 sang SVI VLAN30 rồi ARP tới WEB 192.168.30.50. Nếu đi Internet thì CORE/EDGE dùng default route và NAT; riêng PC-A tới WEB nội bộ không nên NAT.\nc) Kiểm tra: show vlan brief để xác nhận port PC đúng VLAN; show interfaces trunk để xác nhận VLAN 10/30 được allow; show spanning-tree vlan 10,30 để xem port không bị block sai; show mac address-table để thấy MAC học được; show ip interface brief để SVI VLAN10/VLAN30 up/up; show ip route để có connected route hai VLAN; ping 192.168.10.1 rồi ping 192.168.30.50 source VLAN10; show access-lists/log firewall để xem có deny VLAN10 -> DMZ; trên WEB kiểm IP/gateway/firewall và service port 80/443.',
+    explanation: 'Dạng này chấm theo khả năng đọc bảng địa chỉ, xác định default gateway, phân biệt switching và inter-VLAN routing, rồi troubleshoot có thứ tự.'
+  },
+  {
+    id: 'QTM-ESSAY-PT-ROUTING-01',
+    type: 'short',
+    lesson: 'QTM 3 - OSPF & định tuyến',
+    topic: 'Tự luận Packet Tracer routing triangle',
+    difficulty: 3,
+    image: {src:'assets/qtm-routing-triangle-addressing.svg', alt:'Three-router topology with LAN IPs, default gateways and serial links', caption:'Topology Packet Tracer: R1-R2-R3, LAN A/B/C, serial /30 và bảng interface.'},
+    config: 'Yêu cầu: tất cả PC-A..PC-F ping được nhau. Dùng OSPF area 0 hoặc static route, nhưng phải trình bày route hai chiều rõ ràng.\nSự cố: PC-A ping R1 gateway được nhưng không ping được PC-F 192.168.30.12.',
+    question: 'Tự luận routing:\na) Dựa vào hình, ghi bảng IP cho các LAN gateway và ba link serial /30.\nb) Nếu dùng OSPF, viết logic network statement/area cần có trên R1, R2, R3. Nếu dùng static route, nêu các route tối thiểu để LAN 192.168.10.0/24 tới 192.168.30.0/24 và ngược lại.\nc) Troubleshoot sự cố PC-A không ping được PC-F theo từng hop, kèm lệnh kiểm tra trên PC, R1, R2, R3.',
+    answer: 'a) LAN A sau R1: 192.168.10.0/24, gateway R1 G0/1 = 192.168.10.1. LAN B sau R2: 192.168.20.0/24, gateway R2 G0/1 = 192.168.20.1. LAN C sau R3: 192.168.30.0/24, gateway R3 G0/1 = 192.168.30.1. Serial R1-R2: 10.0.12.0/30 với R1 .1, R2 .2. Serial R2-R3: 10.0.23.0/30 với R2 .1, R3 .2. Serial R1-R3: 10.0.13.0/30 với R1 .1, R3 .2.\nb) OSPF: R1 quảng bá 192.168.10.0/24, 10.0.12.0/30, 10.0.13.0/30 area 0; R2 quảng bá 192.168.20.0/24, 10.0.12.0/30, 10.0.23.0/30 area 0; R3 quảng bá 192.168.30.0/24, 10.0.23.0/30, 10.0.13.0/30 area 0. Static route tối thiểu: R1 route 192.168.30.0/24 qua 10.0.13.2 hoặc qua R2; R3 route 192.168.10.0/24 qua 10.0.13.1; R2 cần route transit nếu chọn đường qua R2.\nc) PC-A: kiểm IP/mask/gateway bằng ipconfig, ping 192.168.10.1. R1: show ip interface brief, show ip route 192.168.30.0, show ip ospf neighbor, ping 10.0.13.2/10.0.12.2. R3: show ip route 192.168.10.0, ping 192.168.30.12 source 192.168.30.1, kiểm ACL. Dùng traceroute từ PC-A để biết mất ở R1, R2 hay R3; kiểm encapsulation/clock rate serial nếu link down.',
+    explanation: 'Câu này bắt buộc có route chiều đi và chiều về; chỉ ping gateway được chưa chứng minh liên mạng hoạt động.'
+  },
+  {
+    id: 'QTM-ESSAY-PT-ACL-01',
+    type: 'short',
+    lesson: 'QTM 4 - ACL, NAT, firewall',
+    topic: 'Tự luận ACL theo bảng IP topology',
+    difficulty: 3,
+    image: {src:'assets/qtm-packet-tracer-vlan-addressing.svg', alt:'VLAN topology for ACL and NAT policy', caption:'Dựa trên IP/gateway trong topology để viết policy ACL đúng nguồn, đích, dịch vụ.'},
+    config: 'Chính sách:\n- VLAN10 Students chỉ được truy cập WEB 192.168.30.50 TCP 80/443 và Internet.\n- VLAN20 Teachers được truy cập WEB và SSH quản trị WEB.\n- Không VLAN user nào được truy cập trực tiếp gateway quản trị CORE/EDGE.\n- NAT chỉ dùng cho traffic ra Internet.',
+    question: 'Tự luận ACL/NAT:\na) Viết policy ACL mức logic cho từng luồng: Students -> WEB, Teachers -> WEB/SSH, user VLAN -> management gateway, LAN -> Internet.\nb) ACL nên đặt gần nguồn hay gần đích? Chỉ rõ vị trí áp trên SVI/interface và chiều inbound/outbound.\nc) Nêu cách kiểm chứng bằng lệnh và log khi Students vẫn SSH được vào WEB hoặc bị chặn cả HTTP.',
+    answer: 'a) Permit VLAN10 192.168.10.0/24 tới host 192.168.30.50 TCP 80/443; deny VLAN10 tới 192.168.30.50 TCP 22; permit VLAN10 ra Internet theo policy NAT. Permit VLAN20 tới 192.168.30.50 TCP 80/443/22 nếu giáo viên được quản trị. Deny các VLAN user tới IP quản trị CORE/EDGE, ví dụ 192.168.10.1/20.1/30.1 hoặc management VLAN, trừ subnet quản trị riêng. Cuối ACL cần permit các luồng hợp lệ hoặc hiểu implicit deny.\nb) Extended ACL nên đặt gần nguồn để chặn sớm và đúng luồng. Có thể áp inbound trên SVI VLAN10 cho rule Students, inbound trên SVI VLAN20 cho rule Teachers. NAT overload áp ở Edge/Core cho traffic đi outside; traffic nội bộ tới WEB 192.168.30.50 không NAT.\nc) Dùng show access-lists để xem hit count rule deny/permit; show run interface vlan 10 để xác nhận ACL đúng chiều; test curl/telnet từ PC-A tới 80/443/22; xem log deny trên firewall; kiểm thứ tự rule vì deny rộng đặt trên permit sẽ chặn HTTP; kiểm service WEB có listen bằng ss/netstat và firewall host.',
+    explanation: 'Đáp án mạnh phải có nguồn, đích, port, vị trí đặt ACL, chiều áp ACL và cách kiểm chứng hit count.'
+  },
+  {
+    id: 'QTM-ESSAY-PT-SUBNET-01',
+    type: 'short',
+    lesson: 'QTM 1 - IP, subnet, dịch vụ nền',
+    topic: 'Tự luận subnet và default gateway',
+    difficulty: 3,
+    image: {src:'assets/qtm-routing-triangle-addressing.svg', alt:'Routing topology for subnet and gateway design', caption:'Dựa vào topology để thiết kế subnet, gateway, route và kiểm lỗi IP.'},
+    config: 'Yêu cầu mở rộng: mỗi LAN cần thêm 40 thiết bị trong học kỳ sau. Giữ mô hình 3 router và 3 LAN như hình, có thể đổi subnet LAN nếu cần nhưng serial links vẫn dùng /30.',
+    question: 'Tự luận subnet:\na) Đề xuất subnet cho LAN A/B/C sao cho mỗi LAN chứa được ít nhất 40 host, nêu network, gateway, usable range, broadcast.\nb) Vì sao serial link router-router nên dùng /30 hoặc /31 thay vì /24 trong bài lab này?\nc) Nếu PC-F cấu hình IP 192.168.30.12/24 nhưng gateway nhầm 192.168.20.1, phân tích hiện tượng và cách kiểm tra/sửa.',
+    answer: 'a) Có thể giữ /24 như hình vì mỗi LAN có 254 usable, đủ 40 host: LAN A 192.168.10.0/24 gateway 192.168.10.1 usable .1-.254 broadcast .255; LAN B 192.168.20.0/24 gateway 192.168.20.1; LAN C 192.168.30.0/24 gateway 192.168.30.1. Nếu muốn tiết kiệm hơn, dùng /26 cho mỗi LAN vì có 62 usable: ví dụ 192.168.10.0/26 gateway .1 usable .1-.62 broadcast .63.\nb) Link router-router chỉ cần 2 địa chỉ usable nên /30 tiết kiệm địa chỉ và dễ đọc trong Packet Tracer; /31 dùng được trên point-to-point nếu thiết bị hỗ trợ. Dùng /24 cho serial gây lãng phí và dễ nhầm route.\nc) PC-F vẫn ping được thiết bị cùng LAN 192.168.30.0/24, nhưng không đi khác mạng vì default gateway 192.168.20.1 không nằm cùng subnet nên ARP/gửi gateway thất bại. Kiểm ipconfig, ping 192.168.30.1, arp -a; sửa gateway thành 192.168.30.1 rồi ping R3, PC-A/PC-C và traceroute.',
+    explanation: 'Câu subnet phải tính đủ host, range, broadcast và giải thích vai trò default gateway theo subnet cục bộ.'
+  }
+);
+
+NETWORK_QUESTION_BANK.push(
+  {
+    id: 'QTM-ESSAY-PASTYEAR-FAULT-01',
+    type: 'short',
+    lesson: 'QTM 2 - Switching, VLAN, STP',
+    topic: 'Tu luan dang de cac nam - tim loi topology',
+    difficulty: 3,
+    image: {src:'assets/qtm-packet-tracer-error-lab.svg', alt:'Packet Tracer fault lab with red error markers', caption:'Topology loi co y: E1 trunk thieu VLAN, E2 gateway sai, E3 ACL chan, E4 thieu DHCP relay.'},
+    config: 'Dang mo phong theo de QTM cac nam: cho so do Packet Tracer, bang IP va mot so trieu chung. Sinh vien phai chi ra loi tren topology, giai thich nguyen nhan, neu lenh kiem tra va cach sua.\nTrieu chung: PC-D khong toi WEB; PC-F khong ra khac mang; PC-A khong vao WEB; VLAN20 khong nhan DHCP.',
+    question: 'Tu luan:\na) Dua vao cac marker E1-E4 trong hinh, giai thich tung loi dang nam o thiet bi/interface nao va anh huong toi luong traffic nao.\nb) Voi moi loi, neu it nhat 2 lenh kiem tra Cisco/Linux/PC tuong ung va ket qua mong doi neu loi dung nhu hinh.\nc) Viet huong sua cau hinh theo thu tu an toan, tranh sua nham lam mat cac VLAN/luong khac.',
+    answer: 'a) E1 nam tren trunk S2-CORE: trunk chi allow VLAN10,20 nen VLAN30 cua PC-D khong len CORE, PC-D khong toi WEB/DMZ. E2 nam o PC-F: IP thuoc VLAN20 nhung gateway cau hinh 192.168.30.1 nen PC-F chi co the giao tiep noi bo cung VLAN20, khong di lien mang. E3 nam o ACL tren VLAN10: deny 192.168.10.0/24 toi WEB 192.168.30.50 nen PC-A/PC-C bi chan du routing co the dung. E4 nam tren SVI VLAN20: thieu ip helper-address nen DHCP Discover khong duoc relay toi DHCP server khac VLAN.\nb) E1: show interfaces trunk, show vlan brief, show spanning-tree vlan 30; mong doi VLAN30 khong co trong allowed/active trunk S2. E2: ipconfig tren PC-F, ping 192.168.20.1, arp -a; mong doi gateway sai subnet hoac ping gateway that that bai. E3: show access-lists, show run interface vlan 10, ping/curl tu PC-A toi 192.168.30.50; mong doi hit count tang o rule deny. E4: show run interface vlan 20, show ip dhcp binding, debug/ipconfig renew; mong doi khong co ip helper-address hoac khong co lease.\nc) Sua E1: switchport trunk allowed vlan add 30 tren uplink S2-CORE, khong ghi de mat VLAN cu. Sua E2: dat gateway PC-F thanh 192.168.20.1. Sua E3: doi thu tu ACL, permit TCP 80/443 toi WEB truoc hoac bo deny sai, van giu least privilege. Sua E4: them ip helper-address <DHCP-server-IP> tren interface Vlan20, kiem route/firewall UDP 67/68.',
+    explanation: 'Cau nay luyen dung kieu de cho topology co loi: phai khoanh vung loi, chung minh bang lenh, roi moi sua.'
+  },
+  {
+    id: 'QTM-ESSAY-PASTYEAR-SUBNET-OSPF-01',
+    type: 'short',
+    lesson: 'QTM 3 - OSPF & định tuyến',
+    topic: 'Tu luan dang de cac nam - subnet va dinh tuyen',
+    difficulty: 3,
+    image: {src:'assets/qtm-routing-triangle-addressing.svg', alt:'Three router Packet Tracer topology for subnet and OSPF essay', caption:'Dang de cu thuong yeu cau chia subnet/router interface roi cau hinh route hoac OSPF.'},
+    config: 'Mo phong dang de 2023-2024/2024-2025: doanh nghiep co 3 LAN noi qua 3 router. Can thiet ke dia chi, cau hinh dinh tuyen va kiem tra ping end-to-end.\nYeu cau toi thieu: LAN A 50 host, LAN B 30 host, LAN C 60 host; cac link serial dung /30.',
+    question: 'Tu luan:\na) Chon subnet phu hop cho LAN A/B/C va ba link serial. Ghi network, gateway, usable range, broadcast.\nb) Viet logic cau hinh OSPF area 0 cho R1/R2/R3 dua tren bang interface trong hinh.\nc) Neu PC-A ping gateway duoc nhung khong ping PC-F duoc, hay phan tich 5 nguyen nhan co the va lenh kiem tra tuong ung.',
+    answer: 'a) Co the dung /26 cho LAN A 50 host va LAN C 60 host vi co 62 usable; LAN B 30 host dung /27 hoac giu /26 cho dong nhat. Vi du LAN A 192.168.10.0/26 gateway .1 usable .1-.62 broadcast .63; LAN B 192.168.20.0/27 gateway .1 usable .1-.30 broadcast .31; LAN C 192.168.30.0/26 gateway .1 usable .1-.62 broadcast .63. Serial: 10.0.12.0/30, 10.0.23.0/30, 10.0.13.0/30.\nb) R1 quang ba LAN A va link R1-R2/R1-R3 vao area 0; R2 quang ba LAN B va link R1-R2/R2-R3; R3 quang ba LAN C va link R2-R3/R1-R3. Dung wildcard dung: /26 la 0.0.0.63, /27 la 0.0.0.31, /30 la 0.0.0.3.\nc) Nguyen nhan: gateway PC-F sai -> ipconfig/ping gateway; OSPF neighbor down -> show ip ospf neighbor; thieu network statement LAN C -> show ip route/show ip protocols; serial link down/encapsulation sai -> show ip interface brief/show controllers serial; ACL chan ICMP hoac route chieu ve thieu -> show access-lists/show ip route 192.168.10.0.',
+    explanation: 'Bam dang de cac nam: vua tinh subnet, vua cau hinh dinh tuyen, vua troubleshoot end-to-end.'
+  },
+  {
+    id: 'QTM-ESSAY-PASTYEAR-DHCP-DNS-ACL-01',
+    type: 'short',
+    lesson: 'QTM 1 - IP, subnet, dịch vụ nền',
+    topic: 'Tu luan dang de cac nam - dich vu nen va ACL',
+    difficulty: 3,
+    image: {src:'assets/qtm-packet-tracer-error-lab.svg', alt:'Fault topology for DHCP DNS ACL essay', caption:'Dua vao loi E3/E4 de phan tich DHCP relay, DNS va ACL/firewall.'},
+    config: 'Tinh huong tong hop: DHCP server nam o VLAN30/Server LAN. VLAN20 khong nhan IP DHCP. VLAN10 co IP tinh, ping gateway duoc nhung truy cap web.company.local that bai. DNS noi bo tro web.company.local ve 192.168.30.50.',
+    question: 'Tu luan:\na) Phan tich duong di DHCP Discover tu PC VLAN20 toi DHCP server khac VLAN. Can cau hinh gi tren gateway VLAN20?\nb) Phan tich vi sao VLAN10 ping gateway duoc nhung truy cap web.company.local that bai: tach rieng loi DNS, loi routing va loi ACL.\nc) Neu checklist kiem tra theo thu tu, co lenh o PC, switch/core va server.',
+    answer: 'a) DHCP Discover la broadcast nen khong tu di qua router/SVI. Gateway VLAN20 phai co ip helper-address tro toi DHCP server; DHCP server can scope dung 192.168.20.0/24, default-router 192.168.20.1, DNS option, route nguoc va firewall cho UDP 67/68.\nb) Neu DNS loi: nslookup web.company.local khong tra 192.168.30.50 hoac client tro sai DNS. Neu routing loi: ping 192.168.30.50/traceroute mat o Core/Edge, show ip route thieu connected/static/OSPF. Neu ACL loi: ping/HTTP bi chan nhung route dung, show access-lists co hit deny tu 192.168.10.0/24 toi 192.168.30.50.\nc) PC: ipconfig /all, nslookup, ping gateway, ping IP web, tracert. Core: show ip interface brief, show run interface vlan 20, show ip dhcp relay/helper, show access-lists, show ip route. Server: kiem IP/gateway/DNS record, service web listen 80/443, firewall host va log web.',
+    explanation: 'Cau nay ep tach trieu chung: DNS chi doi ten thanh IP, routing quyet dinh duong di, ACL/firewall quyet dinh cho qua hay chan.'
+  },
+  {
+    id: 'QTM-ESSAY-PASTYEAR-VPN-SERVER-01',
+    type: 'short',
+    lesson: 'QTM 5 - Linux server, VPN, giám sát',
+    topic: 'Tu luan dang de cac nam - VPN va server',
+    difficulty: 3,
+    image: {src:'assets/qtm-routing-triangle-addressing.svg', alt:'Routing topology for VPN and server troubleshooting essay', caption:'Dang de do an/quan tri: client VPN, route chieu ve, firewall va giam sat server.'},
+    config: 'Mo phong dang de cuoi ky/do an: sinh vien remote qua VPN vao LAN C de truy cap WEB 192.168.30.50 va file server. VPN client nhan IP 10.8.0.10/24 nhung chi ping duoc VPN server, khong toi WEB.',
+    question: 'Tu luan:\na) Ve/dien giai duong di goi tin tu VPN client 10.8.0.10 toi WEB 192.168.30.50 trong topology router/server.\nb) Neu cac cau hinh bat buoc tren VPN server/router/firewall de traffic VPN vao LAN hoat dong.\nc) De xuat giam sat Zabbix hoac log can co de phat hien VPN/server loi.',
+    answer: 'a) Client gui goi qua tunnel tun0 toi VPN server; VPN server forward sang LAN/router co route toi 192.168.30.0/24; WEB tra loi ve 10.8.0.0/24 qua default gateway hoac route nguoc/NAT. Neu thieu route chieu ve, request co the toi WEB nhung reply khong quay lai client.\nb) Can push route 192.168.30.0/24 cho client, bat IP forwarding, firewall FORWARD cho tun0 -> LAN dung port, route nguoc tu LAN toi 10.8.0.0/24 hoac NAT/MASQUERADE phu hop, DNS noi bo neu dung ten, khong mo file service public ra Internet.\nc) Zabbix item: trang thai openvpn process, so client connected, ping VPN gateway, ping WEB tu VPN server, port 80/443/SMB/NFS/FTP, disk/CPU/RAM, failed login, certificate expiry, log auth/openvpn. Trigger co duration de tranh canh bao gia, action gui email/Telegram.',
+    explanation: 'Dang nay giong de quan tri thuc hanh: phai co route di, route ve, firewall va giam sat van hanh.'
+  }
+);
+
 const NETWORK_ESSAY_REWRITES = {
   'QTM-OSPF-04': {
+    image: {src:'assets/qtm-packet-tracer-vlan-addressing.svg', alt:'Packet Tracer campus VLAN topology', caption:'Topology có IP host/default gateway và bảng địa chỉ để phân tích OSPF/VLAN.'},
     config: 'Campus có Core L3, Access switch, DMZ Web, Server LAN và Edge router ra Internet.\nYêu cầu: các VLAN nội bộ liên lạc qua Core, Edge quảng bá default route, DMZ chỉ mở dịch vụ cần thiết.',
     question: 'Tự luận:\na) Dựa vào topology, đề xuất chia VLAN/subnet và vai trò của Core L3, Access switch, Edge router.\nb) Thiết kế OSPF area/default route giữa Core và Edge. Nêu các network cần quảng bá.\nc) Nêu 4 lỗi cấu hình có thể làm VLAN nội bộ không truy cập được DMZ và lệnh kiểm tra tương ứng.',
     answer: 'a) Access switch mang VLAN user/server qua trunk; Core L3 có SVI/gateway và định tuyến liên VLAN; Edge giữ default route, NAT/firewall ra Internet.\nb) Core-Edge nên ở area 0; quảng bá các subnet SVI nội bộ, DMZ/server LAN và link Core-Edge; Edge có default route ra ISP và default-information originate nếu cần.\nc) Lỗi hay gặp: trunk thiếu VLAN -> show interfaces trunk; SVI down/sai gateway -> show ip interface brief; OSPF area/passive sai -> show ip ospf neighbor/show ip protocols; ACL/NAT sai chiều -> show access-lists/show ip nat translations.'
@@ -1863,6 +1966,7 @@ const NETWORK_ESSAY_REWRITES = {
     answer: 'a) Dùng Ansible/SSH/API lấy running-config, cấu hình service, firewall, compose/k8s yaml theo lịch.\nb) Lưu private Git/storage, mã hóa secret, commit message/diff rõ, phân quyền truy cập, cảnh báo khi diff bất thường.\nc) Restore thử trong lab, kiểm checksum/version, tài liệu runbook, định kỳ diễn tập rollback.'
   },
   'QTM-ESSAY-FINAL-01': {
+    image: {src:'assets/qtm-packet-tracer-vlan-addressing.svg', alt:'Packet Tracer VLAN topology for final essay', caption:'Topology có bảng VLAN/subnet/default gateway rõ như Packet Tracer.'},
     config: 'Campus gồm VLAN 10 Sinh viên, VLAN 20 Giảng viên, VLAN 30 Server, DMZ Web và Edge NAT ra Internet.\nSự cố: VLAN 20 không truy cập được Web DMZ nhưng vẫn ra Internet được.',
     question: 'Tự luận cuối kỳ:\na) Dựa vào sơ đồ, lập bảng VLAN/subnet/gateway cho 3 phòng ban và DMZ.\nb) Thiết kế routing liên VLAN, OSPF Core-Edge và NAT ra Internet.\nc) Phân tích sự cố VLAN 20 không truy cập được DMZ Web: nêu ít nhất 6 lệnh kiểm tra và kết luận mong đợi.',
     answer: 'a) Cần bảng VLAN ID, subnet, gateway SVI, vị trí server/DMZ rõ ràng.\nb) Core định tuyến liên VLAN, link Core-Edge chạy OSPF area 0, Edge có default route và NAT overload cho LAN ra Internet, static NAT/ACL cho DMZ nếu public.\nc) Kiểm show vlan brief, show interfaces trunk, show ip interface brief, show ip route, show ip ospf neighbor, show access-lists, show ip nat translations, ping/traceroute, log firewall/web.'
@@ -1872,7 +1976,7 @@ const NETWORK_ESSAY_REWRITES = {
     answer: 'a) Service selector app=api không khớp Pod label app=web nên endpoints rỗng.\nb) DNS -> Load Balancer/WAF -> Ingress -> Service -> Endpoint/Pod -> container app. Service cần selector đúng, port/targetPort đúng, Pod Ready.\nc) TLS, RBAC, không commit Secret, image scanning, readiness/liveness, limits, NetworkPolicy, private database, security group, logging/monitoring, backup.'
   },
   'QTM-ESSAY-FINAL-03': {
-    image: {src:'assets/qtm-end-to-end-routers.svg', alt:'VPN end-to-end topology', caption:'Topology VPN end-to-end giữa chi nhánh và LAN server.'},
+    image: {src:'assets/qtm-routing-triangle-addressing.svg', alt:'Packet Tracer routing topology', caption:'Topology router/PC có IP và default gateway rõ để phân tích VPN/routing.'},
     question: 'Tự luận cuối kỳ:\na) Client VPN kết nối thành công nhưng không vào được server 192.168.10.20. Phân tích đường đi gói tin từ client VPN tới server.\nb) Nêu route/firewall/NAT cần kiểm tra trên VPN server, router LAN và server đích.\nc) Thiết kế giám sát Zabbix cho VPN và file server: item, trigger, cảnh báo.',
     answer: 'a) Client nhận IP tunnel, route tới LAN được push, gói đi qua tun0 tới VPN server rồi forward vào LAN và cần route ngược về subnet VPN.\nb) Kiểm route push, IP forwarding, FORWARD rule tun0-LAN, NAT hoặc route ngược, firewall server, DNS nội bộ nếu dùng tên.\nc) Giám sát process OpenVPN, số client, ping tunnel, port SMB/NFS/FTP, disk, CPU/RAM, failed login, backup status, trigger có duration và action email/Telegram.'
   }
