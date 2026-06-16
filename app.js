@@ -919,8 +919,8 @@
     }
 
     const essayPool = prioritizeQtmCatalogSlot(filteredPool.filter(q => q.type === 'short'), catalogExamNo, rng).sort((a,b) => {
-      const aFinal = /ESSAY-(FINAL|END2END)/.test(String(a.id || '')) ? 0 : 1;
-      const bFinal = /ESSAY-(FINAL|END2END)/.test(String(b.id || '')) ? 0 : 1;
+      const aFinal = /ESSAY-(FINAL|END2END|OUTPUT)/.test(String(a.id || '')) ? 0 : 1;
+      const bFinal = /ESSAY-(FINAL|END2END|OUTPUT)/.test(String(b.id || '')) ? 0 : 1;
       const aMedia = a.image ? 0 : 1;
       const bMedia = b.image ? 0 : 1;
       return aFinal - bFinal || essaySlideScore(a) - essaySlideScore(b) || aMedia - bMedia;
@@ -934,8 +934,8 @@
     }
     if(essays.length < essayTarget){
       const fallbackEssays = prioritizeQtmCatalogSlot(pool.filter(q => q.type === 'short'), catalogExamNo, rng).sort((a,b) => {
-        const aFinal = /ESSAY-(FINAL|END2END)/.test(String(a.id || '')) ? 0 : 1;
-        const bFinal = /ESSAY-(FINAL|END2END)/.test(String(b.id || '')) ? 0 : 1;
+        const aFinal = /ESSAY-(FINAL|END2END|OUTPUT)/.test(String(a.id || '')) ? 0 : 1;
+        const bFinal = /ESSAY-(FINAL|END2END|OUTPUT)/.test(String(b.id || '')) ? 0 : 1;
         const aMedia = a.image ? 0 : 1;
         const bMedia = b.image ? 0 : 1;
         return aFinal - bFinal || essaySlideScore(a) - essaySlideScore(b) || aMedia - bMedia;
@@ -994,7 +994,7 @@
   function essaySlideScore(q){
     const id = String(q.id || '');
     const lesson = String(q.lesson || '');
-    if(id.includes('END2END')) return 0;
+    if(id.includes('OUTPUT') || id.includes('END2END')) return 0;
     if(/QTM [1-5]\b/.test(lesson)) return 1;
     if(/cloud|kubernetes|docker/i.test(`${lesson} ${q.topic || ''}`)) return 3;
     return 2;

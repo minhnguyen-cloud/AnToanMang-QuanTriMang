@@ -1821,7 +1821,7 @@ NETWORK_QUESTION_BANK.push(
     topic: 'Tự luận end-to-end routing',
     difficulty: 3,
     image: {src:'assets/qtm-end-to-end-routers.svg', alt:'End-to-end router topology', caption:'Topology end-to-end: chi nhánh A, Core/DC, chi nhánh B, server LAN, Internet và VPN.'},
-    config: 'R-A <-> R-Core: 10.0.12.0/30\nR-Core <-> R-B: 10.0.23.0/30\nLAN A: 192.168.10.0/24\nLAN B: 192.168.20.0/24\nServer LAN: 10.10.30.0/24\nYêu cầu: hai LAN truy cập server, đi Internet qua Core, VPN A-B bảo mật.',
+    config: 'R-A <-> R-Core: 10.0.12.0/30\nR-Core <-> R-B: 10.0.23.0/30\nLAN A: 192.168.10.0/24\nLAN B: 192.168.20.0/24\nServer LAN: 10.10.30.0/24\nYêu cầu: hai LAN truy cập server, đi Internet qua Core, VPN A-B bảo mật.\n\nOutput R-A#show ip route ospf\nO 192.168.20.0/24 [110/2] via 10.0.12.2, 00:00:12, Gig0/0\nO 10.10.30.0/24 [110/2] via 10.0.12.2, 00:00:12, Gig0/0\n\nOutput R-Core#show ip route 192.168.10.0\nRouting entry for 192.168.10.0/24\n  Known via ospf 1, metric 2\n  * 10.0.12.1, from 1.1.1.1, Gig0/0',
     question: 'Tự luận cuối kỳ:\na) Dựa vào topology, lập bảng IP cho các router/interface chính và đề xuất default gateway cho LAN A, LAN B, Server LAN.\nb) Thiết kế định tuyến end-to-end bằng OSPF area 0 hoặc static route. Nêu route/default route cần có để LAN A truy cập LAN B và Server LAN.\nc) Đề xuất NAT ra Internet tại Core và cơ chế VPN giữa hai chi nhánh. Nêu tối thiểu 6 lệnh kiểm tra khi LAN A không truy cập được server 10.10.30.20.',
     answer: 'a) Bảng IP cần khớp subnet trong đề: R-A LAN 192.168.10.1/24, R-A WAN 10.0.12.1/30; R-Core phía A 10.0.12.2/30, phía B 10.0.23.1/30, server gateway 10.10.30.1/24; R-B WAN 10.0.23.2/30, LAN 192.168.20.1/24.\nb) Nếu OSPF: quảng bá 192.168.10.0/24, 10.0.12.0/30, 10.0.23.0/30, 192.168.20.0/24, 10.10.30.0/24 trong area 0; Core có default route ra Internet và originate nếu cần. Nếu static: mỗi router phải có route tới các LAN còn lại và route ngược.\nc) NAT overload chỉ áp dụng traffic ra Internet, không NAT traffic VPN/nội bộ; VPN có thể IPsec/OpenVPN site-to-site giữa R-A và R-B. Lệnh kiểm tra: show ip interface brief, show ip route, show ip ospf neighbor, show access-lists, show ip nat translations, ping, traceroute, tcpdump/log firewall.',
     explanation: 'Câu này chấm end-to-end: addressing, routing, NAT/VPN và troubleshooting theo lớp.'
@@ -1860,7 +1860,7 @@ NETWORK_QUESTION_BANK.push(
     topic: 'Tự luận Packet Tracer routing triangle',
     difficulty: 3,
     image: {src:'assets/qtm-routing-triangle-addressing.svg', alt:'Three-router topology with LAN IPs, default gateways and serial links', caption:'Topology Packet Tracer: R1-R2-R3, LAN A/B/C, serial /30 và bảng interface.'},
-    config: 'Yêu cầu: tất cả PC-A..PC-F ping được nhau. Dùng OSPF area 0 hoặc static route, nhưng phải trình bày route hai chiều rõ ràng.\nSự cố: PC-A ping R1 gateway được nhưng không ping được PC-F 192.168.30.12.',
+    config: 'Yêu cầu: tất cả PC-A..PC-F ping được nhau. Dùng OSPF area 0 hoặc static route, nhưng phải trình bày route hai chiều rõ ràng.\nSự cố: PC-A ping R1 gateway được nhưng không ping được PC-F 192.168.30.12.\n\nOutput R1#show ip route\nC 192.168.10.0/24 is directly connected, Gig0/1\nC 10.0.12.0/30 is directly connected, Serial0/0/0\nO 192.168.20.0/24 [110/2] via 10.0.12.2, 00:00:18, Serial0/0/0\n\nOutput R3#show ip route 192.168.10.0\n% Network not in table',
     question: 'Tự luận routing:\na) Dựa vào hình, ghi bảng IP cho các LAN gateway và ba link serial /30.\nb) Nếu dùng OSPF, viết logic network statement/area cần có trên R1, R2, R3. Nếu dùng static route, nêu các route tối thiểu để LAN 192.168.10.0/24 tới 192.168.30.0/24 và ngược lại.\nc) Troubleshoot sự cố PC-A không ping được PC-F theo từng hop, kèm lệnh kiểm tra trên PC, R1, R2, R3.',
     answer: 'a) LAN A sau R1: 192.168.10.0/24, gateway R1 G0/1 = 192.168.10.1. LAN B sau R2: 192.168.20.0/24, gateway R2 G0/1 = 192.168.20.1. LAN C sau R3: 192.168.30.0/24, gateway R3 G0/1 = 192.168.30.1. Serial R1-R2: 10.0.12.0/30 với R1 .1, R2 .2. Serial R2-R3: 10.0.23.0/30 với R2 .1, R3 .2. Serial R1-R3: 10.0.13.0/30 với R1 .1, R3 .2.\nb) OSPF: R1 quảng bá 192.168.10.0/24, 10.0.12.0/30, 10.0.13.0/30 area 0; R2 quảng bá 192.168.20.0/24, 10.0.12.0/30, 10.0.23.0/30 area 0; R3 quảng bá 192.168.30.0/24, 10.0.23.0/30, 10.0.13.0/30 area 0. Static route tối thiểu: R1 route 192.168.30.0/24 qua 10.0.13.2 hoặc qua R2; R3 route 192.168.10.0/24 qua 10.0.13.1; R2 cần route transit nếu chọn đường qua R2.\nc) PC-A: kiểm IP/mask/gateway bằng ipconfig, ping 192.168.10.1. R1: show ip interface brief, show ip route 192.168.30.0, show ip ospf neighbor, ping 10.0.13.2/10.0.12.2. R3: show ip route 192.168.10.0, ping 192.168.30.12 source 192.168.30.1, kiểm ACL. Dùng traceroute từ PC-A để biết mất ở R1, R2 hay R3; kiểm encapsulation/clock rate serial nếu link down.',
     explanation: 'Câu này bắt buộc có route chiều đi và chiều về; chỉ ping gateway được chưa chứng minh liên mạng hoạt động.'
@@ -1939,6 +1939,45 @@ NETWORK_QUESTION_BANK.push(
     question: 'Tu luan:\na) Ve/dien giai duong di goi tin tu VPN client 10.8.0.10 toi WEB 192.168.30.50 trong topology router/server.\nb) Neu cac cau hinh bat buoc tren VPN server/router/firewall de traffic VPN vao LAN hoat dong.\nc) De xuat giam sat Zabbix hoac log can co de phat hien VPN/server loi.',
     answer: 'a) Client gui goi qua tunnel tun0 toi VPN server; VPN server forward sang LAN/router co route toi 192.168.30.0/24; WEB tra loi ve 10.8.0.0/24 qua default gateway hoac route nguoc/NAT. Neu thieu route chieu ve, request co the toi WEB nhung reply khong quay lai client.\nb) Can push route 192.168.30.0/24 cho client, bat IP forwarding, firewall FORWARD cho tun0 -> LAN dung port, route nguoc tu LAN toi 10.8.0.0/24 hoac NAT/MASQUERADE phu hop, DNS noi bo neu dung ten, khong mo file service public ra Internet.\nc) Zabbix item: trang thai openvpn process, so client connected, ping VPN gateway, ping WEB tu VPN server, port 80/443/SMB/NFS/FTP, disk/CPU/RAM, failed login, certificate expiry, log auth/openvpn. Trigger co duration de tranh canh bao gia, action gui email/Telegram.',
     explanation: 'Dang nay giong de quan tri thuc hanh: phai co route di, route ve, firewall va giam sat van hanh.'
+  }
+);
+
+NETWORK_QUESTION_BANK.push(
+  {
+    id: 'QTM-ESSAY-OUTPUT-ROUTE-01',
+    type: 'short',
+    lesson: 'QTM 3 - OSPF & định tuyến',
+    topic: 'Tự luận đọc output show ip route',
+    difficulty: 3,
+    image: {src:'assets/qtm-routing-triangle-addressing.svg', alt:'Routing triangle topology for route output question', caption:'Dựa vào topology R1-R2-R3 và output bảng định tuyến để tìm lỗi route chiều về.'},
+    config: 'Tình huống: PC-A 192.168.10.11 ping được gateway R1 nhưng không ping được PC-F 192.168.30.12.\n\nR1#show ip route\nC 192.168.10.0/24 is directly connected, Gig0/1\nC 10.0.12.0/30 is directly connected, Serial0/0/0\nO 192.168.20.0/24 [110/2] via 10.0.12.2, 00:00:12, Serial0/0/0\n\nR3#show ip route\nC 192.168.30.0/24 is directly connected, Gig0/1\nC 10.0.23.0/30 is directly connected, Serial0/0/1\nO 192.168.20.0/24 [110/2] via 10.0.23.1, 00:00:10, Serial0/0/1\n\nR2#show ip ospf neighbor\nNeighbor ID     Pri   State      Dead Time   Address       Interface\n1.1.1.1           0   FULL/-     00:00:33    10.0.12.1    Serial0/0/0\n3.3.3.3           0   FULL/-     00:00:34    10.0.23.2    Serial0/0/1',
+    question: 'Tự luận:\na) Từ output, chỉ ra route nào đang thiếu trên R1 hoặc R3 và vì sao PC-A không ping được PC-F.\nb) Nêu 4 lệnh kiểm tra tiếp theo để xác định lỗi nằm ở network statement, interface down, passive-interface hay ACL.\nc) Viết hướng sửa OSPF hoặc static route tối thiểu để hai LAN 192.168.10.0/24 và 192.168.30.0/24 ping được nhau.',
+    answer: 'a) R1 chưa có route tới 192.168.30.0/24 và R3 chưa có route tới 192.168.10.0/24. OSPF neighbor R2 với R1/R3 vẫn FULL, nên lỗi nhiều khả năng là thiếu quảng bá LAN A/LAN C hoặc đang passive/sai network statement, không phải do link serial R1-R2/R2-R3 down.\nb) Kiểm: show ip protocols để xem network statement/passive-interface; show run | section router ospf để xem wildcard/area; show ip interface brief để chắc LAN G0/1 up/up; show ip ospf database/show ip route ospf để xem prefix đã vào LSDB chưa; show access-lists nếu route đúng nhưng ping vẫn fail.\nc) Nếu OSPF: trên R1 quảng bá 192.168.10.0 0.0.0.255 area 0; trên R3 quảng bá 192.168.30.0 0.0.0.255 area 0, giữ serial area 0. Nếu static: R1 route 192.168.30.0/24 qua R2 hoặc R3; R3 route 192.168.10.0/24 qua R2 hoặc R1; R2 phải có route transit tương ứng.',
+    explanation: 'Dạng này giống đề cho output: đọc bảng route trước, đừng đoán mò từ topology.'
+  },
+  {
+    id: 'QTM-ESSAY-OUTPUT-TRUNK-ACL-01',
+    type: 'short',
+    lesson: 'QTM 2 - Switching, VLAN, STP',
+    topic: 'Tự luận đọc output trunk và ACL',
+    difficulty: 3,
+    image: {src:'assets/qtm-packet-tracer-error-lab.svg', alt:'Packet Tracer topology with visible error markers', caption:'Kết hợp marker lỗi E1/E3 với output trunk và ACL để xác định nguyên nhân.'},
+    config: 'Tình huống: PC-D VLAN30 không truy cập được WEB 192.168.30.50; PC-A VLAN10 cũng bị chặn khi mở HTTP tới WEB.\n\nS2#show interfaces trunk\nPort        Mode         Encapsulation  Status        Native vlan\nGi0/1       on           802.1q         trunking      99\n\nPort        Vlans allowed on trunk\nGi0/1       10,20\n\nCORE#show access-lists VLAN10-IN\nExtended IP access list VLAN10-IN\n10 deny tcp 192.168.10.0 0.0.0.255 host 192.168.30.50 eq 80 (24 matches)\n20 permit ip any any (156 matches)',
+    question: 'Tự luận:\na) Dựa vào output, khoanh vùng hai lỗi cấu hình khác nhau và nối chúng với marker trong hình.\nb) Giải thích vì sao PC-D và PC-A cùng không vào WEB nhưng nguyên nhân không giống nhau.\nc) Viết lệnh sửa an toàn, chú ý không làm mất VLAN đang chạy và không mở ACL quá rộng.',
+    answer: 'a) Lỗi thứ nhất là trunk S2 Gi0/1 chỉ allow VLAN 10,20 nên VLAN30 không đi qua trunk, khớp marker E1. Lỗi thứ hai là ACL VLAN10-IN deny TCP 80 từ 192.168.10.0/24 tới WEB 192.168.30.50, khớp marker E3.\nb) PC-D thuộc VLAN30 nên bị kẹt ở Layer 2/trunk: VLAN không được carry qua uplink. PC-A thuộc VLAN10, đường đi Layer 2/3 có thể đúng nhưng bị ACL chặn HTTP ở Layer 3/4. Vì vậy sửa trunk không tự sửa ACL và ngược lại.\nc) Trunk: switchport trunk allowed vlan add 30 để thêm VLAN30 mà không ghi đè 10,20. ACL: đặt permit tcp 192.168.10.0 0.0.0.255 host 192.168.30.50 eq 80 trước deny nếu policy cho phép HTTP, hoặc đổi deny chỉ chặn port không được phép. Sau đó kiểm show interfaces trunk, show access-lists hit count, ping/curl HTTP từ PC-A và PC-D.',
+    explanation: 'Câu này bắt sinh viên tách lỗi theo tầng: VLAN/trunk khác với ACL dù triệu chứng đều là không vào WEB.'
+  },
+  {
+    id: 'QTM-ESSAY-OUTPUT-VPN-01',
+    type: 'short',
+    lesson: 'QTM 5 - Linux server, VPN, giám sát',
+    topic: 'Tự luận đọc output VPN/firewall',
+    difficulty: 3,
+    image: {src:'assets/qtm-end-to-end-routers.svg', alt:'Clean end-to-end VPN topology', caption:'Topology end-to-end đã tách nhãn khỏi dây, dùng cho bài VPN và route chiều về.'},
+    config: 'Tình huống: VPN client nhận IP 10.8.0.10, ping được VPN server 10.8.0.1 nhưng không truy cập được file server 192.168.30.20.\n\nVPN-SRV$ ip route\n10.8.0.0/24 dev tun0 proto kernel scope link src 10.8.0.1\n192.168.30.0/24 via 10.10.30.1 dev eth1\n\nVPN-SRV$ sysctl net.ipv4.ip_forward\nnet.ipv4.ip_forward = 0\n\nVPN-SRV$ iptables -S FORWARD\n-P FORWARD DROP\n-A FORWARD -i tun0 -o eth1 -j ACCEPT',
+    question: 'Tự luận:\na) Dựa vào output, chỉ ra ít nhất 2 nguyên nhân khiến VPN client chưa vào được LAN server.\nb) Phân tích route đi và route về của gói tin từ 10.8.0.10 tới 192.168.30.20.\nc) Nêu cấu hình sửa và checklist giám sát để phát hiện lỗi tương tự.',
+    answer: 'a) IP forwarding đang tắt nên Linux không forward gói giữa tun0 và eth1. Policy FORWARD mặc định DROP và mới có chiều tun0 -> eth1, thiếu chiều reply eth1 -> tun0 hoặc rule stateful RELATED,ESTABLISHED. Ngoài ra LAN gateway/file server phải có route về 10.8.0.0/24 hoặc VPN server phải NAT hợp lý.\nb) Gói đi: client -> tun0 VPN-SRV -> eth1 -> gateway LAN -> file server. Gói về: file server -> default gateway -> route tới 10.8.0.0/24 qua VPN-SRV hoặc về địa chỉ đã NAT. Thiếu route về sẽ làm request tới nơi nhưng reply mất.\nc) Bật net.ipv4.ip_forward=1, thêm firewall FORWARD hai chiều hoặc stateful, push route 192.168.30.0/24 cho client, thêm route ngược 10.8.0.0/24 trên gateway LAN hoặc NAT/MASQUERADE có kiểm soát. Giám sát process OpenVPN, số client, ping từ VPN-SRV tới file server, port SMB/NFS/FTP, firewall drop log và certificate expiry.',
+    explanation: 'Đề VPN hay bẫy ở chỗ connected chưa đủ; phải có forward, firewall và route chiều về.'
   }
 );
 
