@@ -1,72 +1,88 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1160" height="700" viewBox="0 0 1160 700" role="img" aria-labelledby="title desc">
-  <title id="title">End to end branch routing topology</title>
-  <desc id="desc">Clean Packet Tracer style branch A, core data center, branch B, server LAN, Internet and VPN topology with labels placed away from links.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 820" role="img" aria-labelledby="title desc">
+  <title id="title">End to end Packet Tracer style topology</title>
+  <desc id="desc">Packet Tracer style topology with branch A, core router, server LAN, branch B, Internet and VPN. IP labels are separated from cables.</desc>
   <defs>
     <style>
-      .bg{fill:#f8fafc}.zone{fill:#fff;stroke:#cbd5e1;stroke-width:2}.router{fill:#dbeafe;stroke:#2563eb;stroke-width:2.4}.switch{fill:#dcfce7;stroke:#16a34a;stroke-width:2.4}.server{fill:#fee2e2;stroke:#dc2626;stroke-width:2.4}.cloud{fill:#ede9fe;stroke:#7c3aed;stroke-width:2.4}.note{fill:#fff7ed;stroke:#f97316;stroke-width:2}.label{fill:#fff;stroke:#cbd5e1;stroke-width:1.6}.txt{font-family:Segoe UI,Arial,sans-serif;fill:#0f172a;font-size:18px;font-weight:750}.small{font-family:Segoe UI,Arial,sans-serif;font-size:13px;font-weight:650;fill:#334155}.tiny{font-family:Segoe UI,Arial,sans-serif;font-size:12px;font-weight:650;fill:#475569}.link{stroke:#334155;stroke-width:4;stroke-linecap:round;fill:none}.wan{stroke:#0f172a;stroke-width:4;stroke-linecap:round;fill:none}.vpn{stroke:#7c3aed;stroke-width:4;stroke-dasharray:10 8;stroke-linecap:round;fill:none}.tableHead{fill:#dcfce7;stroke:#86efac}.tableRow{fill:#fff;stroke:#cbd5e1}
+      .bg{fill:#f8fafc}.panel{fill:#fff;stroke:#cbd5e1;stroke-width:2}.pc{fill:#ccfbf1;stroke:#0f766e;stroke-width:3}.sw{fill:#14b8a6;stroke:#0f766e;stroke-width:3}.r{fill:#0f9f9a;stroke:#0f766e;stroke-width:3}.srv{fill:#fee2e2;stroke:#dc2626;stroke-width:3}.cloud{fill:#ede9fe;stroke:#7c3aed;stroke-width:3}.line{stroke:#111827;stroke-width:5;stroke-linecap:round}.wan{stroke:#dc2626;stroke-width:7;stroke-linecap:round;fill:none}.vpn{stroke:#7c3aed;stroke-width:4;stroke-dasharray:10 8;stroke-linecap:round;fill:none}.txt{font-family:Segoe UI,Arial,sans-serif;fill:#0f172a;font-weight:750;font-size:18px}.small{font-family:Segoe UI,Arial,sans-serif;font-size:14px;font-weight:650;fill:#334155}.tiny{font-family:Segoe UI,Arial,sans-serif;font-size:12px;font-weight:650;fill:#475569}.ip{font-family:Consolas,monospace;font-size:13px;font-weight:750;fill:#0f172a}.white{fill:#fff}.hdr{fill:#dcfce7;stroke:#86efac}.row{fill:#fff;stroke:#cbd5e1}.tag{fill:#fff7ed;stroke:#f97316}.callout{fill:#fff;stroke:#cbd5e1;stroke-width:1.5}
     </style>
   </defs>
-  <rect class="bg" width="1160" height="700"/>
+  <rect class="bg" width="1240" height="820"/>
+  <rect class="panel" x="24" y="24" width="1192" height="772" rx="10"/>
 
-  <rect class="zone" x="36" y="74" width="300" height="390" rx="10"/>
-  <rect class="zone" x="430" y="74" width="300" height="390" rx="10"/>
-  <rect class="zone" x="824" y="74" width="300" height="390" rx="10"/>
-  <text class="txt" x="62" y="108">Branch A</text>
-  <text class="txt" x="456" y="108">Core / DC</text>
-  <text class="txt" x="850" y="108">Branch B</text>
+  <text class="txt" x="52" y="62">End-to-end branch topology - Packet Tracer style</text>
+  <text class="small" x="52" y="86">Visible LAN gateways, WAN /30 links, server LAN and VPN tunnel. Labels do not touch cables.</text>
 
-  <rect class="switch" x="100" y="150" width="160" height="56" rx="8"/>
-  <text class="txt" x="180" y="174" text-anchor="middle">SW-A</text>
-  <text class="small" x="180" y="195" text-anchor="middle">LAN A 192.168.10.0/24</text>
-  <rect class="router" x="98" y="310" width="164" height="66" rx="8"/>
-  <text class="txt" x="180" y="337" text-anchor="middle">R-A</text>
-  <text class="small" x="180" y="360" text-anchor="middle">G0/1 192.168.10.1</text>
-  <line class="link" x1="180" y1="206" x2="180" y2="310"/>
+  <rect class="pc" x="62" y="210" width="96" height="58" rx="7"/>
+  <text class="txt" x="110" y="245" text-anchor="middle">PC-A</text>
+  <text class="ip" x="52" y="294">192.168.10.11/24</text>
+  <text class="ip" x="52" y="312">GW 192.168.10.1</text>
+  <rect class="pc" x="214" y="210" width="96" height="58" rx="7"/>
+  <text class="txt" x="262" y="245" text-anchor="middle">PC-B</text>
+  <text class="ip" x="204" y="294">192.168.10.12/24</text>
+  <text class="ip" x="204" y="312">GW 192.168.10.1</text>
+  <rect class="sw" x="132" y="376" width="132" height="54" rx="7"/>
+  <text class="txt white" x="198" y="411" text-anchor="middle">SW-A</text>
+  <ellipse class="r" cx="370" cy="403" rx="64" ry="44"/>
+  <text class="txt white" x="370" y="410" text-anchor="middle">R-A</text>
+  <line class="line" x1="110" y1="268" x2="164" y2="376"/>
+  <line class="line" x1="262" y1="268" x2="232" y2="376"/>
+  <line class="line" x1="264" y1="403" x2="306" y2="403"/>
+  <rect class="tag" x="70" y="462" width="300" height="48" rx="8"/>
+  <text class="tiny" x="88" y="484">R-A G0/1: 192.168.10.1/24</text>
+  <text class="tiny" x="88" y="502">LAN A default gateway</text>
 
-  <rect class="router" x="496" y="148" width="168" height="66" rx="8"/>
-  <text class="txt" x="580" y="175" text-anchor="middle">R-Core</text>
-  <text class="small" x="580" y="198" text-anchor="middle">OSPF area 0</text>
-  <rect class="server" x="496" y="312" width="168" height="66" rx="8"/>
-  <text class="txt" x="580" y="339" text-anchor="middle">Server LAN</text>
-  <text class="small" x="580" y="362" text-anchor="middle">10.10.30.0/24</text>
-  <line class="link" x1="580" y1="214" x2="580" y2="312"/>
+  <ellipse class="r" cx="620" cy="236" rx="70" ry="46"/>
+  <text class="txt white" x="620" y="238" text-anchor="middle">R-Core</text>
+  <text class="tiny white" x="620" y="258" text-anchor="middle">OSPF area 0</text>
+  <rect class="srv" x="526" y="374" width="188" height="66" rx="8"/>
+  <text class="txt" x="620" y="402" text-anchor="middle">Server LAN</text>
+  <text class="ip" x="552" y="424">10.10.30.20/24</text>
+  <line class="line" x1="620" y1="282" x2="620" y2="374"/>
+  <rect class="tag" x="474" y="462" width="292" height="48" rx="8"/>
+  <text class="tiny" x="492" y="484">R-Core G0/2: 10.10.30.1/24</text>
+  <text class="tiny" x="492" y="502">Server LAN default gateway</text>
 
-  <rect class="switch" x="900" y="150" width="160" height="56" rx="8"/>
-  <text class="txt" x="980" y="174" text-anchor="middle">SW-B</text>
-  <text class="small" x="980" y="195" text-anchor="middle">LAN B 192.168.20.0/24</text>
-  <rect class="router" x="898" y="310" width="164" height="66" rx="8"/>
-  <text class="txt" x="980" y="337" text-anchor="middle">R-B</text>
-  <text class="small" x="980" y="360" text-anchor="middle">G0/1 192.168.20.1</text>
-  <line class="link" x1="980" y1="206" x2="980" y2="310"/>
+  <rect class="pc" x="914" y="210" width="96" height="58" rx="7"/>
+  <text class="txt" x="962" y="245" text-anchor="middle">PC-C</text>
+  <text class="ip" x="904" y="294">192.168.20.11/24</text>
+  <text class="ip" x="904" y="312">GW 192.168.20.1</text>
+  <rect class="pc" x="1066" y="210" width="96" height="58" rx="7"/>
+  <text class="txt" x="1114" y="245" text-anchor="middle">PC-D</text>
+  <text class="ip" x="1056" y="294">192.168.20.12/24</text>
+  <text class="ip" x="1056" y="312">GW 192.168.20.1</text>
+  <rect class="sw" x="984" y="376" width="132" height="54" rx="7"/>
+  <text class="txt white" x="1050" y="411" text-anchor="middle">SW-B</text>
+  <ellipse class="r" cx="870" cy="403" rx="64" ry="44"/>
+  <text class="txt white" x="870" y="410" text-anchor="middle">R-B</text>
+  <line class="line" x1="962" y1="268" x2="1014" y2="376"/>
+  <line class="line" x1="1114" y1="268" x2="1084" y2="376"/>
+  <line class="line" x1="934" y1="403" x2="984" y2="403"/>
+  <rect class="tag" x="850" y="462" width="300" height="48" rx="8"/>
+  <text class="tiny" x="868" y="484">R-B G0/1: 192.168.20.1/24</text>
+  <text class="tiny" x="868" y="502">LAN B default gateway</text>
 
-  <path class="wan" d="M262 343 H496"/>
-  <path class="wan" d="M664 181 H898"/>
-  <path class="wan" d="M664 345 H898"/>
+  <path class="wan" d="M421 376 C474 288 530 242 550 236"/>
+  <path class="wan" d="M690 236 C720 242 782 288 819 376"/>
+  <rect class="callout" x="390" y="260" width="198" height="46" rx="6"/>
+  <text class="tiny" x="489" y="279" text-anchor="middle">R-A S0/0/0 10.0.12.1/30</text>
+  <text class="tiny" x="489" y="296" text-anchor="middle">R-Core S0/0/0 10.0.12.2/30</text>
+  <rect class="callout" x="654" y="260" width="208" height="46" rx="6"/>
+  <text class="tiny" x="758" y="279" text-anchor="middle">R-Core S0/0/1 10.0.23.1/30</text>
+  <text class="tiny" x="758" y="296" text-anchor="middle">R-B S0/0/0 10.0.23.2/30</text>
 
-  <rect class="label" x="296" y="302" width="174" height="38" rx="6"/>
-  <text class="tiny" x="383" y="318" text-anchor="middle">R-A to R-Core</text>
-  <text class="tiny" x="383" y="334" text-anchor="middle">10.0.12.0/30</text>
-  <rect class="label" x="690" y="132" width="174" height="38" rx="6"/>
-  <text class="tiny" x="777" y="148" text-anchor="middle">R-Core to R-B</text>
-  <text class="tiny" x="777" y="164" text-anchor="middle">10.0.23.0/30</text>
-  <rect class="label" x="690" y="382" width="174" height="38" rx="6"/>
-  <text class="tiny" x="777" y="398" text-anchor="middle">Server path to Branch B</text>
-  <text class="tiny" x="777" y="414" text-anchor="middle">route via Core/DC</text>
+  <ellipse class="cloud" cx="620" cy="592" rx="128" ry="44"/>
+  <text class="txt" x="620" y="599" text-anchor="middle">Internet</text>
+  <path class="line" d="M620 440 V548"/>
+  <path class="vpn" d="M370 448 C474 678 770 678 870 448"/>
+  <rect class="callout" x="420" y="660" width="400" height="38" rx="6"/>
+  <text class="small" x="620" y="684" text-anchor="middle">IPsec/OpenVPN tunnel: LAN A 192.168.10.0/24 to LAN B 192.168.20.0/24</text>
 
-  <ellipse class="cloud" cx="580" cy="520" rx="132" ry="44"/>
-  <text class="txt" x="580" y="527" text-anchor="middle">Internet</text>
-  <path class="link" d="M580 378 V476"/>
-  <path class="vpn" d="M180 376 C330 610 830 610 980 376"/>
-  <rect class="label" x="374" y="588" width="412" height="36" rx="6"/>
-  <text class="small" x="580" y="611" text-anchor="middle">Dashed purple: IPsec/OpenVPN tunnel between branches</text>
-
-  <rect class="note" x="846" y="492" width="254" height="72" rx="8"/>
-  <text class="small" x="973" y="518" text-anchor="middle">Policy requirement</text>
-  <text class="tiny" x="973" y="538" text-anchor="middle">NAT only Internet traffic</text>
-  <text class="tiny" x="973" y="556" text-anchor="middle">Do not NAT internal/VPN traffic</text>
-
-  <g transform="translate(62 628)">
-    <rect class="tableHead" x="0" y="0" width="1036" height="28"/>
-    <text class="small" x="12" y="19">Addressing table: LAN A GW 192.168.10.1 | Core server GW 10.10.30.1 | LAN B GW 192.168.20.1 | WAN: 10.0.12.0/30, 10.0.23.0/30</text>
+  <g transform="translate(72 720)">
+    <rect class="hdr" x="0" y="0" width="1096" height="30"/>
+    <text class="small" x="12" y="21">Addressing table</text>
+    <rect class="row" x="0" y="30" width="1096" height="30"/>
+    <rect class="row" x="0" y="60" width="1096" height="30"/>
+    <text class="tiny" x="14" y="50">LAN A: 192.168.10.0/24 GW 192.168.10.1 | Server LAN: 10.10.30.0/24 GW 10.10.30.1 | LAN B: 192.168.20.0/24 GW 192.168.20.1</text>
+    <text class="tiny" x="14" y="80">WAN: R-A/R-Core 10.0.12.0/30 | R-Core/R-B 10.0.23.0/30 | NAT only Internet traffic; no-NAT internal/VPN traffic.</text>
   </g>
 </svg>
