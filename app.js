@@ -1241,41 +1241,198 @@
 
   function explainWrongChoice(q, selectedChoice){
     if(q.optionFeedback && q.optionFeedback[selectedChoice]) return q.optionFeedback[selectedChoice];
-    const chosen = q.type === 'tf' ? (selectedChoice ? 'Đúng' : 'Sai') : String(q.options?.[selectedChoice] || '');
-    const correct = q.type === 'tf' ? (q.answer ? 'Đúng' : 'Sai') : String(q.options?.[q.answer] || '');
-    const text = `${q.lesson || ''} ${q.topic || ''} ${q.question || ''} ${q.config || ''} ${chosen}`.toLowerCase();
-    const reasons = [
-      {keys:['vlan','trunk','native','stp','etherchannel','switch'], reason:'phương án này chỉ nhìn một phần layer 2 hoặc nhầm vai trò access/trunk/STP; câu hỏi cần đối chiếu cả VLAN, gateway và luồng đi qua thiết bị.'},
-      {keys:['ospf','route','routing','default','router','area'], reason:'phương án này bỏ sót điều kiện định tuyến như area, adjacency, longest-prefix, default route hoặc route ngược; vì vậy chưa giải thích đúng luồng end-to-end.'},
-      {keys:['acl','firewall','nat','dmz','iptables','security group'], reason:'phương án này dễ làm thông mạng nhưng sai hoặc thiếu về thứ tự rule, chiều áp ACL/NAT, implicit deny hoặc nguyên tắc least privilege.'},
-      {keys:['docker','container','kubernetes','kubectl','pod','service','ingress','cloud'], reason:'phương án này nhầm giữa thành phần đang chạy và đường truy cập thật; với container/Kubernetes phải kiểm selector, port/targetPort, endpoint, probe và security group.'},
-      {keys:['vpn','openvpn','zabbix','smb','nfs','ftp','linux','ssh','systemd','ad ds','guacamole'], reason:'phương án này chỉ xử lý service hoặc ứng dụng, nhưng tình huống còn phụ thuộc route, firewall, phân quyền, DNS hoặc luồng qua VPN/server.'},
-      {keys:['dhcp','dns','subnet','gateway','ipv6','arp'], reason:'phương án này nhầm vai trò dịch vụ nền; cần phân biệt địa chỉ IP/subnet/gateway với phân giải tên, DHCP lease và reachability layer 2/3.'}
+    const chosen = choiceText(q, selectedChoice);
+    const correct = correctText(q);
+    const wrong = wrongChoiceReason(q, chosen, correct);
+    const focus = specificReason(q, correct, {forWrong:true});
+    return `${wrong} Đáp án đúng là "${correct}" vì ${focus}`;
+  }
+
+  function choiceText(q, choice){
+    if(q.type === 'tf') return choice ? 'Đúng' : 'Sai';
+    return String(q.options?.[choice] || '');
+  }
+
+  function correctText(q){
+    if(q.type === 'tf') return q.answer ? 'Đúng' : 'Sai';
+    if(q.type === 'mcq' || (q.type === 'calc' && q.options && q.options.length)) return String(q.options?.[q.answer] || '');
+    if(q.type === 'match') return q.answer.map(p=>`${p[0]} -> ${p[1]}`).join('; ');
+    return String(q.answer || q.computedAnswer || '');
+  }
+
+  function explainText(value){
+    return String(value || '')
+      .toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function hasAny(text, keys){
+    return keys.some(k => text.includes(k));
+  }
+
+  function wrongChoiceReason(q, chosen, correct){
+    const selected = explainText(chosen);
+    const all = explainText(`${q.lesson || ''} ${q.topic || ''} ${q.question || ''} ${q.config || ''} ${correct || ''}`);
+    const symptom = focusLabel(q);
+    const rules = [
+      {
+        keys:['dns','cname','mx','resolver','zone','ten mien'],
+        reason:`Phương án này chỉ xử lý phân giải tên. DNS có thể làm sai tên -> IP, nhưng không tự sửa được ${symptom} nếu gốc lỗi là gateway, trunk, route, ACL hoặc firewall.`
+      },
+      {
+        keys:['stp','bpdu','portfast','bridge priority','root bridge'],
+        reason:`Phương án này đang đi về chống loop layer 2. STP/BPDU chỉ hợp lý khi có loop, root bridge hoặc err-disabled; nó không giải thích trực tiếp ${symptom} nếu đề đang cho route, ACL, gateway hoặc service.`
+      },
+      {
+        keys:['nat','pat','dnat','snat','masquerade','overload','hairpin'],
+        reason:`Phương án này nhảy sang dịch địa chỉ. NAT chỉ đổi IP/port ở biên mạng; nếu dữ kiện đang chỉ ra VLAN/trunk, route nội bộ, ACL hoặc service chưa listen thì bật NAT không chữa đúng nguyên nhân.`
+      },
+      {
+        keys:['ospf','router-id','area','cost','default-information','static route','route'],
+        reason:`Phương án này nhìn vào định tuyến, nhưng chưa khớp dấu hiệu chính. Route/OSPF chỉ quyết định đường đi layer 3; nếu lỗi nằm ở access VLAN, trunk allowed VLAN, DNS, service hoặc ACL đặt sai chiều thì sửa route vẫn không hết lỗi.`
+      },
+      {
+        keys:['vlan','trunk','native','switchport','access port','allowed vlan'],
+        reason:`Phương án này tập trung layer 2. VLAN/trunk đúng là quan trọng, nhưng nếu dữ kiện cho thấy gói đã qua gateway hoặc ACL hit count tăng thì vấn đề đã lên layer 3/4, không chỉ còn là cấu hình switchport.`
+      },
+      {
+        keys:['acl','firewall','iptables','nftables','security group','permit','deny','any any'],
+        reason:`Phương án này liên quan lọc traffic nhưng chưa đủ chặt. Với ACL/firewall phải xét đúng nguồn, đích, port, thứ tự rule và chiều inbound/outbound; mở hoặc chặn quá rộng dễ làm sai policy.`
+      },
+      {
+        keys:['dhcp','ip helper','lease','scope','reservation'],
+        reason:`Phương án này chỉ xử lý cấp phát IP. DHCP giúp client nhận IP/mask/gateway/DNS, nhưng không tự sửa được route chiều về, ACL, service server hoặc trunk thiếu VLAN sau khi client đã có địa chỉ.`
+      },
+      {
+        keys:['gateway','subnet','mask','/30','/24','/26','arp'],
+        reason:`Phương án này chạm tới địa chỉ IP nhưng chưa giải đúng dấu hiệu. Gateway phải cùng subnet với host; subnet mask quyết định cùng mạng hay khác mạng, còn route/ACL/service vẫn phải kiểm riêng khi đi qua router.`
+      },
+      {
+        keys:['vpn','openvpn','ipsec','tun0','tunnel'],
+        reason:`Phương án này mới nói tới trạng thái VPN. VPN connected chỉ chứng minh tunnel lên; traffic vào LAN còn cần push route, IP forwarding, rule FORWARD và route chiều về hoặc NAT exemption.`
+      },
+      {
+        keys:['docker','container','compose','ports','volume'],
+        reason:`Phương án này nhìn vào container nhưng chưa chắc đúng luồng truy cập. Container chạy không đồng nghĩa port đã publish, service listen đúng địa chỉ, volume giữ dữ liệu hoặc firewall host cho phép.`
+      },
+      {
+        keys:['kubernetes','kubectl','pod','service','ingress','endpoint','readiness','selector'],
+        reason:`Phương án này nhầm giữa tài nguyên Kubernetes đang tồn tại và traffic thật. Pod Running chưa đủ; Service cần selector đúng, endpoint không rỗng, port/targetPort đúng và Pod Ready.`
+      },
+      {
+        keys:['zabbix','monitoring','trigger','alert','backup','rollback','ansible'],
+        reason:`Phương án này thiên về vận hành sau sự cố. Monitoring/backup/automation rất cần, nhưng nếu câu hỏi hỏi nguyên nhân mất kết nối thì vẫn phải chứng minh bằng route, firewall, service hoặc cấu hình cụ thể trước.`
+      },
+      {
+        keys:['public','internet','mo port','open','tat firewall','xoa acl','any-any','any any'],
+        reason:`Phương án này quá rộng và rủi ro. Trong đề quản trị mạng, mở public hoặc xóa bảo vệ có thể làm thông tạm thời nhưng sai nguyên tắc least privilege và không chứng minh đúng nguyên nhân.`
+      },
+      {
+        keys:['scale','replica','tang','doi hostname','doi password','xoa log'],
+        reason:`Phương án này là thao tác phụ hoặc chữa triệu chứng. Nó không bám vào dấu hiệu kỹ thuật của đề nên dễ bỏ sót lỗi thật như route thiếu, ACL sai chiều, selector sai hoặc gateway không cùng subnet.`
+      }
     ];
-    const matched = reasons.find(item => item.keys.some(k => text.includes(k)));
-    const base = matched ? matched.reason : 'phương án này có thể đúng trong vài ngữ cảnh khác, nhưng không thỏa điều kiện trọng tâm của dữ kiện đề bài.';
-    return `${base} Đáp án đúng hướng tới: ${correct}.`;
+    const matched = rules.find(rule => hasAny(selected, rule.keys));
+    if(matched) return matched.reason;
+    return `Phương án này có thể đúng ở ngữ cảnh khác, nhưng không giải thích được dấu hiệu "${symptom}" trong dữ kiện. Nó cũng không chỉ ra được lệnh kiểm tra hoặc điều kiện cấu hình then chốt.`;
   }
 
   function richExplanation(q){
     const base = String(q.explanation || '').trim();
-    if(base.length >= 90) return base;
-    const text = `${q.topic || ''} ${q.question || ''}`.toLowerCase();
-    const hints = [
-      {keys:['replay','otp','ticket'], hint:'Điểm bẫy là dữ liệu cũ vẫn có thể hợp lệ nếu hệ thống không kiểm tra nonce, timestamp hoặc trạng thái đã dùng.'},
-      {keys:['mitm','diffie','hellman','dh'], hint:'Diffie-Hellman chỉ tạo khóa chung; muốn chống người đứng giữa phải xác thực khóa công khai/endpoint bằng chữ ký, certificate hoặc cơ chế tương đương.'},
-      {keys:['mac','hmac'], hint:'MAC/HMAC xác thực bằng khóa bí mật chia sẻ, nên kiểm tra toàn vẹn và nguồn gửi trong phạm vi các bên cùng biết khóa.'},
-      {keys:['chữ ký','digital signature','non-repudiation'], hint:'Chữ ký số khác MAC ở chỗ chỉ người giữ private key mới ký được, còn public key dùng để kiểm tra.'},
-      {keys:['hash','collision','digest'], hint:'Hash không khóa chủ yếu phục vụ digest/toàn vẹn; collision resistance và one-way là hai thuộc tính rất hay bị hỏi.'},
-      {keys:['firewall','acl','dmz','stateful'], hint:'Khi làm câu firewall, hãy xét vị trí vùng mạng, nguyên tắc default deny/least privilege và firewall có nhớ trạng thái phiên hay không.'},
-      {keys:['wep','wpa','evil','deauth','wifi','wi-fi'], hint:'Các câu Wi-Fi thường bẫy giữa nghe lén, AP giả, bắt handshake và điểm yếu WEP/WPS.'},
-      {keys:['rsa','phi','public key','private key'], hint:'RSA xoay quanh n=pq, phi(n), nghịch đảo d của e và khác biệt giữa mã hóa bằng public key với ký bằng private key.'},
-      {keys:['aes','des','ecb','cbc','block'], hint:'Với mã khối, cần phân biệt kích thước block, độ dài khóa và mode hoạt động; ECB hay bị hỏi vì lộ mẫu lặp.'},
-      {keys:['kerberos','ticket','kdc'], hint:'Kerberos dựa trên KDC, TGT, service ticket và khóa phiên để tránh gửi mật khẩu cho từng dịch vụ.'}
+    const correct = correctText(q);
+    const extra = specificReason(q, correct);
+    const isQtm = String(q.lesson || '').startsWith('QTM');
+    const generic = /trọng tâm là|các đáp án sai|câu ôn định nghĩa|đúng kiểu đề|hướng xử lý trọng tâm/i.test(base);
+    if(!base) return extra;
+    if(isQtm || generic || base.length < 90) return `${base} ${extra}`;
+    return base;
+  }
+
+  function focusLabel(q){
+    const text = explainText(`${q.lesson || ''} ${q.topic || ''} ${q.question || ''} ${q.config || ''}`);
+    const labels = [
+      {keys:['show ip route','route chieu ve','ospf','default route','static route'], label:'bảng định tuyến/route chiều về'},
+      {keys:['trunk','allowed vlan','native vlan','access vlan','switchport'], label:'VLAN hoặc trunk layer 2'},
+      {keys:['acl','access-list','firewall','iptables','security group','deny','permit'], label:'rule lọc traffic hoặc chiều áp ACL/firewall'},
+      {keys:['nat','pat','dnat','hairpin','overload'], label:'luồng NAT và port mapping'},
+      {keys:['dhcp','ip helper','scope','lease'], label:'quá trình cấp IP DHCP'},
+      {keys:['dns','nslookup','record','cname','domain'], label:'phân giải tên DNS'},
+      {keys:['gateway','subnet','mask','arp'], label:'IP/subnet/default gateway'},
+      {keys:['vpn','openvpn','ipsec','tun0'], label:'tunnel VPN, forwarding và route về'},
+      {keys:['kubernetes','pod','service','ingress','endpoint','selector'], label:'đường đi Service/Ingress tới Pod'},
+      {keys:['docker','container','ports','volume'], label:'port/volume/network của container'},
+      {keys:['zabbix','monitoring','backup','rollback','ansible'], label:'quy trình vận hành và giám sát'},
+      {keys:['rsa','diffie','hash','mac','signature','tls','kerberos','otp','replay','aes','ecb'], label:'tính chất bảo mật cốt lõi'}
     ];
-    const matched = hints.find(item => item.keys.some(k => text.includes(k)));
-    const extra = matched ? matched.hint : 'Hãy đối chiếu khái niệm cốt lõi với tình huống trong câu, rồi loại phương án nói quá rộng hoặc lệch tầng giao thức.';
-    return base ? `${base} ${extra}` : extra;
+    return (labels.find(item => hasAny(text, item.keys)) || {label:'dấu hiệu chính của đề'}).label;
+  }
+
+  function specificReason(q, correct, options={}){
+    const text = explainText(`${q.lesson || ''} ${q.topic || ''} ${q.question || ''} ${q.config || ''} ${correct || ''}`);
+    const correctPart = correct ? `Đáp án đúng bám vào "${correct}". ` : '';
+    const rules = [
+      {
+        keys:['show ip route','network not in table','ospf','route chieu ve','default-information','static route'],
+        reason:`${correctPart}Ở câu định tuyến, hãy đọc route hiện có và route còn thiếu: ping qua nhiều router cần cả đường đi lẫn đường về. Neighbor FULL chỉ chứng minh hai router nói chuyện được, chưa chứng minh mọi prefix đã được quảng bá hoặc được chọn vào routing table.`
+      },
+      {
+        keys:['gateway','subnet','mask','/26','/27','/30','arp','usable','broadcast'],
+        reason:`${correctPart}Host dùng subnet mask để quyết định đích cùng mạng hay khác mạng. Default gateway phải cùng subnet với host; với link router-router chỉ cần /30 hoặc /31, còn VLAN người dùng phải đủ usable host.`
+      },
+      {
+        keys:['trunk','allowed vlan','native vlan','switchport','access vlan','vlan'],
+        reason:`${correctPart}VLAN là lỗi layer 2: access port quyết định host thuộc VLAN nào, trunk quyết định VLAN nào được mang qua uplink. Nếu VLAN không nằm trong allowed list hoặc native VLAN lệch, host có IP đúng vẫn có thể không đi tới gateway/DMZ.`
+      },
+      {
+        keys:['acl','access-list','implicit deny','firewall','iptables','security group','permit','deny'],
+        reason:`${correctPart}ACL/firewall phải đọc theo thứ tự, đúng chiều và đúng tuple nguồn-đích-port. Một rule deny phía trên hoặc đặt sai interface có thể làm traffic bị chặn dù routing và gateway đều đúng.`
+      },
+      {
+        keys:['nat','pat','dnat','snat','hairpin','overload','port forward'],
+        reason:`${correctPart}NAT chỉ nên áp cho luồng cần dịch địa chỉ. Traffic nội bộ/VPN thường cần no-NAT hoặc route thật; DNAT/port-forward còn phải khớp public port, private port, ACL outside-in và route trả lời.`
+      },
+      {
+        keys:['dhcp','ip helper','scope','lease','dora'],
+        reason:`${correctPart}DHCP Discover là broadcast nên không tự qua router. Nếu server DHCP ở VLAN khác, gateway VLAN phải relay bằng ip helper-address, server phải có scope đúng subnet và option default-router/DNS đúng.`
+      },
+      {
+        keys:['dns','nslookup','record','cname','split dns','hairpin'],
+        reason:`${correctPart}DNS chỉ biến tên thành địa chỉ IP. Nếu ping IP được nhưng tên lỗi thì kiểm DNS; nếu cả IP cũng lỗi thì phải quay lại route, ACL, firewall hoặc service server.`
+      },
+      {
+        keys:['vpn','openvpn','ipsec','tun0','ip_forward','forward drop','route push'],
+        reason:`${correctPart}VPN up chưa đủ. Client cần route được push, VPN server phải bật IP forwarding, firewall phải cho FORWARD đúng chiều, và LAN đích phải biết route về subnet VPN hoặc dùng NAT có kiểm soát.`
+      },
+      {
+        keys:['docker','container','ports','volume','bridge subnet'],
+        reason:`${correctPart}Với Docker, phải tách ba lớp: container có chạy không, port host:container đã publish chưa, và dữ liệu/network có bị mất hoặc trùng subnet không. Container Running không tự mở port ra ngoài.`
+      },
+      {
+        keys:['kubernetes','kubectl','pod','service','ingress','endpoint','selector','readiness','targetport'],
+        reason:`${correctPart}Trong Kubernetes, request đi DNS/LB -> Ingress -> Service -> Endpoint/Pod. Service selector sai hoặc Pod chưa Ready làm endpoint rỗng, dù Deployment/Pod nhìn có vẻ đang chạy.`
+      },
+      {
+        keys:['zabbix','monitoring','trigger','backup','rollback','ansible','idempotent','change management'],
+        reason:`${correctPart}Câu vận hành không chỉ hỏi lệnh sửa mà hỏi quy trình: backup cấu hình, kiểm thử, giám sát, trigger ít nhiễu và rollback có chứng cứ giúp tránh sửa tay làm lỗi lan rộng.`
+      },
+      {
+        keys:['diffie','hellman','mitm','certificate','tls'],
+        reason:`${correctPart}Điểm mấu chốt là xác thực danh tính. Trao đổi khóa hoặc mã hóa chỉ bảo vệ kênh khi public key/certificate được kiểm chứng; bỏ qua cảnh báo chứng chỉ mở cửa cho MITM.`
+      },
+      {
+        keys:['rsa','phi','public key','private key','signature','mac','hmac','hash','collision'],
+        reason:`${correctPart}Cần phân biệt mục tiêu: hash kiểm toàn vẹn không khóa, HMAC/MAC xác thực bên biết secret, chữ ký số dùng private key để hỗ trợ chống chối bỏ, RSA phụ thuộc n=pq và phi(n).`
+      },
+      {
+        keys:['aes','ecb','cbc','otp','replay','nonce','timestamp','kerberos','ticket'],
+        reason:`${correctPart}Các câu này thường bẫy điều kiện an toàn: ECB lộ mẫu lặp, OTP hỏng khi dùng lại khóa, replay cần nonce/timestamp, Kerberos dựa trên ticket và thời gian hợp lệ.`
+      }
+    ];
+    const matched = rules.find(rule => hasAny(text, rule.keys));
+    if(matched) return matched.reason;
+    return `${correctPart}Hãy bám vào dữ kiện cụ thể, xác định đang lỗi ở layer nào, rồi chọn phương án có thể chứng minh bằng lệnh kiểm tra hoặc tính chất lý thuyết tương ứng.`;
   }
 
   function findQuestion(uid){
