@@ -550,32 +550,47 @@
       {lesson:'QTM 7 - Automation & vận hành', topic:'Change management', clue:'đổi ACL trước giờ thi lab làm mất truy cập', correct:'Backup cấu hình, review diff, maintenance window, kiểm thử từng luồng và chuẩn bị rollback', wrongs:['Sửa trực tiếp production không cần ghi chú','Xóa toàn bộ ACL rồi mở any-any lâu dài','Không cần test route ngược','Chỉ chụp ảnh màn hình là đủ backup'], config:'Cần chặn Student VLAN vào Management VLAN nhưng vẫn cho Web DMZ/Internet.'}
     ];
     drills.push(...extraNetworkDrills());
+    const isProjectDrill = d => isQtmProjectTopic({lesson:d.lesson, topic:d.topic, config:d.config});
+    const theoryDrills = drills.filter(d => !isProjectDrill(d));
+    const projectDrills = drills.filter(isProjectDrill);
+    const preferredDrills = theoryDrills.length ? theoryDrills : drills;
+    const projectStart = Math.max(preferredDrills.length, Math.floor(targetCount * 0.96));
     const forms = [
-      (d) => `Đọc tình huống: ${d.clue}. Hướng kiểm tra hoặc kết luận đúng nhất là gì?`,
-      (d) => `Trong bài lab ${d.topic}, dữ kiện "${d.clue}" thường dẫn tới nhận định nào?`,
-      (d) => `Nếu đề cho cấu hình/dữ kiện sau, phương án nào xử lý đúng trọng tâm?`,
-      (d) => `Câu hỏi thực hành yêu cầu không đoán mò mà đọc luồng end-to-end. Với dấu hiệu "${d.clue}", chọn gì?`
+      (d) => `Đề cũ cho dữ kiện: ${d.clue}. Kết luận nào đúng nhất?`,
+      (d) => `Khi đọc output/cấu hình liên quan ${d.topic}, dấu hiệu "${d.clue}" gợi ý phương án nào?`,
+      (d) => `Câu trắc nghiệm hỏi trọng tâm ${d.topic}. Với dữ kiện "${d.clue}", chọn đáp án nào?`,
+      (d) => `Nếu đề yêu cầu phân tích nhanh và không đoán mò, dữ kiện "${d.clue}" nên xử lý theo hướng nào?`,
+      (d) => `Trong dạng câu lý thuyết nhanh, dấu hiệu "${d.clue}" thường kiểm tra kiến thức nào?`,
+      (d) => `Một đáp án sai thường nhầm tầng hoặc nhầm giao thức. Với tình huống "${d.clue}", đáp án đúng là gì?`
     ];
     const labs = [
-      'mạng campus có Access switch, Core L3 và Edge router',
-      'đồ án triển khai server nội bộ có DMZ và VLAN người dùng',
-      'chi nhánh kết nối về trung tâm qua VPN site-to-site',
-      'phòng lab dùng Cisco IOS, Linux server và firewall default deny',
-      'hệ thống cloud có public subnet, private subnet và load balancer',
-      'cluster Kubernetes expose dịch vụ qua Ingress Controller',
-      'mạng có Zabbix giám sát service, port, disk và log',
-      'bài thực hành yêu cầu chứng minh bằng lệnh kiểm tra trước khi sửa',
-      'topology end-to-end có route đi và route về qua nhiều thiết bị',
-      'môi trường vận hành cần backup, rollback và ghi log thay đổi',
-      'server public chỉ được mở dịch vụ tối thiểu theo least privilege',
-      'người dùng báo lỗi theo triệu chứng, không đưa sẵn nguyên nhân'
+      'bảng định tuyến Cisco show ip route',
+      'output show ip ospf neighbor trên hai router',
+      'cấu hình RIP/OSPF với network statement và wildcard mask',
+      'bài chia subnet/VLSM cho nhiều VLAN',
+      'switch access cấu hình VLAN và trunk 802.1Q',
+      'output show interfaces trunk và allowed VLAN',
+      'STP root bridge, PortFast và BPDU Guard',
+      'router-on-a-stick với subinterface dot1Q',
+      'ACL standard/extended đặt inbound hoặc outbound',
+      'NAT overload với default route ra Internet',
+      'DHCP relay, ip helper-address và DHCP scope',
+      'DNS nội bộ với bản ghi A/CNAME',
+      'Linux systemctl, ss -tulpn và ip route',
+      'Active Directory domain, forest và Additional Domain Controller',
+      'kiểm tra ping/traceroute khi khác subnet',
+      'PC sai default gateway hoặc subnet mask',
+      'show access-lists và implicit deny cuối ACL',
+      'route static, connected route và administrative distance'
     ];
     let index = 0;
     while(qs.length < targetCount && index < targetCount * 5){
-      const d = drills[index % drills.length];
-      const form = forms[Math.floor(index / drills.length) % forms.length];
-      const lab = labs[Math.floor(index / (drills.length * forms.length)) % labs.length];
+      const activeDrills = index < projectStart ? preferredDrills : preferredDrills.concat(projectDrills);
+      const d = activeDrills[index % activeDrills.length];
+      const form = forms[Math.floor(index / activeDrills.length) % forms.length];
+      const lab = labs[Math.floor(index / (activeDrills.length * forms.length)) % labs.length];
       const {options, answer} = shuffleOptions(d.correct, d.wrongs);
+      const wrongHint = d.wrongs.slice(0,2).join('; ');
       qs.push({
         id:`QTM-MEGA-${String(index + 1).padStart(4,'0')}`,
         type:'mcq',
@@ -586,7 +601,7 @@
         question:`${form(d)} Bối cảnh: ${lab}.`,
         options,
         answer,
-        explanation:`Trọng tâm là ${d.correct}. Các đáp án sai thường chỉ đúng một phần, sai tầng giao thức, hoặc bỏ qua điều kiện route/firewall/cấu hình trong dữ kiện.`
+        explanation:`${d.correct}. Dữ kiện "${d.clue}" trỏ trực tiếp tới ${d.topic}; các lựa chọn như "${wrongHint}" sai vì lệch nguyên nhân chính hoặc nhầm sang tầng/giao thức khác.`
       });
       index++;
     }
@@ -876,6 +891,8 @@
 
   function composeNetworkAdminExam(shuffled, pool, count, rng, excludedIds=new Set(), catalogExamNo=1){
     const essayTarget = count >= 24 ? 3 : (count >= 12 ? 2 : 1);
+    const projectEssayTarget = essayTarget > 0 ? 1 : 0;
+    const regularEssayTarget = Math.max(0, essayTarget - projectEssayTarget);
     const objectiveTarget = Math.max(0, count - essayTarget);
     const seen = new Set();
     const isExcluded = q => excludedIds.has(q.caseId || q.id);
@@ -893,20 +910,20 @@
     const selected = [];
     for(const q of objectivePool){
       if(selected.length >= objectiveTarget) break;
-      if(!tryAddQtmQuestion(q, selected, objectiveState, {maxTopic:1})) continue;
+      if(!tryAddQtmQuestion(q, selected, objectiveState, {maxTopic:3})) continue;
       seen.add(qtmIdentity(q));
     }
     if(selected.length < objectiveTarget){
-      for(const q of prioritizeQtmCatalogSlot(filteredPool.filter(q => q.type !== 'short' && q.type !== 'calc'), catalogExamNo, rng)){
+      for(const q of prioritizeQtmOldExamObjectives(filteredPool.filter(q => q.type !== 'short' && q.type !== 'calc'), objectiveTarget, catalogExamNo, rng)){
         if(selected.length >= objectiveTarget) break;
-        if(!tryAddQtmQuestion(q, selected, objectiveState, {maxTopic:2})) continue;
+        if(!tryAddQtmQuestion(q, selected, objectiveState, {maxTopic:4})) continue;
         seen.add(qtmIdentity(q));
       }
     }
     if(selected.length < objectiveTarget){
-      for(const q of prioritizeQtmCatalogSlot(pool.filter(q => q.type !== 'short' && q.type !== 'calc'), catalogExamNo, rng)){
+      for(const q of prioritizeQtmOldExamObjectives(pool.filter(q => q.type !== 'short' && q.type !== 'calc'), objectiveTarget, catalogExamNo, rng)){
         if(selected.length >= objectiveTarget) break;
-        if(!tryAddQtmQuestion(q, selected, objectiveState, {maxTopic:3})) continue;
+        if(!tryAddQtmQuestion(q, selected, objectiveState, {maxTopic:5})) continue;
         seen.add(qtmIdentity(q));
       }
     }
@@ -918,7 +935,7 @@
       }
     }
 
-    const essayPool = prioritizeQtmCatalogSlot(filteredPool.filter(q => q.type === 'short'), catalogExamNo, rng).sort((a,b) => {
+    const essayPool = prioritizeQtmCatalogSlot(filteredPool.filter(q => q.type === 'short' && !isQtmProjectEssay(q)), catalogExamNo, rng).sort((a,b) => {
       const aFinal = /ESSAY-(FINAL|END2END|OUTPUT)/.test(String(a.id || '')) ? 0 : 1;
       const bFinal = /ESSAY-(FINAL|END2END|OUTPUT)/.test(String(b.id || '')) ? 0 : 1;
       const aMedia = a.image ? 0 : 1;
@@ -927,13 +944,13 @@
     });
     const essays = [];
     for(const q of essayPool){
-      if(essays.length >= essayTarget) break;
+      if(essays.length >= regularEssayTarget) break;
       if(seen.has(qtmIdentity(q))) continue;
       if(!tryAddQtmQuestion(q, essays, essayState, {maxTopic:1})) continue;
       seen.add(qtmIdentity(q));
     }
-    if(essays.length < essayTarget){
-      const fallbackEssays = prioritizeQtmCatalogSlot(pool.filter(q => q.type === 'short'), catalogExamNo, rng).sort((a,b) => {
+    if(essays.length < regularEssayTarget){
+      const fallbackEssays = prioritizeQtmCatalogSlot(pool.filter(q => q.type === 'short' && !isQtmProjectEssay(q)), catalogExamNo, rng).sort((a,b) => {
         const aFinal = /ESSAY-(FINAL|END2END|OUTPUT)/.test(String(a.id || '')) ? 0 : 1;
         const bFinal = /ESSAY-(FINAL|END2END|OUTPUT)/.test(String(b.id || '')) ? 0 : 1;
         const aMedia = a.image ? 0 : 1;
@@ -941,27 +958,47 @@
         return aFinal - bFinal || essaySlideScore(a) - essaySlideScore(b) || aMedia - bMedia;
       });
       for(const q of fallbackEssays){
-        if(essays.length >= essayTarget) break;
+        if(essays.length >= regularEssayTarget) break;
         if(seen.has(qtmIdentity(q))) continue;
         if(!tryAddQtmQuestion(q, essays, essayState, {maxTopic:2})) continue;
         seen.add(qtmIdentity(q));
       }
     }
-    if(essays.length < essayTarget){
+    if(essays.length < regularEssayTarget){
       for(const q of prioritizeQtmCatalogSlot(pool.filter(q => q.type === 'short'), catalogExamNo, rng)){
-        if(essays.length >= essayTarget) break;
+        if(essays.length >= regularEssayTarget) break;
         if(!tryAddQtmQuestion(q, essays, essayState, {allowFingerprintRepeat:true, allowTopicOverflow:true})) continue;
         seen.add(qtmIdentity(q));
       }
     }
-    return selected.concat(essays).slice(0, count);
+    const projectEssays = [];
+    if(projectEssayTarget){
+      const projectState = {ids:new Set(essayState.ids), fingerprints:new Set(essayState.fingerprints), topicCounts:new Map(essayState.topicCounts)};
+      const projectPool = prioritizeQtmProjectEssays(filteredPool, catalogExamNo, rng).concat(prioritizeQtmProjectEssays(pool, catalogExamNo, rng));
+      for(const q of projectPool){
+        if(projectEssays.length >= projectEssayTarget) break;
+        if(seen.has(qtmIdentity(q))) continue;
+        if(!tryAddQtmQuestion(q, projectEssays, projectState, {maxTopic:2})) continue;
+        seen.add(qtmIdentity(q));
+      }
+      if(projectEssays.length < projectEssayTarget){
+        for(const q of prioritizeQtmCatalogSlot(pool.filter(q => q.type === 'short'), catalogExamNo, rng)){
+          if(projectEssays.length >= projectEssayTarget) break;
+          if(seen.has(qtmIdentity(q))) continue;
+          if(!tryAddQtmQuestion(q, projectEssays, projectState, {allowFingerprintRepeat:true, allowTopicOverflow:true})) continue;
+          seen.add(qtmIdentity(q));
+        }
+      }
+    }
+    return selected.concat(essays, projectEssays).slice(0, count);
   }
 
   function prioritizeQtmSlideTheory(questions, targetCount, rng){
     const isObjective = q => q.type === 'mcq' || q.type === 'tf' || q.type === 'match' || q.type === 'fill';
-    const core = questions.filter(q => isObjective(q) && isCoreSlideLesson(q.lesson));
-    const extended = questions.filter(q => isObjective(q) && !isCoreSlideLesson(q.lesson));
-    const coreTarget = Math.min(targetCount, Math.max(0, Math.round(targetCount * 0.8)));
+    const sortOldExam = (a,b) => qtmObjectiveExamScore(a) - qtmObjectiveExamScore(b) || stableScore(a.id || a.question, 'old-exam-objective') - stableScore(b.id || b.question, 'old-exam-objective');
+    const core = questions.filter(q => isObjective(q) && isQtmOldExamObjective(q)).sort(sortOldExam);
+    const extended = questions.filter(q => isObjective(q) && !isQtmOldExamObjective(q)).sort(sortOldExam);
+    const coreTarget = Math.min(targetCount, core.length);
     const selected = [];
     const seen = new Set();
     const takeFrom = (list, limit) => {
@@ -985,6 +1022,56 @@
       }
     }
     return selected.concat(questions.filter(q => !seen.has(q.id)));
+  }
+
+  function prioritizeQtmOldExamObjectives(questions, targetCount, catalogExamNo, rng){
+    const ordered = prioritizeQtmCatalogSlot(questions, catalogExamNo, rng).sort((a,b) => {
+      return qtmObjectiveExamScore(a) - qtmObjectiveExamScore(b) || stableScore(a.id || a.question, `old-exam-${catalogExamNo}`) - stableScore(b.id || b.question, `old-exam-${catalogExamNo}`);
+    });
+    const oldStyle = ordered.filter(isQtmOldExamObjective);
+    const regularTheory = ordered.filter(q => !isQtmOldExamObjective(q) && !isQtmProjectTopic(q));
+    const project = ordered.filter(isQtmProjectTopic);
+    return oldStyle.concat(regularTheory, project);
+  }
+
+  function qtmObjectiveExamScore(q){
+    const text = `${q.lesson || ''} ${q.topic || ''} ${q.question || ''} ${q.config || ''}`.toLowerCase();
+    if(String(q.id || '').startsWith('QTM-OLD-MCQ')) return -2;
+    if(isQtmProjectTopic(q)) return 4;
+    if(/show ip route|administrative distance|metric|ospf|rip|static route|bgp|ipv6|subnet|vlsm|wildcard|acl|nat|vlan|trunk|stp|router-on-a-stick|dhcp|dns|linux|systemctl|ss |ip addr|active directory|domain controller|adc/.test(text)) return 0;
+    if(isCoreSlideLesson(q.lesson)) return 1;
+    return 2;
+  }
+
+  function isQtmOldExamObjective(q){
+    if(!q || q.type === 'short') return false;
+    if(isQtmProjectTopic(q)) return false;
+    return isCoreSlideLesson(q.lesson) || /rip|bgp|ipv6|linux|active directory|domain controller|adc|router-on-a-stick|show ip route/i.test(`${q.topic || ''} ${q.question || ''} ${q.config || ''}`);
+  }
+
+  function isQtmProjectTopic(q){
+    const lesson = String(q.lesson || '').toLowerCase();
+    const detail = `${q.topic || ''} ${q.config || ''}`.toLowerCase();
+    if(/qtm 6|qtm 7/.test(lesson)) return true;
+    if(/docker|kubernetes|cloud|ingress|pod|container|ansible|automation|haproxy|backup|rollback|secret manager|deploy web|đồ án|do an/.test(detail)) return true;
+    if(/openvpn|vpn|zabbix|smb|nfs|ftp|guacamole|file server|load balancer|linux firewall|iptables server|monitoring/.test(detail)) return true;
+    return false;
+  }
+
+  function isQtmProjectEssay(q){
+    if(!q || q.type !== 'short') return false;
+    const text = `${q.id || ''} ${q.lesson || ''} ${q.topic || ''} ${q.question || ''} ${q.config || ''}`.toLowerCase();
+    return /final-05|final-06|final-07|project|đồ án|do an|openvpn|vpn|zabbix|file server|smb|nfs|ftp|docker|kubernetes|cloud|ingress|ansible|automation|haproxy|backup|rollback|deploy web|linux server|giám sát|giam sat/.test(text);
+  }
+
+  function prioritizeQtmProjectEssays(pool, catalogExamNo, rng){
+    return prioritizeQtmCatalogSlot(pool.filter(q => q.type === 'short' && isQtmProjectEssay(q)), catalogExamNo, rng).sort((a,b) => {
+      const aFinal = /FINAL|PROJECT|PASTYEAR|OUTPUT/.test(String(a.id || '')) ? 0 : 1;
+      const bFinal = /FINAL|PROJECT|PASTYEAR|OUTPUT/.test(String(b.id || '')) ? 0 : 1;
+      const aMedia = a.image ? 0 : 1;
+      const bMedia = b.image ? 0 : 1;
+      return aFinal - bFinal || aMedia - bMedia || essaySlideScore(a) - essaySlideScore(b);
+    });
   }
 
   function isCoreSlideLesson(lesson){

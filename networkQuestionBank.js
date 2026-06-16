@@ -555,6 +555,182 @@ const NETWORK_QUESTION_BANK = [
 
 NETWORK_QUESTION_BANK.push(
   {
+    id:'QTM-OLD-MCQ-01', type:'mcq', lesson:'QTM 3 - OSPF & định tuyến', topic:'Đọc show ip route', difficulty:2,
+    config:'R1#show ip route\nO 192.168.20.0/24 [110/2] via 10.0.0.2, 00:00:12, Gig0/0\nS 0.0.0.0/0 [1/0] via 203.0.113.1\nC 192.168.10.0/24 is directly connected, Gig0/1',
+    question:'Dòng route bắt đầu bằng ký hiệu O cho biết điều gì?',
+    options:['Route học từ OSPF','Route học từ RIP','Route static do quản trị viên cấu hình','Mạng connected trực tiếp','Default route ra Internet'],
+    answer:0,
+    explanation:'Trong bảng định tuyến Cisco, O là OSPF. S là static, C là connected, R là RIP.'
+  },
+  {
+    id:'QTM-OLD-MCQ-02', type:'mcq', lesson:'QTM 3 - OSPF & định tuyến', topic:'Administrative Distance', difficulty:2,
+    config:'O 192.168.20.0/24 [110/2] via 10.0.0.2, 00:00:12, Gig0/0',
+    question:'Trong giá trị [110/2], số 110 thường biểu diễn gì?',
+    options:['Administrative Distance của OSPF','Metric cost của OSPF','Subnet mask wildcard','Số hop tới đích','Số giây còn lại của route'],
+    answer:0,
+    explanation:'Trong output Cisco, cặp [AD/metric] cho biết độ ưu tiên nguồn route và metric. OSPF có AD mặc định 110.'
+  },
+  {
+    id:'QTM-OLD-MCQ-03', type:'mcq', lesson:'QTM 3 - OSPF & định tuyến', topic:'Metric OSPF', difficulty:2,
+    config:'O 192.168.20.0/24 [110/2] via 10.0.0.2, 00:00:12, Gig0/0',
+    question:'Trong giá trị [110/2], số 2 thường biểu diễn gì?',
+    options:['Metric/cost của route OSPF','Administrative Distance của static route','Số area OSPF','Số VLAN tag','Số octet của subnet mask'],
+    answer:0,
+    explanation:'Số sau dấu gạch là metric của route. Với OSPF, metric thường là cost.'
+  },
+  {
+    id:'QTM-OLD-MCQ-04', type:'mcq', lesson:'QTM 3 - OSPF & định tuyến', topic:'Ký hiệu route', difficulty:2,
+    config:'R2#show ip route\nR 172.16.0.0/16 [120/1] via 10.0.23.1, 00:00:09, Serial0/0/1',
+    question:'Ký hiệu R trong output trên cho biết route được học từ giao thức nào?',
+    options:['RIP','OSPF','BGP','Static route','Connected route'],
+    answer:0,
+    explanation:'R là RIP. Đề cũ thường hỏi phân biệt ký hiệu route trong bảng định tuyến.'
+  },
+  {
+    id:'QTM-OLD-MCQ-05', type:'mcq', lesson:'QTM 3 - OSPF & định tuyến', topic:'RIP version', difficulty:2,
+    question:'Khác biệt quan trọng giữa RIPv1 và RIPv2 là gì?',
+    options:['RIPv2 hỗ trợ VLSM/CIDR và gửi subnet mask trong update','RIPv1 dùng link-state database như OSPF','RIPv2 chỉ chạy được trên IPv6','RIPv1 có AD thấp hơn OSPF','RIPv2 không dùng metric hop count'],
+    answer:0,
+    explanation:'RIPv1 classful, không gửi subnet mask; RIPv2 classless nên hỗ trợ VLSM/CIDR.'
+  },
+  {
+    id:'QTM-OLD-MCQ-06', type:'mcq', lesson:'QTM 3 - OSPF & định tuyến', topic:'BGP', difficulty:2,
+    question:'Giao thức định tuyến nào thường dùng để liên kết các Autonomous System trên Internet?',
+    options:['BGP','RIP','OSPF','STP','DHCP'],
+    answer:0,
+    explanation:'BGP là giao thức định tuyến liên miền giữa các Autonomous System.'
+  },
+  {
+    id:'QTM-OLD-MCQ-07', type:'mcq', lesson:'QTM 1 - IP, subnet, dịch vụ nền', topic:'IPv6', difficulty:2,
+    question:'Địa chỉ IPv6 link-local thường bắt đầu bằng prefix nào?',
+    options:['FE80::/10','2001:db8::/32','FF00::/8','::1/128','FC00::/7'],
+    answer:0,
+    explanation:'IPv6 link-local dùng FE80::/10, thường xuất hiện tự động trên interface.'
+  },
+  {
+    id:'QTM-OLD-MCQ-08', type:'mcq', lesson:'QTM 1 - IP, subnet, dịch vụ nền', topic:'Subnet', difficulty:2,
+    question:'Một VLAN cần ít nhất 60 host usable. Prefix nhỏ nhất phù hợp là gì?',
+    options:['/26','/27','/28','/30','/24 là bắt buộc'],
+    answer:0,
+    explanation:'/26 có 64 địa chỉ, 62 usable, đủ cho 60 host.'
+  },
+  {
+    id:'QTM-OLD-MCQ-09', type:'mcq', lesson:'QTM 1 - IP, subnet, dịch vụ nền', topic:'Default gateway', difficulty:2,
+    question:'Khi host gửi gói tới IP khác subnet, host sẽ gửi frame Ethernet tới MAC của thiết bị nào?',
+    options:['Default gateway của host','DNS server','DHCP server','Switch access','Broadcast MAC của mọi router'],
+    answer:0,
+    explanation:'Đích khác subnet thì host gửi frame tới MAC của default gateway để router chuyển tiếp.'
+  },
+  {
+    id:'QTM-OLD-MCQ-10', type:'mcq', lesson:'QTM 1 - IP, subnet, dịch vụ nền', topic:'DHCP relay', difficulty:2,
+    question:'Client ở VLAN 20 cần nhận IP từ DHCP server đặt ở VLAN 10. Cấu hình nào cần có trên gateway VLAN 20?',
+    options:['ip helper-address trỏ tới DHCP server','spanning-tree portfast trunk','router ospf passive-interface','switchport mode access','ip nat outside'],
+    answer:0,
+    explanation:'DHCP Discover là broadcast, cần DHCP relay/ip helper-address để chuyển tới server khác VLAN.'
+  },
+  {
+    id:'QTM-OLD-MCQ-11', type:'mcq', lesson:'QTM 2 - Switching, VLAN, STP', topic:'Router-on-a-stick', difficulty:2,
+    question:'Trong mô hình router-on-a-stick, link giữa switch và router phải cấu hình thế nào?',
+    options:['Trunk 802.1Q mang các VLAN cần định tuyến','Access VLAN 1 duy nhất','PortFast + BPDU Guard','Shutdown để tránh loop','Chỉ cần đổi hostname router'],
+    answer:0,
+    explanation:'Router-on-a-stick dùng subinterface dot1Q trên router nên link switch-router phải là trunk.'
+  },
+  {
+    id:'QTM-OLD-MCQ-12', type:'mcq', lesson:'QTM 2 - Switching, VLAN, STP', topic:'Trunk allowed VLAN', difficulty:2,
+    config:'SW1#show interfaces trunk\nPort Gi0/1 Vlans allowed on trunk: 10,20',
+    question:'Nếu VLAN 30 mới tạo không đi qua uplink Gi0/1, nguyên nhân sát nhất là gì?',
+    options:['VLAN 30 chưa được allow trên trunk','OSPF area bị sai','DNS thiếu bản ghi A','NAT overload chưa bật','Docker bridge bị trùng subnet'],
+    answer:0,
+    explanation:'Trunk chỉ mang các VLAN nằm trong allowed list. Cần thêm VLAN 30 bằng lệnh allowed vlan add 30.'
+  },
+  {
+    id:'QTM-OLD-MCQ-13', type:'mcq', lesson:'QTM 2 - Switching, VLAN, STP', topic:'Cùng VLAN không ping được', difficulty:2,
+    question:'Hai PC cùng VLAN không ping được nhau trong mô hình router-on-a-stick. Đề cho thấy switch-router chưa trunk và một PC sai subnet mask. Kết luận nào đúng nhất?',
+    options:['Cần sửa trunk và subnet mask; không nên chỉ sửa routing','Chỉ cần thêm default route Internet','Chỉ cần đổi DNS server','Chỉ cần bật NAT static','Chỉ cần tăng OSPF cost'],
+    answer:0,
+    explanation:'Cùng VLAN không ping được nhau thường bắt đầu từ layer 2/subnet mask. Router hoặc Internet route không phải nguyên nhân đầu tiên.'
+  },
+  {
+    id:'QTM-OLD-MCQ-14', type:'mcq', lesson:'QTM 4 - ACL, NAT, firewall', topic:'ACL implicit deny', difficulty:2,
+    question:'Một ACL chỉ có một dòng permit SSH từ mạng quản trị. Traffic HTTP hợp lệ khác bị chặn. Vì sao?',
+    options:['Cuối ACL có implicit deny nếu không có permit phù hợp','ACL tự permit mọi traffic còn lại','SSH permit tự mở cả HTTP','ACL chỉ lọc source MAC','ACL không hoạt động trên router'],
+    answer:0,
+    explanation:'ACL xử lý từ trên xuống và có deny ngầm ở cuối.'
+  },
+  {
+    id:'QTM-OLD-MCQ-15', type:'mcq', lesson:'QTM 4 - ACL, NAT, firewall', topic:'Extended ACL placement', difficulty:2,
+    question:'Extended ACL chặn VLAN sinh viên truy cập server quản trị nên đặt ở đâu là hợp lý nhất?',
+    options:['Gần nguồn, inbound trên SVI/interface VLAN sinh viên','Gần Internet, outbound ở interface ngoài','Trên cổng console','Sau rule permit ip any any','Không cần xét chiều'],
+    answer:0,
+    explanation:'Extended ACL lọc chi tiết nguồn/đích/dịch vụ nên đặt gần nguồn để chặn sớm và tránh ảnh hưởng luồng khác.'
+  },
+  {
+    id:'QTM-OLD-MCQ-16', type:'mcq', lesson:'QTM 4 - ACL, NAT, firewall', topic:'NAT overload', difficulty:2,
+    question:'NAT overload/PAT dùng để làm gì?',
+    options:['Cho nhiều host private dùng chung một IP public bằng cách phân biệt port','Chia VLAN trên trunk','Cấp IP động cho client','Bầu root bridge STP','Tạo OSPF neighbor'],
+    answer:0,
+    explanation:'PAT ánh xạ nhiều kết nối private ra một IP public, phân biệt bằng port.'
+  },
+  {
+    id:'QTM-OLD-MCQ-17', type:'mcq', lesson:'QTM 5 - Linux server, VPN, giám sát', topic:'Linux command', difficulty:2,
+    question:'Lệnh systemctl trong Linux thường dùng để làm gì?',
+    options:['Quản lý service systemd như start/stop/status/enable','Chia subnet IPv4','Tạo VLAN tag 802.1Q trên switch Cisco','Hiển thị bảng định tuyến OSPF của router','Build Docker image duy nhất'],
+    answer:0,
+    explanation:'systemctl là lệnh quản lý service systemd trong Linux.'
+  },
+  {
+    id:'QTM-OLD-MCQ-18', type:'mcq', lesson:'QTM 5 - Linux server, VPN, giám sát', topic:'Linux command', difficulty:2,
+    question:'Lệnh ss -tulpn thường giúp kiểm tra điều gì?',
+    options:['Các port TCP/UDP đang listen và process liên quan','Danh sách VLAN allowed trên trunk','OSPF LSDB','Bản ghi MX trong DNS public','Số Pod Kubernetes đang Ready'],
+    answer:0,
+    explanation:'ss -tulpn dùng để xem socket listen theo TCP/UDP, port và process.'
+  },
+  {
+    id:'QTM-OLD-MCQ-19', type:'mcq', lesson:'QTM 5 - Linux server, VPN, giám sát', topic:'Linux command', difficulty:2,
+    question:'Lệnh ip route trên Linux dùng để xem thông tin gì?',
+    options:['Bảng định tuyến của máy Linux','Danh sách user AD','Danh sách VLAN trunk Cisco','Log truy cập web theo thời gian thực','Tất cả Docker image'],
+    answer:0,
+    explanation:'ip route cho biết route/default route của host Linux.'
+  },
+  {
+    id:'QTM-OLD-MCQ-20', type:'mcq', lesson:'QTM 5 - Linux server, VPN, giám sát', topic:'Active Directory', difficulty:2,
+    question:'Trong Active Directory, domain controller dự phòng giúp tăng tính sẵn sàng thường được gọi là gì trong bối cảnh học phần?',
+    options:['Additional Domain Controller (ADC)','DHCP Relay Agent','Root Bridge','Ingress Controller','NAT Overload'],
+    answer:0,
+    explanation:'ADC/Additional Domain Controller cung cấp dự phòng cho domain controller, giúp dịch vụ AD sẵn sàng hơn.'
+  },
+  {
+    id:'QTM-OLD-MCQ-21', type:'mcq', lesson:'QTM 5 - Linux server, VPN, giám sát', topic:'Active Directory', difficulty:2,
+    question:'Trong Active Directory, forest thường được hiểu đúng nhất là gì?',
+    options:['Tập hợp một hoặc nhiều domain tree có quan hệ tin cậy và schema chung','Một VLAN mặc định','Một DHCP scope','Một OSPF area','Một Docker network'],
+    answer:0,
+    explanation:'Forest là đơn vị logic lớn trong AD, chứa một hoặc nhiều domain tree.'
+  },
+  {
+    id:'QTM-OLD-MCQ-22', type:'mcq', lesson:'QTM 3 - OSPF & định tuyến', topic:'OSPF neighbor', difficulty:2,
+    question:'Hai router ping trực tiếp được nhưng OSPF không lên FULL. Nguyên nhân nào cần kiểm tra trước?',
+    options:['Area ID, subnet/mask, hello/dead timer, authentication hoặc passive-interface','DNS MX record','Docker volume','NAT overload cho mọi host','Port security sticky MAC'],
+    answer:0,
+    explanation:'Ping trực tiếp chỉ chứng minh IP link hoạt động; OSPF còn cần khớp area/timer/auth và không bị passive.'
+  },
+  {
+    id:'QTM-OLD-MCQ-23', type:'mcq', lesson:'QTM 3 - OSPF & định tuyến', topic:'Default route OSPF', difficulty:2,
+    question:'Muốn router biên quảng bá default route vào OSPF, điều kiện thông dụng là gì?',
+    options:['Có default route trong routing table rồi dùng default-information originate','Tất cả router phải trùng router-id','Chỉ cần tạo VLAN 1','Phải tắt mọi static route','Phải dùng RIPv1'],
+    answer:0,
+    explanation:'default-information originate thường cần router có default route trước, trừ khi dùng always theo chủ ý.'
+  },
+  {
+    id:'QTM-OLD-MCQ-24', type:'mcq', lesson:'QTM 1 - IP, subnet, dịch vụ nền', topic:'DNS', difficulty:2,
+    question:'Ping IP server thành công nhưng truy cập bằng tên server lỗi. Hướng kiểm tra sát nhất là gì?',
+    options:['DNS client, bản ghi A/CNAME và DNS server nội bộ','STP root bridge','OSPF area ID đầu tiên','NAT static cho server','Docker container replicas'],
+    answer:0,
+    explanation:'Ping IP chứng minh reachability cơ bản; lỗi bằng tên nghiêng về DNS/name resolution.'
+  }
+);
+
+NETWORK_QUESTION_BANK.push(
+  {
     id: 'QTM-SUBNET-02',
     type: 'mcq',
     lesson: 'QTM 1 - IP, subnet, dịch vụ nền',
