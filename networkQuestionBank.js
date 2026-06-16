@@ -2157,6 +2157,123 @@ NETWORK_QUESTION_BANK.push(
   }
 );
 
+NETWORK_QUESTION_BANK.push(
+  {
+    id: 'QTM-ESSAY-EXAMSTYLE-01',
+    type: 'short',
+    lesson: 'QTM 3 - OSPF & định tuyến',
+    topic: 'Tự luận exam-style: bảng IP, output route và đồ án',
+    difficulty: 3,
+    image: {src:'assets/qtm-routing-triangle-addressing.svg', alt:'Packet Tracer routing topology with PC IPs and gateways', caption:'Dạng đề thi: cho topology, bảng IP/gateway và output show ip route để suy luận lỗi.'},
+    config: 'Dữ kiện đề thi:\nPC-A: 192.168.10.11/24, GW 192.168.10.1\nPC-C: 192.168.20.11/24, GW 192.168.20.1\nPC-F: 192.168.30.12/24, GW 192.168.30.1\nR1-R2: 10.0.12.0/30, R2-R3: 10.0.23.0/30, R1-R3: 10.0.13.0/30\n\nR1#show ip route\nC 192.168.10.0/24 is directly connected, G0/1\nO 192.168.20.0/24 [110/2] via 10.0.12.2, 00:00:12, S0/0/0\nS* 0.0.0.0/0 [1/0] via 203.0.113.1\n\nR3#show ip route\nC 192.168.30.0/24 is directly connected, G0/1\nO 192.168.20.0/24 [110/2] via 10.0.23.1, 00:00:10, S0/0/1',
+    question: 'Tự luận cuối kỳ theo kiểu đề cũ:\na) Lập lại bảng IP/interface/gateway cho 3 LAN và 3 link serial, chỉ rõ subnet nào dùng cho host và subnet nào dùng point-to-point.\nb) Dựa vào output, chỉ ra route nào còn thiếu để PC-A ping PC-F. Giải thích vì sao có route tới LAN B chưa đủ chứng minh end-to-end.\nc) Nếu đây là câu đồ án nhỏ, đề xuất cách hoàn thiện routing, default route/NAT ra Internet và checklist kiểm tra tối thiểu 6 lệnh.',
+    answer: 'a) LAN A 192.168.10.0/24 gateway R1 G0/1 192.168.10.1; LAN B 192.168.20.0/24 gateway R2 G0/1 192.168.20.1; LAN C 192.168.30.0/24 gateway R3 G0/1 192.168.30.1. Các link R1-R2/R2-R3/R1-R3 dùng /30 vì chỉ cần 2 địa chỉ usable.\nb) R1 thiếu route tới 192.168.30.0/24 và R3 thiếu route về 192.168.10.0/24. Có route tới LAN B chỉ chứng minh R1/R3 học được một phần topology qua R2; traffic PC-A -> PC-F cần cả route chiều đi và route chiều về.\nc) Hoàn thiện bằng OSPF area 0 quảng bá đủ LAN và serial, hoặc static route hai chiều. Edge/default route chỉ dùng ra Internet; NAT overload áp cho traffic Internet, không NAT traffic LAN nội bộ. Kiểm: ipconfig, ping gateway, traceroute/tracert, show ip interface brief, show ip route, show ip ospf neighbor, show ip protocols, show access-lists, show ip nat translations.',
+    explanation: 'Tư duy ra đề: câu a chấm đọc topology và bảng địa chỉ; câu b chấm đọc output, không đoán mò; câu c chấm khả năng biến bài lab thành thiết kế đồ án có kiểm chứng.'
+  },
+  {
+    id: 'QTM-ESSAY-EXAMSTYLE-02',
+    type: 'short',
+    lesson: 'QTM 2 - Switching, VLAN, STP',
+    topic: 'Tự luận exam-style: topology lỗi Packet Tracer',
+    difficulty: 3,
+    image: {src:'assets/qtm-packet-tracer-error-lab.svg', alt:'Packet Tracer fault topology with visible error markers', caption:'Dạng đề thi: topology có marker lỗi, kèm output trunk/ACL/DHCP để khoanh vùng.'},
+    config: 'Dữ kiện đề thi:\n- VLAN10 Students: 192.168.10.0/24, GW 192.168.10.1\n- VLAN20 Teachers: 192.168.20.0/24, GW 192.168.20.1\n- VLAN30 Server: 192.168.30.0/24, WEB 192.168.30.50\n\nS2#show interfaces trunk\nPort Gi0/1 trunking, native VLAN 99\nVlans allowed on trunk: 10,20\n\nCORE#show access-lists VLAN10-IN\n10 deny tcp 192.168.10.0 0.0.0.255 host 192.168.30.50 eq 80 (18 matches)\n20 permit ip any any\n\nTriệu chứng: PC-D VLAN30 không lên WEB, PC-A VLAN10 không mở được HTTP tới WEB, VLAN20 không nhận DHCP.',
+    question: 'Tự luận cuối kỳ theo kiểu đề cũ:\na) Khoanh vùng ít nhất 3 lỗi khác nhau theo tầng: Layer 2, Layer 3/dịch vụ, ACL/firewall. Gắn mỗi lỗi với dữ kiện/output tương ứng.\nb) Với từng lỗi, nêu lệnh kiểm tra và kết quả mong đợi trước khi sửa.\nc) Viết hướng sửa an toàn, tránh kiểu sửa “mở hết/permit any any” và tránh ghi đè mất VLAN đang chạy.',
+    answer: 'a) Layer 2: trunk S2 Gi0/1 chỉ allow VLAN10,20 nên VLAN30 không đi qua uplink. Dịch vụ/Layer 3: VLAN20 không nhận DHCP có thể thiếu ip helper-address trên SVI VLAN20 hoặc DHCP scope sai. ACL/firewall: ACL VLAN10-IN đang deny HTTP từ VLAN10 tới WEB 192.168.30.50.\nb) Lệnh kiểm: show interfaces trunk mong thấy VLAN30 vắng trong allowed list; show vlan brief/show spanning-tree vlan 30 để xác nhận VLAN/port; show run interface vlan 20 hoặc show ip helper-address để kiểm DHCP relay; ipconfig /renew hoặc show ip dhcp binding để xem lease; show access-lists để thấy hit count deny tăng; ping/curl từ PC-A tới WEB để tái hiện lỗi.\nc) Sửa trunk bằng switchport trunk allowed vlan add 30, không thay cả list nếu không chắc. Thêm ip helper-address <DHCP-server-IP> trên gateway VLAN20 và kiểm scope/router option. Sửa ACL bằng rule permit đúng TCP 80/443 tới WEB trước deny, hoặc đổi deny chỉ chặn dịch vụ không được phép; vẫn giữ nguyên tắc least privilege và kiểm hit count sau sửa.',
+    explanation: 'Tư duy ra đề: một triệu chứng “không vào server” có thể do nhiều tầng. Bài làm tốt phải tách lỗi theo tầng, chứng minh bằng output, rồi mới đưa lệnh sửa.'
+  },
+  {
+    id: 'QTM-ESSAY-EXAMSTYLE-03',
+    type: 'short',
+    lesson: 'QTM 5 - Linux server, VPN, giám sát',
+    topic: 'Tự luận exam-style: đồ án VPN/server có output',
+    difficulty: 3,
+    image: {src:'assets/qtm-end-to-end-routers.svg', alt:'End-to-end topology for VPN server final essay', caption:'Dạng đề thi đồ án: VPN, server LAN, route chiều về, firewall và giám sát.'},
+    config: 'Dữ kiện đề thi/đồ án:\nVPN client: 10.8.0.10/24\nVPN-SRV tun0: 10.8.0.1/24\nVPN-SRV eth1: 10.10.30.2/24\nFile server: 192.168.30.20/24, GW 192.168.30.1\n\nVPN-SRV$ ip route\n10.8.0.0/24 dev tun0 src 10.8.0.1\n192.168.30.0/24 via 10.10.30.1 dev eth1\n\nVPN-SRV$ sysctl net.ipv4.ip_forward\nnet.ipv4.ip_forward = 0\n\nVPN-SRV$ iptables -S FORWARD\n-P FORWARD DROP\n-A FORWARD -i tun0 -o eth1 -p tcp -m multiport --dports 445,2049,21 -j ACCEPT',
+    question: 'Tự luận cuối kỳ theo kiểu đồ án:\na) Đọc output và chỉ ra vì sao VPN connected nhưng client chưa truy cập được file server. Phân biệt lỗi route, lỗi forwarding và lỗi firewall.\nb) Thiết kế rule/route tối thiểu để client VPN truy cập SMB/NFS/FTP an toàn, không public file server ra Internet.\nc) Nếu chấm theo đồ án, đề xuất các mục giám sát Zabbix/log bắt buộc và tiêu chí nghiệm thu sau khi sửa.',
+    answer: 'a) VPN connected chỉ chứng minh tunnel lên. IP forwarding đang tắt nên Linux không chuyển gói tun0 -> eth1. FORWARD mặc định DROP và mới có chiều đi, thiếu chiều về hoặc rule stateful RELATED,ESTABLISHED. File server/gateway LAN còn cần route về 10.8.0.0/24 qua VPN-SRV hoặc VPN-SRV phải NAT/MASQUERADE có kiểm soát.\nb) Bật net.ipv4.ip_forward=1; thêm FORWARD tun0 -> LAN đúng port SMB/NFS/FTP và rule chiều về/stateful; push route 192.168.30.0/24 cho client; thêm route ngược 10.8.0.0/24 trên gateway LAN hoặc NAT nếu không sửa được route. Chặn truy cập file service từ Internet, chỉ cho từ subnet VPN/user được phép.\nc) Zabbix/log: trạng thái openvpn service, số client connected, ping VPN gateway, ping file server từ VPN-SRV, kiểm port 445/2049/21, disk usage, failed login, firewall drop log, certificate expiry, backup config. Nghiệm thu: client ping/telnet/copy file thành công, traceroute đi đúng tunnel, log không có deny sai, route chiều về rõ ràng.',
+    explanation: 'Tư duy ra đề: đồ án không chỉ hỏi “cấu hình VPN”, mà chấm đủ luồng gói tin, route chiều về, firewall tối thiểu, giám sát và bằng chứng nghiệm thu.'
+  }
+);
+
+const QTM_EXAMSTYLE_PROFILES = [
+  {suffix:'01', a:'192.168.10.0/24', b:'192.168.20.0/24', c:'192.168.30.0/24', ga:'192.168.10.1', gb:'192.168.20.1', gc:'192.168.30.1', pc:'192.168.10.11', server:'192.168.30.50', vlanA:'10', vlanB:'20', vlanC:'30', wan1:'10.0.12.0/30', wan2:'10.0.23.0/30'},
+  {suffix:'02', a:'172.16.10.0/24', b:'172.16.20.0/24', c:'172.16.30.0/24', ga:'172.16.10.1', gb:'172.16.20.1', gc:'172.16.30.1', pc:'172.16.10.21', server:'172.16.30.60', vlanA:'110', vlanB:'120', vlanC:'130', wan1:'10.1.12.0/30', wan2:'10.1.23.0/30'},
+  {suffix:'03', a:'10.10.10.0/24', b:'10.10.20.0/24', c:'10.10.30.0/24', ga:'10.10.10.1', gb:'10.10.20.1', gc:'10.10.30.1', pc:'10.10.10.25', server:'10.10.30.20', vlanA:'210', vlanB:'220', vlanC:'230', wan1:'10.2.12.0/30', wan2:'10.2.23.0/30'},
+  {suffix:'04', a:'192.168.40.0/24', b:'192.168.50.0/24', c:'192.168.60.0/24', ga:'192.168.40.1', gb:'192.168.50.1', gc:'192.168.60.1', pc:'192.168.40.14', server:'192.168.60.40', vlanA:'40', vlanB:'50', vlanC:'60', wan1:'10.3.12.0/30', wan2:'10.3.23.0/30'},
+  {suffix:'05', a:'172.20.1.0/24', b:'172.20.2.0/24', c:'172.20.3.0/24', ga:'172.20.1.1', gb:'172.20.2.1', gc:'172.20.3.1', pc:'172.20.1.30', server:'172.20.3.10', vlanA:'301', vlanB:'302', vlanC:'303', wan1:'10.4.12.0/30', wan2:'10.4.23.0/30'},
+  {suffix:'06', a:'10.50.10.0/24', b:'10.50.20.0/24', c:'10.50.30.0/24', ga:'10.50.10.1', gb:'10.50.20.1', gc:'10.50.30.1', pc:'10.50.10.18', server:'10.50.30.80', vlanA:'510', vlanB:'520', vlanC:'530', wan1:'10.5.12.0/30', wan2:'10.5.23.0/30'},
+  {suffix:'07', a:'192.168.70.0/24', b:'192.168.80.0/24', c:'192.168.90.0/24', ga:'192.168.70.1', gb:'192.168.80.1', gc:'192.168.90.1', pc:'192.168.70.22', server:'192.168.90.90', vlanA:'70', vlanB:'80', vlanC:'90', wan1:'10.6.12.0/30', wan2:'10.6.23.0/30'},
+  {suffix:'08', a:'172.31.10.0/24', b:'172.31.20.0/24', c:'172.31.30.0/24', ga:'172.31.10.1', gb:'172.31.20.1', gc:'172.31.30.1', pc:'172.31.10.44', server:'172.31.30.44', vlanA:'610', vlanB:'620', vlanC:'630', wan1:'10.7.12.0/30', wan2:'10.7.23.0/30'},
+  {suffix:'09', a:'10.60.11.0/24', b:'10.60.22.0/24', c:'10.60.33.0/24', ga:'10.60.11.1', gb:'10.60.22.1', gc:'10.60.33.1', pc:'10.60.11.11', server:'10.60.33.33', vlanA:'711', vlanB:'722', vlanC:'733', wan1:'10.8.12.0/30', wan2:'10.8.23.0/30'},
+  {suffix:'10', a:'192.168.101.0/24', b:'192.168.102.0/24', c:'192.168.103.0/24', ga:'192.168.101.1', gb:'192.168.102.1', gc:'192.168.103.1', pc:'192.168.101.15', server:'192.168.103.25', vlanA:'101', vlanB:'102', vlanC:'103', wan1:'10.9.12.0/30', wan2:'10.9.23.0/30'}
+];
+
+QTM_EXAMSTYLE_PROFILES.forEach(profile => {
+  NETWORK_QUESTION_BANK.push(
+    {
+      id: `QTM-ESSAY-EXAMSTYLE-ROUTE-${profile.suffix}`,
+      type: 'short',
+      lesson: 'QTM 3 - OSPF & định tuyến',
+      topic: 'Đồ án mini exam-style: đọc route và hoàn thiện end-to-end',
+      difficulty: 3,
+      image: {src:'assets/qtm-routing-triangle-addressing.svg', alt:'Routing triangle exam topology', caption:'Đề thi biến thể: đọc topology, bảng IP và route còn thiếu.'},
+      config: `LAN A ${profile.a}, gateway ${profile.ga}; LAN B ${profile.b}, gateway ${profile.gb}; LAN C ${profile.c}, gateway ${profile.gc}.\nSerial R1-R2 ${profile.wan1}; Serial R2-R3 ${profile.wan2}.\nPC-A ${profile.pc} ping gateway được nhưng không ping server ${profile.server}.\n\nR1#show ip route\nC ${profile.a} is directly connected, G0/1\nO ${profile.b} [110/2] via R2\n\nR3#show ip route\nC ${profile.c} is directly connected, G0/1\nO ${profile.b} [110/2] via R2`,
+      question: 'Tự luận cuối kỳ:\na) Lập bảng địa chỉ cho LAN/router/interface và xác định default gateway cho host.\nb) Dựa vào output, chỉ ra route còn thiếu ở R1/R3 và giải thích route chiều về.\nc) Đề xuất cấu hình OSPF hoặc static route, default route/NAT nếu có Internet, và lệnh kiểm tra nghiệm thu.',
+      answer: `a) Host LAN A dùng gateway ${profile.ga}, LAN B dùng ${profile.gb}, LAN C/server dùng ${profile.gc}; serial dùng /30 vì là point-to-point.\nb) R1 thiếu route tới ${profile.c}; R3 thiếu route về ${profile.a}. Muốn ${profile.pc} tới ${profile.server}, phải có cả chiều đi lẫn chiều về.\nc) OSPF area 0 quảng bá đủ ${profile.a}, ${profile.b}, ${profile.c} và các serial; hoặc static route hai chiều qua R2. Nếu ra Internet, đặt default route ở edge và NAT overload chỉ cho traffic Internet. Kiểm show ip route, show ip ospf neighbor, show ip protocols, ping/traceroute, show access-lists, show ip nat translations.`,
+      explanation: 'Tư duy ra đề: đọc bảng route để phát hiện thiếu prefix, không chỉ nhìn topology; đồ án nhỏ phải có route, NAT và kiểm chứng.'
+    },
+    {
+      id: `QTM-ESSAY-EXAMSTYLE-VLAN-${profile.suffix}`,
+      type: 'short',
+      lesson: 'QTM 2 - Switching, VLAN, STP',
+      topic: 'Đồ án mini exam-style: VLAN trunk ACL DHCP',
+      difficulty: 3,
+      image: {src:'assets/qtm-packet-tracer-error-lab.svg', alt:'Packet Tracer VLAN fault exam topology', caption:'Đề thi biến thể: trunk thiếu VLAN, ACL deny và DHCP relay.'},
+      config: `VLAN${profile.vlanA}: ${profile.a}, GW ${profile.ga}; VLAN${profile.vlanB}: ${profile.b}, GW ${profile.gb}; VLAN${profile.vlanC}: ${profile.c}, WEB ${profile.server}.\n\nSW#show interfaces trunk\nGi0/1 trunking, allowed VLANs: ${profile.vlanA},${profile.vlanB}\n\nCORE#show access-lists VLAN${profile.vlanA}-IN\n10 deny tcp ${profile.a.replace('/24','')} 0.0.0.255 host ${profile.server} eq 80\n20 permit ip any any\n\nTriệu chứng: VLAN${profile.vlanC} không tới WEB; VLAN${profile.vlanA} bị chặn HTTP; VLAN${profile.vlanB} không nhận DHCP.`,
+      question: 'Tự luận cuối kỳ:\na) Khoanh vùng lỗi Layer 2, DHCP relay và ACL/firewall từ output.\nb) Nêu lệnh kiểm tra trước khi sửa và kết quả mong đợi.\nc) Viết hướng sửa an toàn, không ghi đè mất VLAN và không mở ACL quá rộng.',
+      answer: `a) Trunk thiếu VLAN${profile.vlanC}; VLAN${profile.vlanB} có thể thiếu ip helper-address hoặc DHCP scope; ACL VLAN${profile.vlanA}-IN đang deny HTTP tới ${profile.server}.\nb) Kiểm show interfaces trunk, show vlan brief, show run interface vlan ${profile.vlanB}, ipconfig /renew, show access-lists hit count, ping/curl tới WEB.\nc) Dùng switchport trunk allowed vlan add ${profile.vlanC}; thêm ip helper-address tới DHCP server và scope đúng gateway ${profile.gb}; sửa ACL bằng permit đúng TCP 80/443 trước deny hoặc giới hạn deny theo policy.`,
+      explanation: 'Tư duy ra đề: cùng một triệu chứng không vào server nhưng có thể gồm lỗi trunk, DHCP và ACL; bài làm phải tách tầng.'
+    },
+    {
+      id: `QTM-ESSAY-EXAMSTYLE-DNS-${profile.suffix}`,
+      type: 'short',
+      lesson: 'QTM 1 - IP, subnet, dịch vụ nền',
+      topic: 'Đồ án mini exam-style: DHCP DNS gateway',
+      difficulty: 3,
+      image: {src:'assets/qtm-packet-tracer-vlan-addressing.svg', alt:'Packet Tracer addressing exam topology', caption:'Đề thi biến thể: IP/gateway/DHCP/DNS theo bảng địa chỉ.'},
+      config: `PC-A ${profile.pc}/24, gateway ${profile.ga}; WEB ${profile.server}/24, gateway ${profile.gc}.\nDHCP server đặt ở VLAN${profile.vlanC}; DNS nội bộ phải phân giải web.local -> ${profile.server}.\nTriệu chứng: PC ping gateway được, ping IP WEB lúc được lúc không, truy cập web.local lỗi.`,
+      question: 'Tự luận cuối kỳ:\na) Phân biệt lỗi IP/gateway, lỗi DHCP relay và lỗi DNS trong tình huống trên.\nb) Lập checklist kiểm tra từ PC, switch/core và server.\nc) Nếu đây là phần đồ án, nêu tiêu chí nghiệm thu để chứng minh người dùng truy cập web nội bộ ổn định.',
+      answer: `a) Gateway sai làm host không đi khác subnet; DHCP relay sai làm client không nhận đúng IP/gateway/DNS; DNS sai làm ping IP được nhưng tên web.local không ra ${profile.server}.\nb) PC: ipconfig /all, ping ${profile.ga}, nslookup web.local, tracert ${profile.server}. Core: show ip interface brief, show run interface vlan, show interfaces trunk, show access-lists. Server: kiểm IP ${profile.server}, gateway ${profile.gc}, DNS record, service 80/443 và firewall host.\nc) Nghiệm thu: client nhận IP đúng scope, gateway/DNS đúng, nslookup trả đúng IP, ping/traceroute/curl web.local thành công, log không còn deny sai.`,
+      explanation: 'Tư duy ra đề: đề hay cho nhiều triệu chứng giống nhau, nhưng DNS chỉ đổi tên thành IP, routing quyết định đường đi, ACL/firewall quyết định cho qua.'
+    },
+    {
+      id: `QTM-ESSAY-EXAMSTYLE-VPN-${profile.suffix}`,
+      type: 'short',
+      lesson: 'QTM 5 - Linux server, VPN, giám sát',
+      topic: 'Đồ án mini exam-style: VPN server route chiều về',
+      difficulty: 3,
+      image: {src:'assets/qtm-end-to-end-routers.svg', alt:'End-to-end VPN exam topology', caption:'Đề thi biến thể: client VPN, server LAN, route chiều về và giám sát.'},
+      config: `VPN subnet: 10.8.${profile.suffix}.0/24\nVPN client: 10.8.${profile.suffix}.10\nServer LAN: ${profile.c}, file/web server ${profile.server}\nVPN-SRV$ sysctl net.ipv4.ip_forward -> 0\niptables FORWARD default DROP, chỉ có rule tun0 -> LAN.`,
+      question: 'Tự luận cuối kỳ:\na) Vì sao VPN connected chưa đủ để client truy cập server LAN? Phân tích route đi, route về, forwarding và firewall.\nb) Đề xuất route/firewall/NAT tối thiểu để VPN vào LAN an toàn.\nc) Nêu item/trigger Zabbix hoặc log cần có để chấm phần vận hành đồ án.',
+      answer: `a) Tunnel lên chỉ chứng minh client tới VPN-SRV. Cần IP forwarding, rule FORWARD hai chiều/stateful và route từ LAN ${profile.c} về 10.8.${profile.suffix}.0/24 hoặc NAT phù hợp.\nb) Push route ${profile.c} cho client, bật net.ipv4.ip_forward=1, permit đúng port tới ${profile.server}, thêm route ngược trên gateway LAN hoặc MASQUERADE có kiểm soát, không public SMB/NFS/FTP ra Internet.\nc) Giám sát openvpn service, số client, ping tunnel, ping ${profile.server}, port dịch vụ, disk/CPU/RAM, failed login, firewall drop log, certificate expiry và cảnh báo email/Telegram.`,
+      explanation: 'Tư duy ra đề: phần đồ án chấm được khi sinh viên giải thích đúng luồng gói tin và có bằng chứng vận hành.'
+    },
+    {
+      id: `QTM-ESSAY-EXAMSTYLE-NAT-${profile.suffix}`,
+      type: 'short',
+      lesson: 'QTM 4 - ACL, NAT, firewall',
+      topic: 'Đồ án mini exam-style: NAT ACL DMZ',
+      difficulty: 3,
+      image: {src:'assets/qtm-end-to-end-routers.svg', alt:'End-to-end NAT ACL exam topology', caption:'Đề thi biến thể: LAN, Server/DMZ, Internet, NAT và ACL.'},
+      config: `LAN user ${profile.a}; LAN server/DMZ ${profile.c}; WEB ${profile.server}; Edge ra Internet.\nYêu cầu: user truy cập WEB nội bộ và Internet; Internet chỉ vào WEB 80/443; không cho user truy cập gateway quản trị.\nTriệu chứng: user đi Internet được nhưng không vào WEB nội bộ.`,
+      question: 'Tự luận cuối kỳ:\na) Viết policy ACL logic theo nguồn, đích, dịch vụ. Chỉ rõ rule permit/deny quan trọng.\nb) Phân biệt NAT overload ra Internet, static/DNAT vào WEB và traffic nội bộ không nên NAT.\nc) Nêu thứ tự kiểm tra khi user Internet được nhưng WEB nội bộ lỗi.',
+      answer: `a) Permit ${profile.a} tới ${profile.server} TCP 80/443; deny user tới IP quản trị gateway; permit traffic Internet theo policy; Internet chỉ vào ${profile.server} 80/443 nếu public.\nb) NAT overload dùng cho ${profile.a} ra Internet; DNAT/static PAT dùng nếu public WEB; traffic ${profile.a} tới ${profile.server} nội bộ không nên bị NAT sai.\nc) Kiểm show ip route tới ${profile.c}, gateway server ${profile.gc}, show access-lists hit count, show ip nat translations, traceroute, curl/telnet port, firewall host và log deny.`,
+      explanation: 'Tư duy ra đề: NAT/ACL phải gắn nguồn-đích-dịch vụ và phân biệt traffic Internet với traffic nội bộ.'
+    }
+  );
+});
+
 const NETWORK_ESSAY_REWRITES = {
   'QTM-OSPF-04': {
     image: {src:'assets/qtm-packet-tracer-vlan-addressing.svg', alt:'Packet Tracer campus VLAN topology', caption:'Topology có IP host/default gateway và bảng địa chỉ để phân tích OSPF/VLAN.'},

@@ -1064,8 +1064,19 @@
     return /final-05|final-06|final-07|project|đồ án|do an|openvpn|vpn|zabbix|file server|smb|nfs|ftp|docker|kubernetes|cloud|ingress|ansible|automation|haproxy|backup|rollback|deploy web|linux server|giám sát|giam sat/.test(text);
   }
 
+  function qtmProjectEssayRank(q){
+    const text = `${q.id || ''} ${q.topic || ''} ${q.question || ''} ${q.config || ''}`.toLowerCase();
+    if(/examstyle|pastyear|output|end2end|packet tracer|show ip route|show interfaces trunk|bảng ip|bang ip|default gateway|marker lỗi|marker loi|chia subnet|đọc output|doc output/.test(text)) return 0;
+    if(/topology|ospf|vlan|acl|nat|dhcp|dns|route chiều về|route chieu ve/.test(text)) return 1;
+    if(/vpn|openvpn|zabbix|file server|linux server/.test(text)) return 2;
+    if(/cloud|kubernetes|docker|automation|backup|rollback|haproxy/.test(text)) return 3;
+    return 4;
+  }
+
   function prioritizeQtmProjectEssays(pool, catalogExamNo, rng){
     return prioritizeQtmCatalogSlot(pool.filter(q => q.type === 'short' && isQtmProjectEssay(q)), catalogExamNo, rng).sort((a,b) => {
+      const rankDiff = qtmProjectEssayRank(a) - qtmProjectEssayRank(b);
+      if(rankDiff) return rankDiff;
       const aFinal = /FINAL|PROJECT|PASTYEAR|OUTPUT/.test(String(a.id || '')) ? 0 : 1;
       const bFinal = /FINAL|PROJECT|PASTYEAR|OUTPUT/.test(String(b.id || '')) ? 0 : 1;
       const aMedia = a.image ? 0 : 1;
