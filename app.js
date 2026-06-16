@@ -624,6 +624,20 @@
     return [...document.querySelectorAll(`input[name="${name}"]:checked`)].map(x=>x.value);
   }
 
+  function qtmLessonNumber(lesson){
+    const match = String(lesson || '').match(/\bQTM\s*(\d+)\b/i);
+    return match ? match[1] : '';
+  }
+
+  function lessonMatchesSelection(q, selectedLessons){
+    const lesson = String(q.lesson || '');
+    if(selectedLessons.includes(lesson)) return true;
+    const qtmNo = qtmLessonNumber(lesson);
+    if(qtmNo && selectedLessons.some(item => qtmLessonNumber(item) === qtmNo)) return true;
+    const normalized = normalizeDuplicateText(lesson);
+    return selectedLessons.some(item => normalizeDuplicateText(item) === normalized);
+  }
+
   function getSubject(){
     return $('subject')?.value || 'atmm';
   }
@@ -740,8 +754,8 @@
     if(mode==='hard') types = types.filter(t => t !== 'tf' && t !== 'fill');
     if(types.length===0) types=['mcq'];
 
-    let pool = baseQuestions().filter(q => lessons.includes(q.lesson) && q.difficulty >= minDiff && types.includes(q.type));
-    pool = pool.concat(dynamicQuestions(seed, DYNAMIC_BANK_SIZE).filter(q => lessons.includes(q.lesson) && q.difficulty >= minDiff && types.includes(q.type)));
+    let pool = baseQuestions().filter(q => lessonMatchesSelection(q, lessons) && q.difficulty >= minDiff && types.includes(q.type));
+    pool = pool.concat(dynamicQuestions(seed, DYNAMIC_BANK_SIZE).filter(q => lessonMatchesSelection(q, lessons) && q.difficulty >= minDiff && types.includes(q.type)));
     if(mode==='docx') pool = pool.filter(q=>q.type==='mcq');
     if(mode==='hard') pool = pool.filter(q=>q.difficulty>=3 || q.type==='calc');
 
@@ -756,7 +770,7 @@
       if(subject === 'qtm' && (mode === 'mixed' || batchMode)) shuffled = balanceQtmSelection(shuffled, count, rng);
       if(shuffled.length < count){
         const fallback = shuffle(baseQuestions().concat(dynamicQuestions(variantSeed+'fallback',DYNAMIC_BANK_SIZE)), rng)
-          .filter(q => (mode==='docx'? q.type==='mcq': true) && lessons.includes(q.lesson) && q.difficulty >= minDiff && types.includes(q.type));
+          .filter(q => (mode==='docx'? q.type==='mcq': true) && lessonMatchesSelection(q, lessons) && q.difficulty >= minDiff && types.includes(q.type));
         const seen = new Set(shuffled.map(q=>q.id));
         for(const q of fallback){ if(!seen.has(q.id)){ shuffled.push(q); seen.add(q.id); } if(shuffled.length>=count) break; }
       }
@@ -837,6 +851,27 @@
     return preferred.concat(shuffle(rest, rng));
   }
 
+  function qtmCatalogPreferredIds(questions, examNo){
+    const bucket = ((Number(examNo) || 1) - 1 + EXAM_CATALOG_SIZE) % EXAM_CATALOG_SIZE;
+    return new Set(questions.map((q, index) => ({
+      q,
+      index,
+      score: stableScore(q.caseId || q.id || index, 'qtm-catalog')
+    })).sort((a,b) => a.score - b.score || a.index - b.index)
+      .filter((item, index) => index % EXAM_CATALOG_SIZE === bucket)
+      .map(item => item.q.id));
+  }
+
+  function qtmCatalogPreferredScore(q, preferredIds){
+    return preferredIds.has(q.id) ? 0 : 1;
+  }
+
+  function rotateQtmCatalogList(list, examNo, salt=''){
+    if(list.length <= 1) return list;
+    const offset = Math.floor(stableScore(`${examNo}|${salt}|${list.length}`, 'qtm-group-rotate') * list.length);
+    return list.slice(offset).concat(list.slice(0, offset));
+  }
+
   function balanceQtmSelection(shuffled, count, rng){
     const medium = shuffled.filter(q => q.difficulty <= 2);
     const hard = shuffled.filter(q => q.difficulty >= 3);
@@ -911,7 +946,8 @@
     const objectivePool = prioritizeQtmSlideTheory(
       filteredShuffled.filter(q => q.type === 'mcq' || q.type === 'tf' || q.type === 'match' || q.type === 'fill'),
       objectiveTarget,
-      rng
+      rng,
+      catalogExamNo
     );
     const selected = [];
     for(const q of objectivePool){
@@ -996,13 +1032,15 @@
         }
       }
     }
-    return selected.concat(essays, projectEssays).slice(0, count);
+    return shuffle(selected, rng).concat(essays, projectEssays).slice(0, count);
   }
 
-  function prioritizeQtmSlideTheory(questions, targetCount, rng){
+  function prioritizeQtmSlideTheory(questions, targetCount, rng, catalogExamNo=1){
     const isObjective = q => q.type === 'mcq' || q.type === 'tf' || q.type === 'match' || q.type === 'fill';
-    const sortOldExam = (a,b) => qtmObjectiveExamScore(a) - qtmObjectiveExamScore(b) || stableScore(a.id || a.question, 'old-exam-objective') - stableScore(b.id || b.question, 'old-exam-objective');
-    const ordered = questions.filter(isObjective).sort(sortOldExam);
+    const objectiveQuestions = questions.filter(isObjective);
+    const preferredIds = qtmCatalogPreferredIds(objectiveQuestions, catalogExamNo);
+    const sortOldExam = (a,b) => qtmObjectiveExamScore(a) - qtmObjectiveExamScore(b) || qtmCatalogPreferredScore(a, preferredIds) - qtmCatalogPreferredScore(b, preferredIds) || stableScore(a.id || a.question, `old-exam-objective-${catalogExamNo}`) - stableScore(b.id || b.question, `old-exam-objective-${catalogExamNo}`);
+    const ordered = objectiveQuestions.sort(sortOldExam);
     const grouped = new Map();
     for(const q of ordered){
       const group = qtmKnowledgeGroup(q);
@@ -1012,26 +1050,34 @@
     const selected = [];
     const seen = new Set();
     const projectLimit = Math.max(1, Math.min(4, Math.round(targetCount * 0.16)));
+    const dynamicLimit = Math.max(4, Math.min(8, Math.round(targetCount * 0.30)));
     let projectPicked = 0;
+    let dynamicPicked = 0;
     const addQuestion = (q) => {
       if(!q || seen.has(q.id)) return false;
       const project = isQtmProjectTopic(q);
       if(project && projectPicked >= projectLimit) return false;
+      const dynamic = isQtmDynamicObjective(q);
+      if(dynamic && dynamicPicked >= dynamicLimit) return false;
       selected.push(q);
       seen.add(q.id);
       if(project) projectPicked++;
+      if(dynamic) dynamicPicked++;
       return true;
     };
-    const takeFrom = (list, desiredCount) => {
+    const takeFrom = (list, desiredCount, group) => {
       const balanced = balanceQtmSelection(list, Math.max(desiredCount, targetCount), rng);
+      const rotated = rotateQtmCatalogList(balanced, catalogExamNo, group);
+      const preferredIds = qtmCatalogPreferredIds(rotated, catalogExamNo);
+      const cataloged = rotated.slice().sort((a,b) => qtmCatalogPreferredScore(a, preferredIds) - qtmCatalogPreferredScore(b, preferredIds));
       const startCount = selected.length;
-      for(const q of balanced){
+      for(const q of cataloged){
         if(selected.length - startCount >= desiredCount || selected.length >= targetCount) break;
         addQuestion(q);
       }
     };
     for(const [group, desiredCount] of qtmObjectiveGroupTargets(targetCount)){
-      takeFrom(grouped.get(group) || [], desiredCount);
+      takeFrom(grouped.get(group) || [], desiredCount, group);
     }
     if(selected.length < targetCount){
       const oldStyle = ordered.filter(isQtmOldExamObjective);
@@ -1046,8 +1092,9 @@
   }
 
   function prioritizeQtmOldExamObjectives(questions, targetCount, catalogExamNo, rng){
-    const ordered = prioritizeQtmCatalogSlot(questions, catalogExamNo, rng).sort((a,b) => {
-      return qtmObjectiveExamScore(a) - qtmObjectiveExamScore(b) || stableScore(a.id || a.question, `old-exam-${catalogExamNo}`) - stableScore(b.id || b.question, `old-exam-${catalogExamNo}`);
+    const preferredIds = qtmCatalogPreferredIds(questions, catalogExamNo);
+    const ordered = questions.slice().sort((a,b) => {
+      return qtmObjectiveExamScore(a) - qtmObjectiveExamScore(b) || qtmCatalogPreferredScore(a, preferredIds) - qtmCatalogPreferredScore(b, preferredIds) || stableScore(a.id || a.question, `old-exam-${catalogExamNo}`) - stableScore(b.id || b.question, `old-exam-${catalogExamNo}`);
     });
     const oldStyle = ordered.filter(isQtmOldExamObjective);
     const regularTheory = ordered.filter(q => !isQtmOldExamObjective(q) && !isQtmProjectTopic(q));
@@ -1100,12 +1147,18 @@
   }
 
   function qtmObjectiveExamScore(q){
+    const id = String(q.id || '');
     const text = `${q.lesson || ''} ${q.topic || ''} ${q.question || ''} ${q.config || ''}`.toLowerCase();
-    if(String(q.id || '').startsWith('QTM-OLD-MCQ')) return -2;
     if(isQtmProjectTopic(q)) return 4;
+    if(isQtmDynamicObjective(q)) return 0;
+    if(id.startsWith('QTM-OLD-MCQ')) return 1;
     if(/show ip route|administrative distance|metric|ospf|rip|static route|bgp|ipv6|subnet|vlsm|wildcard|acl|nat|vlan|trunk|stp|router-on-a-stick|dhcp|dns|linux|systemctl|ss |ip addr|active directory|domain controller|adc/.test(text)) return 0;
     if(isCoreSlideLesson(q.lesson)) return 1;
     return 2;
+  }
+
+  function isQtmDynamicObjective(q){
+    return /^QTM-(DYN|MEGA)-/.test(String(q?.id || ''));
   }
 
   function isQtmOldExamObjective(q){
