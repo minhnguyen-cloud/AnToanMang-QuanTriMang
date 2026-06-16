@@ -498,6 +498,12 @@
       {lesson:'QTM 1 - IP, subnet, dịch vụ nền', topic:'IP conflict', clue:'hai máy thỉnh thoảng rớt mạng và log báo duplicate IP', correct:'Tìm thiết bị trùng IP, kiểm DHCP reservation/static IP, ARP table và dải cấp phát DHCP', wrongs:['Tăng OSPF cost trên uplink','Mở thêm port 22 inbound','Đổi native VLAN không cần kiểm IP','Xóa toàn bộ DNS zone'], config:'DHCP pool 192.168.10.50-192.168.10.200; một máy in đặt static 192.168.10.88.'},
       {lesson:'QTM 1 - IP, subnet, dịch vụ nền', topic:'DHCP scope', clue:'một VLAN nhận được IP sai dải của VLAN khác', correct:'Kiểm tra VLAN access/trunk, DHCP relay, scope tương ứng subnet và có server DHCP giả hay không', wrongs:['Bật PortFast sẽ tự sửa dải DHCP','Đổi cipher suite TLS','Chỉ tăng lease time','Tắt default route Internet'], config:'VLAN 30 đáng lẽ nhận 192.168.30.0/24 nhưng client nhận 192.168.10.x.'},
       {lesson:'QTM 1 - IP, subnet, dịch vụ nền', topic:'DNS split horizon', clue:'trong LAN truy cập domain public trỏ nhầm ra IP ngoài thay vì server nội bộ', correct:'Kiểm tra DNS nội bộ, split DNS/hairpin NAT và bản ghi A tương ứng môi trường trong LAN', wrongs:['Đổi STP root bridge','Chỉ mở thêm UDP 67/68','Tăng MTU trên trunk','Xóa mọi bản ghi MX'], config:'app.company.vn public = 203.0.113.10; server nội bộ = 10.10.30.20.'},
+      {lesson:'QTM 5 - Linux server, VPN, giám sát', topic:'Linux command', clue:'service nginx báo inactive sau khi reboot server', correct:'Dùng systemctl status/start/enable để kiểm tra, khởi động và bật service chạy cùng hệ thống', wrongs:['Thêm VLAN vào trunk là đủ','Đổi OSPF area trên router','Tạo NAT overload cho service local','Chỉ đổi DNS public'], config:'systemctl status nginx -> inactive; journalctl -u nginx có lỗi bind port.'},
+      {lesson:'QTM 5 - Linux server, VPN, giám sát', topic:'Linux command', clue:'service báo active nhưng client không truy cập được port từ máy khác', correct:'Dùng ss -tulpn kiểm tra process listen IP/port, sau đó kiểm firewall host và route tới server', wrongs:['Active nghĩa là chắc chắn nghe trên mọi interface','Chỉ đổi default gateway PC','Tăng STP priority','Xóa bản ghi DNS MX'], config:'ss -tulpn thấy 127.0.0.1:8080 thay vì 0.0.0.0:8080.'},
+      {lesson:'QTM 5 - Linux server, VPN, giám sát', topic:'Linux command', clue:'server Linux ping LAN được nhưng không ra Internet sau khi đổi gateway', correct:'Dùng ip route kiểm default route, gateway hợp lệ cùng subnet và metric của route', wrongs:['Kiểm tra BPDU Guard đầu tiên','Đổi Service Kubernetes sang NodePort','Thêm CNAME DNS là đủ','Tắt toàn bộ ACL trên core'], config:'ip route không có default via gateway hoặc gateway nằm sai subnet.'},
+      {lesson:'QTM 5 - Linux server, VPN, giám sát', topic:'Active Directory', clue:'máy Windows join domain thất bại dù ping được IP domain controller', correct:'Kiểm tra DNS client trỏ về DNS/DC nội bộ, bản ghi SRV, đồng bộ thời gian và quyền join domain', wrongs:['Đổi native VLAN là đủ','Dùng NAT overload cho DC','Tăng OSPF cost','Scale thêm Pod CoreDNS'], config:'Client đang dùng DNS 8.8.8.8, domain nội bộ là corp.local.'},
+      {lesson:'QTM 5 - Linux server, VPN, giám sát', topic:'Active Directory', clue:'domain controller dự phòng không đồng bộ user mới', correct:'Kiểm tra replication giữa DC/ADC, DNS, site link, thời gian và log Directory Service', wrongs:['Đổi trunk allowed VLAN cho mọi port','Bật Docker volume','Chỉ flush DNS trên web server','Tắt firewall toàn mạng'], config:'repadmin /replsummary báo lỗi replication giữa DC1 và ADC1.'},
+      {lesson:'QTM 5 - Linux server, VPN, giám sát', topic:'Active Directory', clue:'user đã đổi policy nhưng máy client chưa nhận cấu hình mới', correct:'Kiểm tra OU/link GPO, security filtering, gpupdate /force, gpresult và đồng bộ DC', wrongs:['Đổi router-id OSPF','Mở port FTP passive','Tạo NAT static cho client','Xóa DHCP scope'], config:'gpresult không thấy GPO mới áp dụng cho user/máy.'},
       {lesson:'QTM 2 - Switching, VLAN, STP', topic:'Access VLAN sai', clue:'máy phòng kế toán cắm vào port mới nhưng nhận IP của VLAN sinh viên', correct:'Kiểm tra switchport access vlan, profile port, mô tả cổng và DHCP scope nhận được', wrongs:['Đổi OSPF area trên router biên','Mở NAT overload trên server DNS','Tăng replica Kubernetes','Chỉ đổi password Wi-Fi'], config:'interface Gi0/18\n switchport mode access\n switchport access vlan 40'},
       {lesson:'QTM 2 - Switching, VLAN, STP', topic:'EtherChannel mismatch', clue:'hai uplink cấu hình channel-group nhưng port-channel không lên', correct:'Kiểm tra mode LACP/PAgP hai đầu, speed/duplex, native/allowed VLAN và cấu hình member port đồng nhất', wrongs:['Tạo DHCP reservation cho port-channel','Đổi CA certificate','Mở ICMP trên firewall là đủ','Xóa toàn bộ VLAN database'], config:'SW1 channel-group 1 mode active; SW2 channel-group 1 mode on.'},
       {lesson:'QTM 2 - Switching, VLAN, STP', topic:'Port security', clue:'cổng access bị err-disabled sau khi thay máy người dùng', correct:'Kiểm tra port-security sticky/static MAC, violation mode và recovery trước khi cho thiết bị mới hoạt động', wrongs:['Đổi OSPF router-id','Tăng timeout HAProxy','Đổi subnet mask thành /30','Tắt backup cấu hình'], config:'switchport port-security\nswitchport port-security mac-address sticky'},
@@ -554,7 +560,7 @@
     const theoryDrills = drills.filter(d => !isProjectDrill(d));
     const projectDrills = drills.filter(isProjectDrill);
     const preferredDrills = theoryDrills.length ? theoryDrills : drills;
-    const projectStart = Math.max(preferredDrills.length, Math.floor(targetCount * 0.96));
+    const projectStart = Math.max(preferredDrills.length, Math.floor(targetCount * 0.8));
     const forms = [
       (d) => `Đề cũ cho dữ kiện: ${d.clue}. Kết luận nào đúng nhất?`,
       (d) => `Khi đọc output/cấu hình liên quan ${d.topic}, dấu hiệu "${d.clue}" gợi ý phương án nào?`,
@@ -996,32 +1002,47 @@
   function prioritizeQtmSlideTheory(questions, targetCount, rng){
     const isObjective = q => q.type === 'mcq' || q.type === 'tf' || q.type === 'match' || q.type === 'fill';
     const sortOldExam = (a,b) => qtmObjectiveExamScore(a) - qtmObjectiveExamScore(b) || stableScore(a.id || a.question, 'old-exam-objective') - stableScore(b.id || b.question, 'old-exam-objective');
-    const core = questions.filter(q => isObjective(q) && isQtmOldExamObjective(q)).sort(sortOldExam);
-    const extended = questions.filter(q => isObjective(q) && !isQtmOldExamObjective(q)).sort(sortOldExam);
-    const coreTarget = Math.min(targetCount, core.length);
+    const ordered = questions.filter(isObjective).sort(sortOldExam);
+    const grouped = new Map();
+    for(const q of ordered){
+      const group = qtmKnowledgeGroup(q);
+      if(!grouped.has(group)) grouped.set(group, []);
+      grouped.get(group).push(q);
+    }
     const selected = [];
     const seen = new Set();
-    const takeFrom = (list, limit) => {
-      const balanced = balanceQtmSelection(list, limit, rng);
+    const projectLimit = Math.max(1, Math.min(4, Math.round(targetCount * 0.16)));
+    let projectPicked = 0;
+    const addQuestion = (q) => {
+      if(!q || seen.has(q.id)) return false;
+      const project = isQtmProjectTopic(q);
+      if(project && projectPicked >= projectLimit) return false;
+      selected.push(q);
+      seen.add(q.id);
+      if(project) projectPicked++;
+      return true;
+    };
+    const takeFrom = (list, desiredCount) => {
+      const balanced = balanceQtmSelection(list, Math.max(desiredCount, targetCount), rng);
+      const startCount = selected.length;
       for(const q of balanced){
-        if(selected.length >= limit) break;
-        if(seen.has(q.id)) continue;
-        selected.push(q);
-        seen.add(q.id);
+        if(selected.length - startCount >= desiredCount || selected.length >= targetCount) break;
+        addQuestion(q);
       }
     };
-    takeFrom(core, coreTarget);
-    const extendedTarget = targetCount - selected.length;
-    takeFrom(extended, selected.length + extendedTarget);
+    for(const [group, desiredCount] of qtmObjectiveGroupTargets(targetCount)){
+      takeFrom(grouped.get(group) || [], desiredCount);
+    }
     if(selected.length < targetCount){
-      for(const q of balanceQtmSelection(questions, targetCount, rng)){
+      const oldStyle = ordered.filter(isQtmOldExamObjective);
+      const regularTheory = ordered.filter(q => !isQtmOldExamObjective(q) && !isQtmProjectTopic(q));
+      const project = ordered.filter(isQtmProjectTopic);
+      for(const q of oldStyle.concat(regularTheory, project)){
         if(selected.length >= targetCount) break;
-        if(seen.has(q.id)) continue;
-        selected.push(q);
-        seen.add(q.id);
+        addQuestion(q);
       }
     }
-    return selected.concat(questions.filter(q => !seen.has(q.id)));
+    return selected.concat(ordered.filter(q => !seen.has(q.id)));
   }
 
   function prioritizeQtmOldExamObjectives(questions, targetCount, catalogExamNo, rng){
@@ -1032,6 +1053,50 @@
     const regularTheory = ordered.filter(q => !isQtmOldExamObjective(q) && !isQtmProjectTopic(q));
     const project = ordered.filter(isQtmProjectTopic);
     return oldStyle.concat(regularTheory, project);
+  }
+
+  function qtmObjectiveGroupTargets(targetCount){
+    const planned = [
+      ['Routing/OSPF/RIP', Math.max(2, Math.round(targetCount * 0.20))],
+      ['Switching/VLAN/STP', Math.max(2, Math.round(targetCount * 0.16))],
+      ['IP/DHCP/DNS', Math.max(2, Math.round(targetCount * 0.16))],
+      ['ACL/NAT/Firewall', Math.max(2, Math.round(targetCount * 0.14))],
+      ['Linux/AD', Math.max(1, Math.round(targetCount * 0.10))],
+      ['VPN/Server/Monitoring', targetCount >= 20 ? 2 : 1],
+      ['Cloud/Docker/K8s', targetCount >= 20 ? 1 : 0],
+      ['Automation/Ops', targetCount >= 20 ? 1 : 0]
+    ].filter(([, count]) => count > 0);
+    let total = planned.reduce((sum, [, count]) => sum + count, 0);
+    for(let i = planned.length - 1; total > targetCount && i >= 0; i--){
+      const trim = Math.min(planned[i][1], total - targetCount);
+      planned[i][1] -= trim;
+      total -= trim;
+    }
+    return planned.filter(([, count]) => count > 0);
+  }
+
+  function qtmKnowledgeGroup(q){
+    const lesson = String(q.lesson || '').toLowerCase();
+    const topic = String(q.topic || '').toLowerCase();
+    const detail = `${q.question || ''} ${q.config || ''}`.toLowerCase();
+    const classify = (text) => {
+      if(/acl|access-list|firewall|nat|pat|dnat|snat|dmz|implicit deny|port forward|overload/.test(text)) return 'ACL/NAT/Firewall';
+      if(/ospf|rip|bgp|show ip route|routing|static route|default route|administrative distance|metric|neighbor|router-id|wildcard/.test(text)) return 'Routing/OSPF/RIP';
+      if(/vlan|trunk|stp|switch|router-on-a-stick|port security|etherchannel|bpdu|native vlan|access port/.test(text)) return 'Switching/VLAN/STP';
+      if(/subnet|vlsm|cidr|default gateway|dhcp|dns|ip conflict|ip, subnet|dịch vụ nền|dich vu nen|ipv6|host usable/.test(text)) return 'IP/DHCP/DNS';
+      if(/active directory|domain controller|adc|forest|linux command|linux firewall|systemctl|ss -|ss |ip route|windows|kerberos|gpupdate|repadmin/.test(text)) return 'Linux/AD';
+      if(/vpn|openvpn|zabbix|monitoring|smb|nfs|ftp|file server|guacamole|tun0|giám sát|giam sat/.test(text)) return 'VPN/Server/Monitoring';
+      if(/docker|kubernetes|cloud|ingress|pod|container|service selector|readiness|liveness/.test(text)) return 'Cloud/Docker/K8s';
+      if(/automation|backup|rollback|ansible|change management|haproxy|version control/.test(text)) return 'Automation/Ops';
+      return null;
+    };
+    const byTopic = classify(topic);
+    if(byTopic) return byTopic;
+    const byDetail = classify(detail);
+    if(byDetail) return byDetail;
+    const byLesson = classify(lesson);
+    if(byLesson) return byLesson;
+    return 'Other';
   }
 
   function qtmObjectiveExamScore(q){
