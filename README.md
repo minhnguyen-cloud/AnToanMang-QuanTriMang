@@ -1,4 +1,4 @@
-# ATMMT Exam Generator - bản chạy trên VS Code/localhost
+# QTM Exam Generator - bản chạy trên VS Code/localhost
 
 Bản này không mở bằng `file:///...` nữa, mà chạy qua local server ở `http://localhost:3000`.
 
@@ -40,7 +40,7 @@ App này là web tĩnh, nên khi đưa lên GitHub Pages có thể mở trực t
 ## Tạo nhiều đề Quản trị mạng
 
 - Cách nhanh nhất: chọn **Chế độ đề** là **Bộ 50 đề Quản trị mạng để in/PDF** rồi bấm **Tạo đề mới**.
-- Chọn **Môn học** là **Quản trị mạng - ôn thi tổng hợp**.
+- App hiện chỉ giữ phần **Quản trị mạng - ôn thi tổng hợp** để nhẹ hơn sau khi bỏ ngân hàng đề An toàn mạng.
 - Nếu muốn tạo nhiều mã đề cùng lúc để in hoặc lưu PDF, chọn **Luyện tập**, nhập **Số đề cần tạo** từ 1 đến 50, rồi bấm **Tạo đề mới**.
 - Format QTM mặc định là **28 câu/đề**: khoảng **25 câu trắc nghiệm/đọc cấu hình/thực hành** và **3 câu tự luận cuối đề**.
 - Các đề QTM ưu tiên lý thuyết/lab nền tảng từ slide: IP/subnet, DHCP/DNS, VLAN/STP, OSPF/static route, ACL/NAT/firewall, Linux server/VPN/Zabbix; Docker/Kubernetes/cloud chỉ xen vừa phải theo phần đồ án.
@@ -54,7 +54,7 @@ App này là web tĩnh, nên khi đưa lên GitHub Pages có thể mở trực t
 ```bash
 git init
 git add .
-git commit -m "Add ATMMT and QTM exam generator"
+git commit -m "Add QTM exam generator"
 git branch -M main
 git remote add origin https://github.com/<username>/atmm-qtm-exam-generator.git
 git push -u origin main

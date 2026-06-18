@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ATMMT/QTM - Máy tạo đề ôn local</title>
+  <title>QTM - Máy tạo đề ôn local</title>
   <link rel="stylesheet" href="styles.css?v=20260606-exam-picker" />
 </head>
 <body>
   <header class="hero no-print">
     <div>
-      <h1>ATMMT/QTM ExamPrep</h1>
-      <p class="sub">Tạo đề ôn thi An toàn mạng máy tính và Quản trị mạng, có luyện tập và thi thật tính giờ.</p>
+      <h1>QTM ExamPrep</h1>
+      <p class="sub">Tạo đề ôn thi Quản trị mạng, có luyện tập, thi thật tính giờ và tự luận đồ án cuối đề.</p>
     </div>
     <div class="hero-card">
       <span id="bankCount">0</span>
@@ -22,18 +22,11 @@
     <aside class="panel controls no-print">
       <h2>Cấu hình đề</h2>
 
-      <label class="field">
-        <span>Môn học</span>
-        <select id="subject">
-          <option value="atmm">An toàn mạng máy tính</option>
-          <option value="qtm">Quản trị mạng - ôn thi tổng hợp</option>
-        </select>
-      </label>
+      <input id="subject" type="hidden" value="qtm" />
 
       <label class="field">
         <span>Chế độ đề</span>
         <select id="mode">
-          <option value="docx">Giống đề thi DOCX - 40 câu trắc nghiệm A-E</option>
           <option value="mixed">Đề trộn nhiều dạng</option>
           <option value="qtm-batch">Bộ 50 đề Quản trị mạng để in/PDF</option>
           <option value="hard">Đề khó/vận dụng cao</option>
@@ -128,7 +121,7 @@
         <button id="exportJsonBtn">Xuất JSON</button>
       </div>
 
-      <p class="hint">Mỗi môn có 50 mã đề cố định. Chọn ô có nhãn <strong>Mới</strong> để luyện đề chưa làm; sau khi nộp bài, đề sẽ được đánh dấu <strong>Đã làm</strong>.</p>
+      <p class="hint">Có 50 mã đề QTM cố định. Chọn ô có nhãn <strong>Mới</strong> để luyện đề chưa làm; sau khi nộp bài, đề sẽ được đánh dấu <strong>Đã làm</strong>.</p>
     </aside>
 
     <section class="content">
@@ -192,7 +185,6 @@
     </article>
   </template>
 
-  <script src="questionBank.js?v=20260606-exam-picker"></script>
   <script src="networkQuestionBank.js?v=20260606-exam-picker"></script>
   <script src="app.js?v=20260606-exam-picker"></script>
 </body>

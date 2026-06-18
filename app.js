@@ -1,4 +1,4 @@
-/* ATMMT local exam generator - no dependencies */
+/* QTM local exam generator - no dependencies */
 (function(){
   const $ = (id) => document.getElementById(id);
   const letters = ['A','B','C','D','E','F'];
@@ -16,11 +16,6 @@
   const COMPLETED_EXAMS_KEY = 'atmmt-qtm-completed-exams-v1';
 
   const subjectConfig = {
-    atmm: {
-      label: 'ATMMT',
-      fullName: 'An toàn mạng máy tính',
-      examTitle: 'BỘ ĐỀ ÔN TẬP TẠO TỰ ĐỘNG'
-    },
     qtm: {
       label: 'QTM',
       fullName: 'Quản trị mạng',
@@ -639,7 +634,7 @@
   }
 
   function getSubject(){
-    return $('subject')?.value || 'atmm';
+    return 'qtm';
   }
 
   function getCompletedExams(){
@@ -707,10 +702,7 @@
   }
 
   function baseQuestions(){
-    if(getSubject() === 'qtm' && typeof NETWORK_QUESTION_BANK !== 'undefined'){
-      return NETWORK_QUESTION_BANK;
-    }
-    return QUESTION_BANK.concat(SUPPLEMENTAL_QUESTIONS);
+    return typeof NETWORK_QUESTION_BANK !== 'undefined' ? NETWORK_QUESTION_BANK : [];
   }
 
   function syncSeedFromExamNumber(){
@@ -736,7 +728,6 @@
     const batchMode = mode === 'qtm-batch';
     const examMode = !batchMode && $('answerMode')?.value === 'exam';
     let count = parseInt($('count').value,10) || 40;
-    if(mode==='docx') count = 40;
     if(batchMode) count = 28;
     if(mode==='quick') count = Math.min(count,20);
     $('count').value = count;
@@ -750,13 +741,11 @@
     const previousIds = new Set(lastExamIds);
     const batchUsedIds = new Set();
 
-    if(mode==='docx') types = ['mcq'];
     if(mode==='hard') types = types.filter(t => t !== 'tf' && t !== 'fill');
     if(types.length===0) types=['mcq'];
 
     let pool = baseQuestions().filter(q => lessonMatchesSelection(q, lessons) && q.difficulty >= minDiff && types.includes(q.type));
     pool = pool.concat(dynamicQuestions(seed, DYNAMIC_BANK_SIZE).filter(q => lessonMatchesSelection(q, lessons) && q.difficulty >= minDiff && types.includes(q.type)));
-    if(mode==='docx') pool = pool.filter(q=>q.type==='mcq');
     if(mode==='hard') pool = pool.filter(q=>q.difficulty>=3 || q.type==='calc');
 
     currentExamSets = [];
@@ -770,7 +759,7 @@
       if(subject === 'qtm' && (mode === 'mixed' || batchMode)) shuffled = balanceQtmSelection(shuffled, count, rng);
       if(shuffled.length < count){
         const fallback = shuffle(baseQuestions().concat(dynamicQuestions(variantSeed+'fallback',DYNAMIC_BANK_SIZE)), rng)
-          .filter(q => (mode==='docx'? q.type==='mcq': true) && lessonMatchesSelection(q, lessons) && q.difficulty >= minDiff && types.includes(q.type));
+          .filter(q => lessonMatchesSelection(q, lessons) && q.difficulty >= minDiff && types.includes(q.type));
         const seen = new Set(shuffled.map(q=>q.id));
         for(const q of fallback){ if(!seen.has(q.id)){ shuffled.push(q); seen.add(q.id); } if(shuffled.length>=count) break; }
       }
@@ -1363,7 +1352,7 @@
   function renderExam(){
     const mode = $('mode').value;
     const subject = getSubject();
-    const config = subjectConfig[subject] || subjectConfig.atmm;
+    const config = subjectConfig[subject] || subjectConfig.qtm;
     const mcqCount = currentExam.filter(q => q.type==='mcq' || (q.type==='calc' && q.options && q.options.length)).length;
     const perExamCount = currentExamSets[0]?.questions.length || currentExam.length;
     const examMode = $('answerMode')?.value === 'exam';
@@ -1371,13 +1360,13 @@
     const examLabel = currentExamSets.length > 1 ? `${currentExamSets.length} đề` : (currentExamSets[0]?.label || `Đề ${$('examNumber')?.value || 1}`);
     $('examMeta').innerHTML = `
       <div>
-        <h2>${mode==='docx' && subject==='atmm'?'ĐỀ THI MÔ PHỎNG - 40 CÂU':config.examTitle}</h2>
-        <p>${escapeHtml(examLabel)} · ${examMode ? `Thời gian thi: ${duration} phút` : `Thời gian gợi ý: ${mode==='docx'?'75 phút': Math.max(15, Math.round(perExamCount*1.8))+' phút'}`} · Tổng câu: ${currentExam.length}</p>
+        <h2>${config.examTitle}</h2>
+        <p>${escapeHtml(examLabel)} · ${examMode ? `Thời gian thi: ${duration} phút` : `Thời gian gợi ý: ${Math.max(15, Math.round(perExamCount*1.8))} phút`} · Tổng câu: ${currentExam.length}</p>
       </div>
       <span class="meta-chip">${escapeHtml(config.label)} · ${mcqCount} câu trắc nghiệm</span>
     `;
 
-    $('answerGrid').innerHTML = mode==='docx' && subject==='atmm' ? buildBlankAnswerGrid(40) : '';
+    $('answerGrid').innerHTML = '';
     const out = $('examOutput');
     out.innerHTML = '';
     const sets = currentExamSets.length ? currentExamSets : [{label:'', seed, questions:currentExam}];
@@ -1438,7 +1427,27 @@
     else if(q.type==='match') a = q.answer.map(p=>`${escapeHtml(p[0])} → ${escapeHtml(p[1])}`).join('; ');
     else a = formatMultilineText(q.answer);
     const wrong = wrongFeedbackHtml(q, selectedChoice);
+    if(q.type==='mcq' || q.type==='tf' || (q.type==='calc' && q.options && q.options.length)){
+      return `${wrong}<strong>Đáp án:</strong> ${a}<br><strong>Vì sao đúng:</strong> ${escapeHtml(conciseCorrectReason(q, correctText(q)))}${optionReviewHtml(q)}`;
+    }
     return `${wrong}<strong>Đáp án:</strong> ${a}<br><strong>Giải thích:</strong> ${formatMultilineText(richExplanation(q))}`;
+  }
+
+  function optionReviewHtml(q){
+    if(!(q.type==='mcq' || q.type==='tf' || (q.type==='calc' && q.options && q.options.length))) return '';
+    const rows = [];
+    if(q.type === 'tf'){
+      [true, false].forEach((value, index) => {
+        if(value === q.answer) return;
+        rows.push(`<li><strong>${letters[index]}.</strong> ${escapeHtml(briefWrongChoiceReason(q, value ? 'Đúng' : 'Sai'))}</li>`);
+      });
+    } else {
+      (q.options || []).forEach((option, index) => {
+        if(index === q.answer) return;
+        rows.push(`<li><strong>${letters[index]}.</strong> ${escapeHtml(briefWrongChoiceReason(q, option))}</li>`);
+      });
+    }
+    return rows.length ? `<div class="option-review"><strong>Loại đáp án sai:</strong><ul>${rows.join('')}</ul></div>` : '';
   }
 
   function formatMultilineText(value){
@@ -1459,9 +1468,92 @@
     if(q.optionFeedback && q.optionFeedback[selectedChoice]) return q.optionFeedback[selectedChoice];
     const chosen = choiceText(q, selectedChoice);
     const correct = correctText(q);
-    const wrong = wrongChoiceReason(q, chosen, correct);
-    const focus = specificReason(q, correct, {forWrong:true});
-    return `${wrong} Đáp án đúng là "${correct}" vì ${focus}`;
+    return `${briefWrongChoiceReason(q, chosen)} Đáp án đúng là "${correct}" vì ${conciseCorrectReason(q, correct)}`;
+  }
+
+  function conciseCorrectReason(q, correct){
+    const text = explainText(`${q.lesson || ''} ${q.topic || ''} ${q.question || ''} ${q.config || ''} ${correct || ''}`);
+    const base = String(q.explanation || '').trim();
+    if(hasAny(text, ['passive-interface'])){
+      return 'passive-interface không gửi Hello nên không lập neighbor trên interface đó, nhưng prefix vẫn có thể được quảng bá nếu network statement khớp.';
+    }
+    if(hasAny(text, ['area mismatch','area id','area 10','area 0']) && hasAny(text, ['ospf','neighbor','full'])){
+      return 'OSPF chỉ lên neighbor FULL khi hai đầu cùng link khớp area, subnet, timer và authentication; lệch area là lỗi làm neighbor không hình thành.';
+    }
+    if(hasAny(text, ['administrative distance'])){
+      return 'administrative distance dùng để chọn giữa các nguồn route khác nhau; giá trị nhỏ hơn được tin hơn trước khi xét metric.';
+    }
+    if(hasAny(text, ['ospf cost','metric','reference-bandwidth'])){
+      return 'metric/cost chỉ chọn đường trong cùng giao thức; OSPF chọn cost thấp hơn, nhưng vẫn phải có neighbor và route hợp lệ trước.';
+    }
+    if(hasAny(text, ['default-information originate'])){
+      return 'default-information originate chỉ phát default route vào OSPF khi router có default route hợp lệ, trừ khi dùng tùy chọn always có chủ đích.';
+    }
+    if(hasAny(text, ['wildcard'])){
+      return 'wildcard mask là phần đảo của subnet mask: bit 0 phải khớp chính xác, bit 1 được bỏ qua khi match network hoặc ACL.';
+    }
+    if(hasAny(text, ['show ip route','ospf','static route','default route','administrative distance','metric','route chieu ve'])){
+      return 'câu này phải đọc bảng định tuyến: có route chiều đi chưa đủ, prefix đích và route chiều về cũng phải xuất hiện đúng trong routing table.';
+    }
+    if(hasAny(text, ['vlan','trunk','native vlan','switchport','allowed vlan','stp','bpdu','portfast'])){
+      return 'dữ kiện nằm ở layer 2: access VLAN, allowed VLAN trên trunk, native VLAN hoặc STP quyết định host có tới được gateway/segment cần thiết hay không.';
+    }
+    if(hasAny(text, ['acl','access-list','firewall','iptables','security group','permit','deny','implicit deny'])){
+      return 'ACL/firewall được xử lý theo thứ tự và theo chiều áp rule; đáp án đúng bám đúng nguồn, đích, port và implicit deny.';
+    }
+    if(hasAny(text, ['nat','pat','dnat','snat','overload','hairpin','port forward'])){
+      return 'NAT chỉ xử lý dịch địa chỉ/port cho luồng phù hợp; traffic nội bộ hoặc VPN thường cần no-NAT, route đúng và rule firewall đi kèm.';
+    }
+    if(hasAny(text, ['dhcp','ip helper','scope','lease','default-router'])){
+      return 'DHCP khác VLAN cần relay bằng ip helper-address, scope đúng subnet và option gateway/DNS đúng cho client.';
+    }
+    if(hasAny(text, ['dns','nslookup','record','cname','split dns','resolver'])){
+      return 'DNS chỉ đổi tên thành IP; nếu truy cập bằng IP được mà bằng tên lỗi thì kiểm DNS record/resolver, còn mất cả IP thì phải kiểm route hoặc firewall.';
+    }
+    if(hasAny(text, ['gateway','subnet','mask','/26','/27','/30','usable','broadcast','arp'])){
+      return 'host quyết định cùng mạng hay khác mạng bằng subnet mask; default gateway phải cùng subnet và subnet phải đủ số host usable theo yêu cầu.';
+    }
+    if(hasAny(text, ['vpn','openvpn','ipsec','tun0','ip_forward','forward drop','route push'])){
+      return 'VPN connected chỉ là bước đầu; muốn vào LAN phải có route push, IP forwarding, rule FORWARD và route chiều về hoặc NAT phù hợp.';
+    }
+    if(hasAny(text, ['docker','container','compose','ports','volume','bridge subnet'])){
+      return 'Docker cần đọc đúng host:container port, network/bridge và volume; container chạy không đồng nghĩa service đã public hoặc dữ liệu đã được giữ lại.';
+    }
+    if(hasAny(text, ['kubernetes','kubectl','pod','service','ingress','endpoint','selector','readiness','targetport'])){
+      return 'Kubernetes phải lần theo Ingress -> Service -> Endpoint/Pod; selector, targetPort và readiness quyết định traffic có tới Pod thật hay không.';
+    }
+    if(hasAny(text, ['zabbix','monitoring','trigger','backup','rollback','ansible','idempotent','change management','haproxy'])){
+      return 'câu vận hành chấm quy trình: backup, kiểm chứng bằng log/metric, health check, rollback và thay đổi có kiểm soát quan trọng hơn sửa tay một lệnh.';
+    }
+    if(hasAny(text, ['rsa','diffie','hellman','tls','certificate','hash','hmac','mac','signature','aes','ecb','otp','replay','kerberos'])){
+      return 'đáp án đúng bám vào thuộc tính bảo mật cốt lõi: xác thực danh tính, toàn vẹn, chống phát lại, quản lý khóa hoặc điều kiện an toàn của thuật toán.';
+    }
+    if(base && base.length <= 180) return base;
+    return `dữ kiện trọng tâm là ${focusLabel(q)}; đáp án đúng là phương án bám sát dấu hiệu đó và có thể kiểm chứng bằng lệnh hoặc tính chất lý thuyết tương ứng.`;
+  }
+
+  function briefWrongChoiceReason(q, chosen){
+    const selected = explainText(chosen);
+    const focus = focusLabel(q);
+    const rules = [
+      {keys:['dns','cname','mx','resolver','zone'], reason:`Sai vì DNS chỉ xử lý tên -> IP, trong khi trọng tâm câu này là ${focus}.`},
+      {keys:['stp','bpdu','portfast','root bridge','bridge priority'], reason:`Sai vì STP/BPDU chỉ liên quan chống loop layer 2; nó không giải thích trực tiếp ${focus}.`},
+      {keys:['nat','pat','dnat','snat','masquerade','overload','hairpin'], reason:`Sai vì NAT đổi địa chỉ/port, không tự sửa được ${focus} nếu route, VLAN, ACL hoặc service đang sai.`},
+      {keys:['ospf','router-id','area','cost','default-information','static route','route'], reason:`Sai vì chỉ nói tới định tuyến nhưng chưa khớp điều kiện then chốt của ${focus}.`},
+      {keys:['vlan','trunk','native','switchport','access port','allowed vlan'], reason:`Sai vì chỉ xử lý layer 2; nếu câu hỏi đang chỉ ra ${focus} thì còn phải xét route, gateway, ACL hoặc dịch vụ.`},
+      {keys:['acl','firewall','iptables','security group','permit','deny','any any'], reason:`Sai vì ACL/firewall phải đúng nguồn-đích-port, thứ tự rule và chiều áp; phương án này quá rộng hoặc thiếu điều kiện.`},
+      {keys:['dhcp','ip helper','lease','scope','reservation'], reason:`Sai vì DHCP chỉ cấp IP/gateway/DNS; sau khi client có IP vẫn phải kiểm ${focus}.`},
+      {keys:['gateway','subnet','mask','/30','/24','/26','arp'], reason:`Sai vì mới xét địa chỉ IP/subnet, chưa chứng minh được phần ${focus} mà đề đang hỏi.`},
+      {keys:['vpn','openvpn','ipsec','tun0','tunnel'], reason:`Sai vì tunnel lên chưa đủ; VPN còn cần forwarding, firewall và route chiều về.`},
+      {keys:['docker','container','compose','ports','volume'], reason:`Sai vì container chạy hoặc có image chưa chứng minh port/network/volume đúng.`},
+      {keys:['kubernetes','kubectl','pod','service','ingress','endpoint','readiness','selector'], reason:`Sai vì Pod tồn tại chưa đủ; Service/Ingress cần selector, endpoint, port và readiness đúng.`},
+      {keys:['zabbix','monitoring','trigger','alert','backup','rollback','ansible'], reason:`Sai vì đây là bước vận hành phụ; nó không chỉ ra nguyên nhân kỹ thuật chính của ${focus}.`},
+      {keys:['public','internet','open','tat firewall','xoa acl','any-any','any any'], reason:'Sai vì mở rộng hoặc tắt bảo vệ có thể làm thông tạm thời nhưng trái nguyên tắc least privilege và không chứng minh đúng nguyên nhân.'},
+      {keys:['scale','replica','doi hostname','doi password','xoa log'], reason:'Sai vì đây là thao tác phụ hoặc chữa triệu chứng, không bám vào dấu hiệu cấu hình mà đề đưa ra.'}
+    ];
+    const matched = rules.find(rule => hasAny(selected, rule.keys));
+    if(matched) return matched.reason;
+    return `Sai vì phương án này không bám sát ${focus} hoặc thiếu điều kiện kiểm chứng trực tiếp từ dữ kiện đề bài.`;
   }
 
   function choiceText(q, choice){
@@ -1745,7 +1837,7 @@
     if(Number.isFinite(raw) && raw > 0) return Math.max(5, Math.min(180, raw));
     const mode = $('mode')?.value;
     const count = parseInt($('count')?.value,10) || 40;
-    return mode === 'docx' ? 75 : Math.max(15, Math.round(count * 1.8));
+    return Math.max(15, Math.round(count * 1.8));
   }
 
   function startTimer(){
@@ -1831,7 +1923,7 @@
   }
 
   function renderTheory(){
-    const cards = getSubject() === 'qtm' && typeof NETWORK_THEORY_CARDS !== 'undefined' ? NETWORK_THEORY_CARDS : THEORY_CARDS;
+    const cards = typeof NETWORK_THEORY_CARDS !== 'undefined' ? NETWORK_THEORY_CARDS : [];
     $('theoryOutput').innerHTML = cards.map(card => `
       <article class="theory-card">
         <h3>${escapeHtml(card.lesson)} - ${escapeHtml(card.title)}</h3>
@@ -1856,10 +1948,10 @@
     if(!currentExam.length) generateExam();
     const seed = $('seed').value.trim() || 'exam';
     if(kind==='json'){
-      download(`atmm-de-${safeName(seed)}.json`, JSON.stringify(currentExam, null, 2), 'application/json;charset=utf-8');
+      download(`qtm-de-${safeName(seed)}.json`, JSON.stringify(currentExam, null, 2), 'application/json;charset=utf-8');
     } else {
-      const html = `<!doctype html><html lang="vi"><head><meta charset="utf-8"><title>Đề ATMMT ${escapeHtml(seed)}</title><style>${document.querySelector('style')?.textContent || ''}</style><link rel="stylesheet" href="styles.css"></head><body><main style="max-width:980px;margin:24px auto">${$('examMeta').outerHTML}${$('examOutput').outerHTML}</main></body></html>`;
-      download(`atmm-de-${safeName(seed)}.html`, html, 'text/html;charset=utf-8');
+      const html = `<!doctype html><html lang="vi"><head><meta charset="utf-8"><title>Đề QTM ${escapeHtml(seed)}</title><style>${document.querySelector('style')?.textContent || ''}</style><link rel="stylesheet" href="styles.css"></head><body><main style="max-width:980px;margin:24px auto">${$('examMeta').outerHTML}${$('examOutput').outerHTML}</main></body></html>`;
+      download(`qtm-de-${safeName(seed)}.html`, html, 'text/html;charset=utf-8');
     }
   }
 
@@ -1889,20 +1981,11 @@
   }
 
   function applySubjectDefaults(){
-    const subject = getSubject();
-    if(subject === 'qtm'){
-      if($('mode')) $('mode').value = 'mixed';
-      if($('difficulty')) $('difficulty').value = 2;
-      if($('count')) $('count').value = 28;
-      if($('examDuration')) $('examDuration').value = 90;
-      document.querySelectorAll('input[name="qtype"]').forEach(x=>{ x.checked = true; });
-    } else {
-      if($('mode')) $('mode').value = 'docx';
-      if($('difficulty')) $('difficulty').value = 2;
-      if($('count')) $('count').value = 40;
-      if($('examDuration')) $('examDuration').value = 75;
-      document.querySelectorAll('input[name="qtype"]').forEach(x=>{ x.checked = x.value === 'mcq'; });
-    }
+    if($('mode')) $('mode').value = 'mixed';
+    if($('difficulty')) $('difficulty').value = 2;
+    if($('count')) $('count').value = 28;
+    if($('examDuration')) $('examDuration').value = 90;
+    document.querySelectorAll('input[name="qtype"]').forEach(x=>{ x.checked = true; });
   }
 
   function initSubjectBehavior(){
@@ -1930,11 +2013,6 @@
         initFilters();
         renderTheory();
         renderStats();
-      } else if(mode==='docx'){
-        $('count').value = 40;
-        if($('examDuration')) $('examDuration').value = 75;
-        document.querySelectorAll('input[name="qtype"]').forEach(x=>{ x.checked = x.value==='mcq'; });
-        $('difficulty').value = 2;
       } else if(mode==='hard'){
         $('difficulty').value = 3;
         $('count').value = 35;
