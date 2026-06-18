@@ -30,7 +30,6 @@
           <option value="mixed">Đề trộn nhiều dạng</option>
           <option value="qtm-batch">Bộ 50 đề Quản trị mạng để in/PDF</option>
           <option value="hard">Đề khó/vận dụng cao</option>
-          <option value="quick">Ôn nhanh theo chủ đề</option>
         </select>
       </label>
 
@@ -51,8 +50,8 @@
 
       <div class="grid2">
         <label class="field">
-          <span>Số câu</span>
-          <input id="count" type="number" min="5" max="120" value="40" />
+          <span>Tổng câu</span>
+          <input id="count" type="number" min="28" max="28" value="28" readonly />
         </label>
         <label class="field">
           <span>Mã đề</span>
@@ -98,18 +97,6 @@
       <section>
         <h3>Chủ đề</h3>
         <div id="lessonFilters" class="checks"></div>
-      </section>
-
-      <section>
-        <h3>Dạng câu</h3>
-        <div class="checks">
-          <label><input type="checkbox" name="qtype" value="mcq" checked /> Trắc nghiệm</label>
-          <label><input type="checkbox" name="qtype" value="tf" checked /> Đúng/Sai</label>
-          <label><input type="checkbox" name="qtype" value="fill" checked /> Điền khuyết</label>
-          <label><input type="checkbox" name="qtype" value="short" checked /> Tự luận ngắn</label>
-          <label><input type="checkbox" name="qtype" value="match" checked /> Ghép cặp</label>
-          <label><input type="checkbox" name="qtype" value="calc" checked /> Bài tính</label>
-        </div>
       </section>
 
       <div class="buttons">

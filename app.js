@@ -13,6 +13,9 @@
   let activeQuestionUid = null;
   const EXAM_CATALOG_SIZE = 50;
   const DYNAMIC_BANK_SIZE = 2000;
+  const QTM_OBJECTIVE_COUNT = 25;
+  const QTM_ESSAY_COUNT = 3;
+  const QTM_EXAM_COUNT = QTM_OBJECTIVE_COUNT + QTM_ESSAY_COUNT;
   const COMPLETED_EXAMS_KEY = 'atmmt-qtm-completed-exams-v1';
 
   const subjectConfig = {
@@ -727,9 +730,7 @@
     const subject = getSubject();
     const batchMode = mode === 'qtm-batch';
     const examMode = !batchMode && $('answerMode')?.value === 'exam';
-    let count = parseInt($('count').value,10) || 40;
-    if(batchMode) count = 28;
-    if(mode==='quick') count = Math.min(count,20);
+    let count = QTM_EXAM_COUNT;
     $('count').value = count;
 
     const seed = syncSeedFromExamNumber();
@@ -741,8 +742,7 @@
     const previousIds = new Set(lastExamIds);
     const batchUsedIds = new Set();
 
-    if(mode==='hard') types = types.filter(t => t !== 'tf' && t !== 'fill');
-    if(types.length===0) types=['mcq'];
+    types = ['mcq', 'tf', 'fill', 'short', 'match'];
 
     let pool = baseQuestions().filter(q => lessonMatchesSelection(q, lessons) && q.difficulty >= minDiff && types.includes(q.type));
     pool = pool.concat(dynamicQuestions(seed, DYNAMIC_BANK_SIZE).filter(q => lessonMatchesSelection(q, lessons) && q.difficulty >= minDiff && types.includes(q.type)));
@@ -920,16 +920,17 @@
   }
 
   function composeNetworkAdminExam(shuffled, pool, count, rng, excludedIds=new Set(), catalogExamNo=1){
-    const essayTarget = count >= 24 ? 3 : (count >= 12 ? 2 : 1);
-    const projectEssayTarget = essayTarget > 0 ? 1 : 0;
+    const targetCount = QTM_EXAM_COUNT;
+    const essayTarget = QTM_ESSAY_COUNT;
+    const objectiveTarget = QTM_OBJECTIVE_COUNT;
+    const projectEssayTarget = 1;
     const regularEssayTarget = Math.max(0, essayTarget - projectEssayTarget);
-    const objectiveTarget = Math.max(0, count - essayTarget);
     const seen = new Set();
     const isExcluded = q => excludedIds.has(q.caseId || q.id);
     let filteredShuffled = shuffled.filter(q => !isExcluded(q));
     let filteredPool = pool.filter(q => !isExcluded(q));
-    if(filteredShuffled.length < count) filteredShuffled = shuffled;
-    if(filteredPool.length < count) filteredPool = pool;
+    if(filteredShuffled.length < targetCount) filteredShuffled = shuffled;
+    if(filteredPool.length < targetCount) filteredPool = pool;
     const objectiveState = {ids:new Set(), fingerprints:new Set(), topicCounts:new Map()};
     const essayState = {ids:new Set(), fingerprints:new Set(), topicCounts:new Map()};
     const objectivePool = prioritizeQtmSlideTheory(
@@ -1021,7 +1022,7 @@
         }
       }
     }
-    return shuffle(selected, rng).concat(essays, projectEssays).slice(0, count);
+    return shuffle(selected, rng).concat(essays, projectEssays).slice(0, targetCount);
   }
 
   function prioritizeQtmSlideTheory(questions, targetCount, rng, catalogExamNo=1){
@@ -1353,7 +1354,6 @@
     const mode = $('mode').value;
     const subject = getSubject();
     const config = subjectConfig[subject] || subjectConfig.qtm;
-    const mcqCount = currentExam.filter(q => q.type==='mcq' || (q.type==='calc' && q.options && q.options.length)).length;
     const perExamCount = currentExamSets[0]?.questions.length || currentExam.length;
     const examMode = $('answerMode')?.value === 'exam';
     const duration = getExamDurationMinutes();
@@ -1361,9 +1361,9 @@
     $('examMeta').innerHTML = `
       <div>
         <h2>${config.examTitle}</h2>
-        <p>${escapeHtml(examLabel)} · ${examMode ? `Thời gian thi: ${duration} phút` : `Thời gian gợi ý: ${Math.max(15, Math.round(perExamCount*1.8))} phút`} · Tổng câu: ${currentExam.length}</p>
+        <p>${escapeHtml(examLabel)} · ${examMode ? `Thời gian thi: ${duration} phút` : `Thời gian gợi ý: ${Math.max(15, Math.round(perExamCount*1.8))} phút`} · Cấu trúc: ${QTM_OBJECTIVE_COUNT} câu + ${QTM_ESSAY_COUNT} tự luận</p>
       </div>
-      <span class="meta-chip">${escapeHtml(config.label)} · ${mcqCount} câu trắc nghiệm</span>
+      <span class="meta-chip">${escapeHtml(config.label)} · ${QTM_EXAM_COUNT} câu/đề</span>
     `;
 
     $('answerGrid').innerHTML = '';
@@ -1836,7 +1836,7 @@
     const raw = parseInt($('examDuration')?.value,10);
     if(Number.isFinite(raw) && raw > 0) return Math.max(5, Math.min(180, raw));
     const mode = $('mode')?.value;
-    const count = parseInt($('count')?.value,10) || 40;
+    const count = parseInt($('count')?.value,10) || QTM_EXAM_COUNT;
     return Math.max(15, Math.round(count * 1.8));
   }
 
@@ -1983,7 +1983,7 @@
   function applySubjectDefaults(){
     if($('mode')) $('mode').value = 'mixed';
     if($('difficulty')) $('difficulty').value = 2;
-    if($('count')) $('count').value = 28;
+    if($('count')) $('count').value = QTM_EXAM_COUNT;
     if($('examDuration')) $('examDuration').value = 90;
     document.querySelectorAll('input[name="qtype"]').forEach(x=>{ x.checked = true; });
   }
@@ -2006,7 +2006,7 @@
         if($('subject')) $('subject').value = 'qtm';
         if($('answerMode')) $('answerMode').value = 'practice';
         $('difficulty').value = 2;
-        $('count').value = 28;
+        $('count').value = QTM_EXAM_COUNT;
         if($('variantCount')) $('variantCount').value = EXAM_CATALOG_SIZE;
         if($('examDuration')) $('examDuration').value = 90;
         document.querySelectorAll('input[name="qtype"]').forEach(x=>{ x.checked = true; });
@@ -2015,11 +2015,8 @@
         renderStats();
       } else if(mode==='hard'){
         $('difficulty').value = 3;
-        $('count').value = 35;
+        $('count').value = QTM_EXAM_COUNT;
         if($('examDuration')) $('examDuration').value = 60;
-      } else if(mode==='quick'){
-        $('count').value = 15;
-        if($('examDuration')) $('examDuration').value = 25;
       }
       generateExam();
     });
